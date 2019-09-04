@@ -1,2 +1,2 @@
 # tedi-code
-TEDI UAV Commeand Forward
+TEDI UAV Command Forward
