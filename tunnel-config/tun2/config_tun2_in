@@ -1,0 +1,31 @@
+#!/bin/bash
+# # Setting up MPLS tunnel 2 - in
+
+# Setting up tun1
+
+printf "\nSetting up tunnel on guest\n\n"
+
+ip tun a tun2 mode gre remote 10.0.1.5 local 10.0.1.4
+ip addr a 10.0.20.1 dev tun2
+ip link set tun2 up
+ip rou a 10.0.20.0/24 dev tun2
+ip rou a 10.0.30.0/24 dev tun2
+
+# MPLS Encapsulation
+
+printf "MPLS Encapsulation\n\n"
+
+sysctl -w net.mpls.conf.tun2.input=1
+sysctl -w net.mpls.conf.lo.input=1
+sysctl -w net.mpls.platform_labels=1048575
+sysctl -w net.ipv4.conf.all.rp_filter=2
+
+ip rou c 10.0.20.0/24 encap mpls 300 dev tun2
+ip rou c 10.0.30.0/24 encap mpls 304 dev tun2
+ip -f mpls route add 203 as 300 via inet 10.0.20.2
+ip -f mpls route add 204 as 304 via inet 10.0.20.2
+ip -f mpls route add 201 as 100 via inet 10.0.10.1
+
+
+
+printf "\nEnd.\n"
