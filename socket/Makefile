@@ -22,4 +22,4 @@ all: $(SRV_OBJS) $(CLT_OBJS)
 	$(CC) $(CFLAGS) -o $(server) $(SRV_OBJS)
 	$(CC) $(CFLAGS) -o $(client) $(CLT_OBJS)
 clean:
-	rm -rf *.o $(OUT)
+	rm -rf *.o $(server) $(client) server client
