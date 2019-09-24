@@ -1,4 +1,8 @@
 #!/bin/bash
+
+cd ../socket/
+make all
+
 while :
 do
 	sleep 1
