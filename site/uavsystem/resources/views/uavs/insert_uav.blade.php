@@ -1,13 +1,21 @@
-@extends('layouts.layout')
+@extends('layouts.uav_layout')
 
 @section('htmlheader_title')
 	{{ trans('adminlte_lang::message.uav_insert') }}
 @endsection
 
-@section('box_title')
+@section('uav_box_title')
     {{ trans('adminlte_lang::message.uav_insert') }}
 @endsection
 
-@section('content')
+@section('uav_main_content')
 	@include('forms.uav_form')
+@endsection
+
+@section('network_box_title')
+    {{ trans('adminlte_lang::message.uav_network interface') }}
+@endsection
+
+@section('uav_network_content')
+	@include('forms.uav_net_form')
 @endsection

@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Uav;
-use App\Network;
 use App\MplsTag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class UavController extends Controller
+class MplsTagController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,9 +14,9 @@ class UavController extends Controller
      */
     public function index()
     {
-        $uavs = UAV::all();
+        $mpls_tags = MplsTag::all();
 
-        return view("uavs.index", compact('uavs'));
+        return view("mpls_tags.index", compact('mpls_tags'));
     }
 
     /**
@@ -29,7 +26,7 @@ class UavController extends Controller
      */
     public function create()
     {
-        return view('uavs.insert_uav');
+        return view('mpls_tags.insert_mpls_tag');
     }
 
     /**
@@ -40,66 +37,59 @@ class UavController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $mpls_tag=new MplsTag;
+        $mpls_tag->tag=request('tag');
+        $mpls_tag->save();
 
-        dd($request);
-        $uav=new Uav;
-        $uav->name=request('name');
-        $uav->local_ip=request('local_ip');
-        $uav->save();
-
-        return redirect('/home');
-
-
+        return redirect('/mpls_tags/create');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Uav  $uav
+     * @param  \App\MplsTag  $mplsTag
      * @return \Illuminate\Http\Response
      */
-    public function show(Uav $uav)
+    public function show(MplsTag $mplsTag)
     {
-        //
+        
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Uav  $uav
+     * @param  \App\MplsTag  $mpls_tag
      * @return \Illuminate\Http\Response
      */
-    public function edit(Uav $uav)
-    {   
-        return view('uavs.edit_uav', compact('uav'));
+    public function edit(MplsTag $mpls_tag)
+    {
+        return view('mpls_tags.edit_mpls_tag', compact('mpls_tag'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Uav  $uav
+     * @param  \App\MplsTag  $mpls_tag
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Uav $uav)
+    public function update(Request $request, MplsTag $mpls_tag)
     {
-        $uav->name=request('name');
-        $uav->local_ip=request('local_ip');
+        $mpls_tag->tag=request('tag');
 
-        $uav->save();
-        return redirect('/uavs');
+        $mpls_tag->save();
+        return redirect('/mpls_tags');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Uav  $uav
+     * @param  \App\MplsTag  $mpls_tag
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Uav $uav)
+    public function destroy(MplsTag $mpls_tag)
     {
-        $uav->delete();
-        return redirect('/uavs');
+        $mpls_tag->delete();
+        return redirect('/mpls_tags');
     }
 }

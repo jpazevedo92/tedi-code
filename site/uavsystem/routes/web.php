@@ -12,6 +12,9 @@
 */
 
 Route::resource('uavs', "UavController");
+Route::resource('networks', "NetworkController");
+Route::resource('mpls_tags', "MplsTagController");
+
 /* Route::get('/uav/insert', 'UavController@create');
 Route::post('/uavs', 'UavController@store');
 Route::get('/uavs', 'UavController@index');
