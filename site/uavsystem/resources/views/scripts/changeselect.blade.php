@@ -4,7 +4,6 @@
         /*if($('select option:selected').text() == "Other"){
             $('label').show();*/
      });
-     
     }
      $('#out_label')
          .append($("<option></option>")

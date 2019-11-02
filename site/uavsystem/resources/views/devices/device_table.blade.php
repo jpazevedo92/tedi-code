@@ -1,21 +1,21 @@
 <table style="width:100%">
         <thead>
             <tr>
-                <th>Network Adress</th>
+                <th>Device</th>
                 <th>Operations</th>
             </tr>
         </thead>
         <tbody>
-        @foreach($networks as $network)
+        @foreach($devices as $device)
 
             <tr>
-                <td>{{$network->address == "none" ? $network->ip_out : $network->address}}</td>
+                <td>{{$device->name}}</a></td> 
                 <td>
                     <div class="form-group">
-                        <form action="{{'/networks/'.$network->id }}" method="post">
+                        <form action="{{'/devices/'.$device->id }}" method="post">
                             {{ csrf_field() }}
                             {{method_field('DELETE')}}
-                            <a href="{{'/networks/'.$network->id.'/edit' }}" class="btn btn-warning"><i class="fa fa-edit"></i></a>
+                            <a href="{{'/devices/'.$device->id.'/edit' }}" class="btn btn-warning"><i class="fa fa-edit"></i></a>
                             <button type="submit" class="btn btn-danger btn-xl">
                             <i class="fa fa-trash"></i>
                             </button>

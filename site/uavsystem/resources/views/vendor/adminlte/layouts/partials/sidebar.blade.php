@@ -43,6 +43,13 @@
                 </ul>
             </li>
             <li class="treeview">
+                <a href="#"><i class='	fa fa-sitemap'></i> <span>{{ trans('adminlte_lang::message.device') }}</span> <i class="fa fa-angle-left pull-right"></i></a>
+                <ul class="treeview-menu">
+                <li><a href="/devices/create">{{ trans('adminlte_lang::message.device_insert') }}</a></li>
+                    <li><a href="/devices">{{ trans('adminlte_lang::message.device_modify_delete') }}</a></li>
+                </ul>
+            </li>
+            <li class="treeview">
                 <a href="#"><i class='fa fa-link'></i> <span>{{ trans('adminlte_lang::message.network') }}</span> <i class="fa fa-angle-left pull-right"></i></a>
                 <ul class="treeview-menu">
                 <li><a href="/networks/create">{{ trans('adminlte_lang::message.network_insert') }}</a></li>
@@ -54,6 +61,13 @@
                 <ul class="treeview-menu">
                 <li><a href="/mpls_tags/create">{{ trans('adminlte_lang::message.mpls_tag_insert') }}</a></li>
                     <li><a href="/mpls_tags">{{ trans('adminlte_lang::message.mpls_tag_modify_delete') }}</a></li>
+                </ul>
+            </li>
+            <li class="treeview">
+                <a href="#"><i class='fa fa-road'></i> <span>{{ trans('adminlte_lang::message.route') }}</span> <i class="fa fa-angle-left pull-right"></i></a>
+                <ul class="treeview-menu">
+                <li><a href="/routes/create">{{ trans('adminlte_lang::message.route_insert') }}</a></li>
+                    <li><a href="/routes">{{ trans('adminlte_lang::message.route_modify_delete') }}</a></li>
                 </ul>
             </li>
         </ul><!-- /.sidebar-menu -->

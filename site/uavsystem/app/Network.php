@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Network extends Model
 {
-    public function uav()
+    public function device()
     {
-        return $this->belongsTo(Uav::class);
+        return $this->hasOne(Device::class);
     }
 }

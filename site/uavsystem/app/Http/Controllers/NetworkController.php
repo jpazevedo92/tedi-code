@@ -38,14 +38,13 @@ class NetworkController extends Controller
     public function store(Request $request)
     {
         $network=new Network;
-        $network->if_name=request('if_name');
-        $network->tunnel_ip_in=request('tunnel_ip_in');
-        $network->tunnel_ip_out=request('tunnel_ip_out');
-        $network->network_address=request('network_address');
+        $network->address=request('address');
         $network->mask=request('mask');
+        $network->ip_in=request('ip_in');
+        $network->ip_out=request('ip_out');
         $network->save();
 
-        return redirect('/home');
+        return redirect('/networks/create');
     }
 
     /**
@@ -79,12 +78,10 @@ class NetworkController extends Controller
      */
     public function update(Request $request, Network $network)
     {
-        $network->if_name=request('if_name');
-        $network->tunnel_ip_in=request('tunnel_ip_in');
-        $network->tunnel_ip_out=request('tunnel_ip_out');
-        $network->network_address=request('network_address');
+        $network->address=request('address');
         $network->mask=request('mask');
-
+        $network->ip_in=request('ip_in');
+        $network->ip_out=request('ip_out');
         $network->save();
         return redirect('/networks');
     }

@@ -6,13 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Uav extends Model
 {
-    public function networks()
+    public function routes()
     {
-        return $this->hasMany(Network::class);
+        return $this->hasMany(Route::class);
     }
     
-    public function mpls_tags()
-    {
-        return $this->hasMany(MplsTag::class);
-    }
 }

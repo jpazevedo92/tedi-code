@@ -12,8 +12,13 @@
 */
 
 Route::resource('uavs', "UavController");
+Route::resource('devices', "DeviceController");
 Route::resource('networks', "NetworkController");
 Route::resource('mpls_tags', "MplsTagController");
+Route::resource('routes', "RouteController");
+
+Route::delete('/uav_routes/{uav_route}', 'UavController@route_destroy'); 
+
 
 /* Route::get('/uav/insert', 'UavController@create');
 Route::post('/uavs', 'UavController@store');

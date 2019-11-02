@@ -1,5 +1,5 @@
 <script type="text/javascript">
     $(document).ready(function() {
-    $(".sel-status").select2();
+    $(".js-example-basic-multiple").select2();
     });
 </script>

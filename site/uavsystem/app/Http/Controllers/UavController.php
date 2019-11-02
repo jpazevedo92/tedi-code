@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Uav;
-use App\Network;
-use App\MplsTag;
+use App\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -42,13 +41,22 @@ class UavController extends Controller
     {
         
 
-        dd($request);
+        //dd($request);
         $uav=new Uav;
         $uav->name=request('name');
         $uav->local_ip=request('local_ip');
         $uav->save();
-
-        return redirect('/home');
+        $length = count(request('in_if'));
+        for ($i = 0; $i < $length; $i++) {
+            $route = new Route;
+            $route->uav_id=$uav->id;
+            $route->in_if_id=request('in_if')[$i] == 0 ? 1 : request('in_if')[$i];
+            $route->in_tag_id=request('in_label')[$i] == 0 ? 1 : request('in_label')[$i];
+            $route->out_if_id=request('out_if')[$i];
+            $route->out_tag_id=request('out_label')[$i];
+            $route->save();
+        }
+        return redirect('/uavs');
 
 
     }
@@ -72,7 +80,8 @@ class UavController extends Controller
      */
     public function edit(Uav $uav)
     {   
-        return view('uavs.edit_uav', compact('uav'));
+        $routes=$uav->routes;
+        return view('uavs.edit_uav', compact(['uav', 'routes']));
     }
 
     /**
@@ -86,8 +95,43 @@ class UavController extends Controller
     {
         $uav->name=request('name');
         $uav->local_ip=request('local_ip');
-
         $uav->save();
+
+        $routes=$uav->routes;
+        
+        $length_routes=count($routes);
+        $i=0;
+        $length = count(request('in_if'));
+        if($length > $length_routes){
+            
+            foreach($routes as $route)
+            {
+                $route->in_if_id=request('in_if')[$i] == 0 ? 1 : request('in_if')[$i];
+                $route->in_tag_id=request('in_label')[$i] == 0 ? 1 : request('in_label')[$i];
+                $route->out_if_id=request('out_if')[$i];
+                $route->out_tag_id=request('out_label')[$i];
+                $route->save();
+                $i=$i+1;
+            }
+            $route = new Route();
+            $route->uav_id=$uav->id;
+            $route->in_if_id=request('in_if')[$i] == 0 ? 1 : request('in_if')[$i];
+            $route->in_tag_id=request('in_label')[$i] == 0 ? 1 : request('in_label')[$i];
+            $route->out_if_id=request('out_if')[$i];
+            $route->out_tag_id=request('out_label')[$i];
+            $route->save();  
+        } else {
+            foreach($routes as $route)
+            {
+                $route->in_if_id=request('in_if')[$i] == 0 ? 1 : request('in_if')[$i];
+                $route->in_tag_id=request('in_label')[$i] == 0 ? 1 : request('in_label')[$i];
+                $route->out_if_id=request('out_if')[$i];
+                $route->out_tag_id=request('out_label')[$i];
+                $route->save();
+                $i += 1;
+            } 
+        }
+     
         return redirect('/uavs');
     }
 
@@ -99,7 +143,22 @@ class UavController extends Controller
      */
     public function destroy(Uav $uav)
     {
+        $uav->routes()->delete();
         $uav->delete();
         return redirect('/uavs');
+    }
+
+        /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Uav  $uav
+     * @return \Illuminate\Http\Response
+     */
+    public function route_destroy(Uav $uav, $id)
+    {
+        $route=Route::find($id); 
+        $msg = "Successfully deleted";
+        $route->delete();    
+        return response()->json(array('msg'=> $msg), 200);
     }
 }
