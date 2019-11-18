@@ -1,4 +1,5 @@
 <script type="text/javascript">
+
 $(".del_route").click(function() {
     id=this.id;
     console.log("/uav_routes/"+id);

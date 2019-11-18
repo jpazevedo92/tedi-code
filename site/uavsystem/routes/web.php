@@ -26,6 +26,10 @@ Route::get('/uavs', 'UavController@index');
 Route::get('/uavs/{uav}/edit', 'UavController@edit');
 Route::patch('/uavs/{uav}', 'UavController@update');
 Route::delete('/uavs/{uav}', 'UavController@destroy'); */
+
+Route::get("/qgc", "OptionsController@open_qgroundcontrol");
+Route::get("/start_vm/{id}", "OptionsController@start_vm");
+Route::get("/download_cfg/{id}", "OptionsController@download_cfg");
 Route::get('/', function () {
     return redirect(route('login'));
 });
