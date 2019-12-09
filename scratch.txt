@@ -1,0 +1,91 @@
+    def say_hi(self):
+        print("hi there, everyone!")
+
+    def start_uav_frame(self, master=None):
+        self.uav_frame = Frame(master)
+        self.uav_frame["bg"] = "blue"
+        #Frame.__init__(self, master)
+        self.uav_frame.pack({"side": "top"})
+        self.start_uav_opt(self.uav_frame)
+    
+    def uav_opt(self, master=None):
+        self.uav1 = Button(master)
+        self.uav1["text"] = "TEDI-GUEST1"
+        self.uav1.pack({"side": "left"})
+
+    def start_options_frame(self, master=None):
+        self.opt_frame = Frame(master)
+        self.opt_frame["bg"] = "white"
+        #Frame.__init__(self, master)
+        self.opt_frame.pack({"side": "bottom"})
+        self.options_panel(self.opt_frame)
+
+    def options_panel(self, master=None):
+        self.QUIT = Button(self)
+        self.QUIT["text"] = "Leave"
+        self.QUIT["fg"]   = "red"
+        self.QUIT["command"] =  self.quit
+
+        self.QUIT.pack({"side": "right"})
+
+        self.hi_there = Button(self)
+        self.hi_there["text"] = "Hello",
+        self.hi_there["command"] = self.say_hi
+        self.hi_there.pack({"side": "left"})
+
+###################################################################
+
+from Tkinter import *
+from Tkinter.ttk import *
+
+
+
+class Application(Frame):
+
+    def start_uav_frame(self, master=None):
+        self.uav_frame = Frame(master)
+
+        self.uav_frame.pack(side = TOP)
+        self.uav_opt(self.uav_frame)
+
+    def uav_opt(self, master=None):
+        self.uav_label = Label(master, background="blue")
+        self.uav_label.config(height=3, width=20)
+        self.uav_label.pack(expand=YES, fill=BOTH)
+        self.uav1 = Button(self.uav_label)
+        self.uav1["text"] = "TEDI-GUEST1"
+        self.uav1.pack({"side": "left"})
+
+    def options_frame(self, master=None):
+        self.opt_frame = Frame(master, width=500, height =100)
+        self.opt_frame.pack()
+        self.options(self.opt_frame)
+    
+    def options(self, master=None):
+        self.opt_label = Label(master, background="blue", width=500, height=200)
+        self.opt_label.pack(expand=YES, fill=BOTH)
+        self.QUIT = Button(self.opt_label)
+        self.QUIT["text"] = "Leave"
+        self.QUIT["fg"]   = "red"
+        self.QUIT["command"] =  self.quit
+        self.QUIT.pack({"side": "right"})
+
+
+    def __init__(self, master=None):
+        main_frame = Frame.__init__(self, master)
+        self.pack()
+        self.start_uav_frame(main_frame)
+        self.options_frame(main_frame)
+        
+
+
+        
+root = Tk()
+img = PhotoImage(file='uavsys.png')
+root.tk.call('wm', 'iconphoto', root._w, img)
+root.title('UAVSys')
+root.geometry("500x500")
+
+app = Application(master=root)
+app.mainloop()
+root.tk.call('destroy', root)

@@ -3,6 +3,6 @@
 
 NAME=$1
 echo $NAME
-VBoxManage startvm $NAME
+VBoxManage startvm $NAME & echo $!
 echo  "End of Start VM Script"
 
