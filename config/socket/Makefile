@@ -17,10 +17,6 @@ socket.o: ${SRC}
 soc_utils.o: soc_utils.c
 	$(CC) $(CFLAGS) -c soc_utils.c -o soc_utils.o
 
-
-#all: $(SCKT_OBJS)
-#	$(CC) $(CFLAGS) -o $(socket) $(SCKT_OBJS)
-
 clean:
 	rm -rf *.o $(socket)
 
