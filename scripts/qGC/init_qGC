@@ -1,8 +1,0 @@
-#!/bin/bash
-# Script to QGroundControl
-
-cd /home/jpazevedo
-./QGroundControl.AppImage & echo $!
-
-echo  "QGroundControl Started"
-

@@ -1,8 +1,0 @@
-#!/bin/bash
-
-HOST=$1
-ssh -t pi@$HOST bash -c "'
-    sudo su
-    echo "Running script on $HOST"
-'"
-
