@@ -34,8 +34,8 @@ void initClient(char *iface_name, char *srv_ip, char *clt_message){
     
     send(sock , clt_message , strlen(clt_message) , 0 );
     printf("Message sent\n"); 
-    read( sock , buffer, 1024); 
-    printf("%s\n",buffer );
+    //read( sock , buffer, 1024); 
+    //printf("%s\n",buffer );
     //printf("%s\n", clt_message);
 }
 
