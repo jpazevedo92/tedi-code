@@ -1,0 +1,46 @@
+#!/bin/bash
+
+echo "Tunnel Configuration Script"
+#set -x
+
+######################################################################## VARIABLES ###################################################################################
+OPTION=$1
+TUN_NAME=$2
+TUN_IN=$3
+TUN_OUT=$4
+IP=$5
+NETWORK=$6
+
+########## RUN COMMANDS ############
+
+if [ $OPTION = '-a' ]
+then
+    sudo TUN_NAME=$2 TUN_IN=$3 TUN_OUT=$4 IP=$5 NETWORK=$6 su -p -c '
+    echo $TUN_NAME
+    ip tun a $TUN_NAME mode gre remote $TUN_OUT local $TUN_IN
+    ip addr a $IP dev $TUN_NAME
+    ip link set $TUN_NAME up
+    ip route add dev $NETWORK
+    exit '
+
+    echo "Tunnel name: $TUN_NAME"
+    echo "Tunnel input: $TUN_IN"
+    echo "Tunnel output: $TUN_OUT"
+    echo "Tunnel IP: $IP"
+    echo "Tunnel network: $NETWORK"
+
+elif [ $OPTION == '-d'  ]
+then
+    sudo TUN_NAME=$2 TUN_IN=$3 TUN_OUT=$4 su -p -c '
+        ip tun d $TUN_NAME mode gre remote $TUN_OUT local $TUN_IN
+        exit
+    '
+    echo "Tunnel deleted"
+elif [ $OPTION == '-h'  ]
+then
+    echo "Add tunnel: tunnel_config -a tunnel_name tunnel_ip_in tunnel_ip_out tunnel_given_ip tunnel_network"
+    echo "Delete tunnel: tunnel_config -d tunnel_name tunnel_ip_in tunnel_ip_out"
+fi
+
+
+

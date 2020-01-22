@@ -1,0 +1,44 @@
+{
+    "name": "Host",
+    "local_ip": "192.168.56.1",
+    "interfaces": [
+        {
+            "name": "tun1",
+            "network": "10.0.10.0",
+            "network_mask": "/24",
+            "ip": "10.0.10.1"
+        },
+        {
+            "name": "lo",
+            "network": "127.0.0.1",
+            "network_mask": "255.0.0.0",
+            "ip": "127.0.0.1"
+        }
+    ],
+    "routes": [
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "tun1",
+            "out_label": "200"
+        },
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "tun1",
+            "out_label": "203"
+        },
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "tun1",
+            "out_label": "204"
+        },
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "lo",
+            "out_label": "100"
+        }
+    ]
+}

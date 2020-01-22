@@ -1,0 +1,68 @@
+{
+    "name": "TEDI-GUEST1",
+    "local_ip": "192.168.56.101",
+    "interfaces": [
+        {
+            "name": "tun1",
+            "network": "10.0.10.0",
+            "network_mask": "255.255.255.0",
+            "ip": "10.0.10.2"
+        },
+        {
+            "name": "tun2",
+            "network": "10.0.20.0",
+            "network_mask": "255.255.255.0",
+            "ip": "10.0.20.1"
+        },
+        {
+            "name": "lo",
+            "network": "127.0.0.1",
+            "network_mask": "255.0.0.0",
+            "ip": "127.0.0.1"
+        }
+    ],
+    "routes": [
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "lo",
+            "out_label": "200"
+        },
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "tun1",
+            "out_label": "100"
+        },
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "tun2",
+            "out_label": "300"
+        },
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "tun2",
+            "out_label": "304"
+        },
+        {
+            "in_if": "tun1",
+            "in_label": "203",
+            "out_if": "tun2",
+            "out_label": "300"
+        },
+        {
+            "in_if": "tun1",
+            "in_label": "204",
+            "out_if": "tun2",
+            "out_label": "304"
+        },
+        {
+            "in_if": "tun3",
+            "in_label": "201",
+            "out_if": "tun1",
+            "out_label": "100"
+        }
+    ]
+}
