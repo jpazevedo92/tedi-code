@@ -25,6 +25,6 @@ void getHostandIp(char* iface, char *result);
 
 void initServer(char *iface_name);
 void getIp(char* iface, char *result);
-
+void execCommand(char* command, char *result);
 
 #endif /* SOC_UTILS_H_*/

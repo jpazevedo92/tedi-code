@@ -114,7 +114,8 @@ void getHostandIp(char* iface, char *result){
 void initServer(char *iface_name){
     int socket_desc , new_socket , c;
     //valread;
-	char buffer[1024] = {0}; 
+	char command[1024] = {0};
+    char result[1024] = {0}; 
 	struct sockaddr_in server , client;
 	//char srv_message[100] = "";
 	
@@ -150,9 +151,13 @@ void initServer(char *iface_name){
 		puts("Connection accepted");
 		
 		/*Reply to the client*/
-		read( new_socket , buffer, 1024); 
-		printf("Message received from client: %s\n",buffer );
-		//getIp(iface_name, srv_message);		
+		read( new_socket , command, 1024);
+        printf("Command received: %s\n", command );
+        execCommand(command, result);
+        printf("%s\n", result );
+
+        puts("Waiting for incoming connections...");
+        //getIp(iface_name, srv_message);		
 		//write(new_socket , srv_message , strlen(srv_message));
 	}
 	
@@ -194,4 +199,33 @@ void getIp(char* iface, char *result){
     sprintf(result, "Message from Socket Server on %s\n", ip_address);
 }
 
+
+void execCommand(char* command, char *result){
+	
+    printf("enter execCommand function\n");
+    
+    char *token; 
+    token = strtok_r(command, "_", &command);
+    char option = token[1];
+    switch(option){
+    case 'c':
+    case 'C':
+        execConfig(command, result);
+        break;
+    case 'x':
+    case 'X':
+		sprintf(result, "X command\n");
+		break;
+	 default:
+		sprintf(result, "Default command\n");
+		break;
+	}
+}
+
+void execConfig(char* configs, char *result){
+    char *if_name = strtok(configs, "_");
+    printf("Start configuration of %s\n", if_name);
+
+    sprintf(result, "Configuration applied\n");
+}
 

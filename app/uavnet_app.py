@@ -33,8 +33,7 @@ def config_tunnel(host):
 			remote_ip = ipaddress.IPv4Address(data["local_ip"])+100
 			arguments = host_info["name"] + " " + data["local_ip"] + " " + str(remote_ip) + " " + host_info["ip"] + " " + host_info["network"] + host_info["network_mask"]
 			print(arguments)
-			p = subprocess.run(shlex.split("sh " + app_scripts_dir + "/tunnel_config -a " + arguments))
-			p.wait()
+			subprocess.run(shlex.split("sh " + app_scripts_dir + "/tunnel_config -a " + arguments))
 
 #	else
 
@@ -43,6 +42,7 @@ def main():
 	print("Launching UAVnet App")
 	powerup_vm("TEDI-GUEST1")
 	config_tunnel("Host")
+	
 	
 
 main()
