@@ -223,9 +223,33 @@ void execCommand(char* command, char *result){
 }
 
 void execConfig(char* configs, char *result){
+    printf("enter execConfig function\n");
     char *if_name = strtok(configs, "_");
     printf("Start configuration of %s\n", if_name);
-
+    char *tun_ip_in = strtok(NULL, "_");
+    char *tun_ip_out = strtok(NULL, "_");
+    char *ip_address = strtok(NULL, "_");
+    char *nw = strtok(NULL, "_");
+    printf("splits all parameters\n");
+    FILE *pp;
+    char command_arg[1024] = {0};
+    sprintf(command_arg, "cd ../../app/scripts && sh tunnel_config -a %s %s %s %s %s", if_name, tun_ip_in, tun_ip_out, ip_address, nw);
+    printf("%s\n", command_arg);
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
     sprintf(result, "Configuration applied\n");
+}
+
+void printProcessInfo(FILE *pp){
+    if (pp != NULL) {
+        while (1) {
+            char *line;
+            char buf[1000];
+            line = fgets(buf, sizeof buf, pp);
+            if (line == NULL) break;
+            if (line[0] == 'd') printf("%s", line); /* line includes '\n' */
+        }
+    }
 }
 

@@ -26,5 +26,7 @@ void getHostandIp(char* iface, char *result);
 void initServer(char *iface_name);
 void getIp(char* iface, char *result);
 void execCommand(char* command, char *result);
+void execConfig(char* configs, char *result);
+void printProcessInfo(FILE *pp);
 
 #endif /* SOC_UTILS_H_*/
