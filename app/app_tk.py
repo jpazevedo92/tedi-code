@@ -79,18 +79,18 @@ class Application:
         print("start_drone")
 
     def _config_drone(self, btn_id, master=None):
-        newwin = Toplevel(master)
-        newwin.container6 = Frame(master)
-        newwin.container6["padx"] = 20
-        newwin.container6["pady"] = 5
-        newwin.container6.pack()
+        self.newwin = Toplevel(master)
+        self.newwin.container6 = Frame(self.newwin)
+        self.newwin.container6["padx"] = 20
+        self.newwin.container6["pady"] = 5
+        self.newwin.container6.pack()
 
-        newwin.exit_btn = Button(newwin.container6, text="Exit", 
+        self.newwin.exit_btn = Button(self.newwin.container6, text="Exit", 
         font=self.fonte, width=15)
-        newwin.exit_btn["command"] = quit
-        newwin.exit_btn.pack(side=RIGHT)
+        self.newwin.exit_btn["command"] = self.neww00000000000000000000000000000000.in.destroy()
+        self.newwin.exit_btn.pack(side=RIGHT)
 
-        display = Label(newwin, text="Humm, see a new window !")
+        display = Label(self.newwin, text="Humm, see a new window !")
 
         display.pack() 
 
