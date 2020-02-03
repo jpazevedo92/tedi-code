@@ -54,17 +54,11 @@ class Application:
         self.add_drone["command"] = self._add_drone
         self.add_drone.pack(side=RIGHT)
 
-        self.container6 = Frame(master)
-        self.container6["padx"] = 20
-        self.container6["pady"] = 5
-        self.container6.pack()
-
-        self.exit_btn = Button(self.container6, text="Exit", 
-        font=self.fonte, width=15)
+        self.exit_btn = Button(master, text="Exit", 
+        font=self.fonte, width=5)
         self.exit_btn["command"] = quit
-        self.exit_btn.pack(side=RIGHT)
+        self.exit_btn.pack(side=BOTTOM)
 
-    
     def command(self):
         print("button clicked")
 
@@ -79,29 +73,40 @@ class Application:
         print("start_drone")
 
     def _config_drone(self, btn_id, master=None):
-        self.newwin = Toplevel(master)
-        self.newwin.container6 = Frame(self.newwin)
-        self.newwin.container6["padx"] = 20
-        self.newwin.container6["pady"] = 5
-        self.newwin.container6.pack()
-
-        self.newwin.exit_btn = Button(self.newwin.container6, text="Exit", 
-        font=self.fonte, width=15)
-        self.newwin.exit_btn["command"] = self.neww00000000000000000000000000000000.in.destroy()
-        self.newwin.exit_btn.pack(side=RIGHT)
-
-        display = Label(self.newwin, text="Humm, see a new window !")
-
-        display.pack() 
-
         print("config_drone id: " + str(btn_id))
+        
+        self.newwin = Toplevel(master)
+
+        self.newwin.container = Frame(self.newwin)
+        self.newwin.container["pady"] = 10
+        self.newwin.container.pack()
+
+        self.newwin.title = Label(self.newwin.container, text="Settings - Drone " + str(btn_id))
+        self.newwin.title["font"] = ("Calibri", "9", "bold")
+        self.newwin.title.pack ()
+
+        self.newwin.container1 = Frame(self.newwin)
+        self.newwin.container1["padx"] = 20
+        self.newwin.container1["pady"] = 5
+        self.newwin.container1.pack()
+
+        self.lblqgc = Label(self.newwin.container1, 
+        text="qGroundControl:", font=self.fonte, width=15)
+        self.lblqgc.pack(side=TOP)
+
+        self.newwin.exit_btn = Button(self.newwin, text="Exit", 
+        font=self.fonte, width=15)
+        self.newwin.exit_btn["command"] = self.newwin.destroy
+        self.newwin.exit_btn.pack(side=BOTTOM)
+
+        
     
     def _add_drone(self, master=None):
         global id
         id = id + 1
         self.container5 = Frame(master)
         self.container5["pady"] = 10
-        self.container5.pack()
+        self.container5.pack(side = TOP)
 
         self.lbluav = Label(self.container5, 
         text="Drone "+str(id)+":", font=self.fonte, width=10)
