@@ -81,23 +81,30 @@ class Application:
         self.newwin.container["pady"] = 10
         self.newwin.container.pack()
 
-        self.newwin.title = Label(self.newwin.container, text="Settings - Drone " + str(btn_id))
+        self.newwin.title = Label(self.newwin.container, borderwidth=1 , text="Settings - Drone " + str(btn_id))
         self.newwin.title["font"] = ("Calibri", "9", "bold")
-        self.newwin.title.pack ()
+        self.newwin.title.grid(row=0,column=1)
 
-        self.newwin.container1 = Frame(self.newwin)
-        self.newwin.container1["padx"] = 20
-        self.newwin.container1["pady"] = 5
-        self.newwin.container1.pack()
+        self.lblnetwork = Label(self.newwin.container, 
+        text="network:", font=self.fonte, width=15)
+        self.lblnetwork.grid(row=1,column=0)
 
-        self.lblqgc = Label(self.newwin.container1, 
-        text="qGroundControl:", font=self.fonte, width=15)
-        self.lblqgc.pack(side=TOP)
+        self.entnetwork = Entry(self.newwin.container, font=self.fonte, width=15)
+        self.entnetwork.grid(row=1,column=1)
 
-        self.newwin.exit_btn = Button(self.newwin, text="Exit", 
-        font=self.fonte, width=15)
-        self.newwin.exit_btn["command"] = self.newwin.destroy
-        self.newwin.exit_btn.pack(side=BOTTOM)
+        # self.newwin.container1 = Frame(self.newwin)
+        # self.newwin.container1["padx"] = 20
+        # self.newwin.container1["pady"] = 5
+        # self.newwin.container1.pack()
+
+        # self.lblqgc = Label(self.newwin.container1, 
+        # text="qGroundControl:", font=self.fonte, width=15)
+        # self.lblqgc.pack(side=TOP)
+
+        # self.newwin.exit_btn = Button(self.newwin, text="Exit", 
+        # font=self.fonte, width=15)
+        # self.newwin.exit_btn["command"] = self.newwin.destroy
+        # self.newwin.exit_btn.pack(side=BOTTOM)
 
         
     
