@@ -1,8 +1,25 @@
+'''
+    Imports
+'''
 import os
 import subprocess
+import shlex
+import json
+import ipaddress
 from tkinter import *
-
+'''
+    Global Variables
+'''
 id = 0
+config_drone_buttons = list()
+add_drone_buttons = list()
+app_scripts_dir = os.path.abspath(os.path.join(__file__,"..","scripts"))
+app_settings_dir = os.path.abspath(os.path.join(__file__,"..","settings"))
+
+'''
+    Class definitions
+'''
+# 
 class Application:    
     def __init__(self, master=None):
         self.fonte = ("Verdana", "8")
@@ -66,9 +83,10 @@ class Application:
         qgc_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "..", ".."))
         subprocess.Popen(qgc_path+"/QGroundControl.AppImage", shell=True)
 
-        def _add_drone(self, master=None):
+    def _add_drone(self, master=None):
         global id
         id = id + 1
+        print("add_drone opt")
         self.container5 = Frame(master)
         self.container5["pady"] = 10
         self.container5.pack(side = TOP)
@@ -79,21 +97,27 @@ class Application:
         
         self.config_drone = Button(self.container5, text="Config", 
         font=self.fonte, width=10)
-        self.config_drone["command"] = lambda: self._config_drone(id)
+        config_drone_buttons.append(self.config_drone)
+        config_index = config_drone_buttons.index(self.config_drone) + 1
+        self.config_drone["command"] = lambda i=config_index: self._config_drone(i)
         self.config_drone.pack(side=LEFT)
 
         self.start_drone = Button(self.container5, text="Start", 
         font=self.fonte, width=10)
-        self.start_drone["command"] = lambda: self._start_drone(id)
+        add_drone_buttons.append(self.start_drone)
+        add_index = add_drone_buttons.index(self.start_drone) + 1
+        #self.start_drone.drone_id = id
+        #self.start_drone = Button(self.container5, text="TEDI-GUEST"+str(id), font=self.fonte, width=10)
+        self.start_drone["command"] = lambda i=add_index: self._start_drone(i)
         self.start_drone.pack(side=RIGHT)
         
-        print("add_drone opt")
-
     def _config_base(self):
         print("config_base")
 
     def _start_drone(self, btn_id):
-        print("start_drone")
+        print("Drone ID: ", btn_id)
+        #print("start_drone" + print(self))
+        subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
 
     def _config_drone(self, btn_id, master=None):
         print("config_drone id: " + str(btn_id))
@@ -128,8 +152,23 @@ class Application:
         # font=self.fonte, width=15)
         # self.newwin.exit_btn["command"] = self.newwin.destroy
         # self.newwin.exit_btn.pack(side=BOTTOM)
+
+class DroneButton(Button):
+    drone_id = 0
+    def __init__(self,master=None, width=10, font=("Verdana", "8")):
+        Button.__init__(self, master, text="Start", font=font, width=width)
+        #self.drone_button = Button(master, text="Start", font=font, width=width)
+        
                 
+'''
+    Function definitions
+'''
+
+
+'''
+    Function Calls
+'''
 root = Tk()
 Application(root)
-root.geometry("300x200+300+300")
+root.geometry("300x350+300+300")
 root.mainloop()
