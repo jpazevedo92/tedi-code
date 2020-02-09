@@ -28,5 +28,6 @@ void getIp(char* iface, char *result);
 void execCommand(char* command, char *result);
 void execConfig(char* configs, char *result);
 void printProcessInfo(FILE *pp);
+void execAliveCheck(char *result);
 
 #endif /* SOC_UTILS_H_*/

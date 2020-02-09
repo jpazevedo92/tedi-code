@@ -1,0 +1,13 @@
+./socket -C vboxnet0 192.168.56.1 -C_tun1_192.168.56.101_192.168.56.1_10.0.10.2_10.0.10.0/24
+
+def send_command(command, ip):
+    tcp_ip = ip
+    tcp_port = 8080
+    buffer_size = 1024
+    message = command
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((tcp_ip, tcp_port))
+    s.send(message.encode())
+    data = s.recv(buffer_size)
+    s.close()
+    return data

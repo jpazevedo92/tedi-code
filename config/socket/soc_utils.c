@@ -32,10 +32,10 @@ void initClient(char *iface_name, char *srv_ip, char *clt_message){
         //return -1; 
     }
     
-    send(sock , clt_message , strlen(clt_message) , 0 );
+    send(sock , clt_message , strlen(clt_message) , 0);
     printf("Message sent\n"); 
-    //read( sock , buffer, 1024); 
-    //printf("%s\n",buffer );
+    read( sock , buffer, 1024); 
+    printf("%s\n",buffer );
     //printf("%s\n", clt_message);
 }
 
@@ -148,17 +148,23 @@ void initServer(char *iface_name){
 	
 	while( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
 	{
-		puts("Connection accepted");
+        struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&client;
+        struct in_addr ipAddr = pV4Addr->sin_addr;
+
+        char clt_ip[INET_ADDRSTRLEN];
+        inet_ntop( AF_INET, &ipAddr, clt_ip, INET_ADDRSTRLEN );
+
+		printf("Connection accepted from: %s", clt_ip);
 		
 		/*Reply to the client*/
 		read( new_socket , command, 1024);
         printf("Command received: %s\n", command );
         execCommand(command, result);
         printf("%s\n", result );
-
+        write(new_socket , result , strlen(result));
+        //Wait for new connection
         puts("Waiting for incoming connections...");
-        //getIp(iface_name, srv_message);		
-		//write(new_socket , srv_message , strlen(srv_message));
+        //getIp(iface_name, srv_message);
 	}
 	
 	if (new_socket < 0)
@@ -199,7 +205,6 @@ void getIp(char* iface, char *result){
     sprintf(result, "Message from Socket Server on %s\n", ip_address);
 }
 
-
 void execCommand(char* command, char *result){
 	
     printf("enter execCommand function\n");
@@ -208,17 +213,22 @@ void execCommand(char* command, char *result){
     token = strtok_r(command, "_", &command);
     char option = token[1];
     switch(option){
-    case 'c':
-    case 'C':
-        execConfig(command, result);
-        break;
-    case 'x':
-    case 'X':
-		sprintf(result, "X command\n");
-		break;
-	 default:
-		sprintf(result, "Default command\n");
-		break;
+        case 'a':
+        case 'A':
+            execAliveCheck(result);
+            //execConfig(command, result);
+            break;
+        case 'c':
+        case 'C':
+            execConfig(command, result);
+            break;
+        case 'x':
+        case 'X':
+            sprintf(result, "X command\n");
+            break;
+        default:
+            sprintf(result, "Default command\n");
+            break;
 	}
 }
 
@@ -253,3 +263,7 @@ void printProcessInfo(FILE *pp){
     }
 }
 
+
+void execAliveCheck(char *result){
+    sprintf(result, "OK");
+}

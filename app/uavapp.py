@@ -1,20 +1,25 @@
 '''
     Imports
 '''
+
 import os
 import subprocess
 import shlex
 import json
 import ipaddress
+import socket
 from tkinter import *
+
 '''
     Global Variables
 '''
+
 id = 0
 config_drone_buttons = list()
 add_drone_buttons = list()
 app_scripts_dir = os.path.abspath(os.path.join(__file__,"..","scripts"))
 app_settings_dir = os.path.abspath(os.path.join(__file__,"..","settings"))
+socket_dir = os.path.abspath(os.path.join(__file__,"..", "..", "config", "socket"))
 
 '''
     Class definitions
@@ -22,6 +27,7 @@ app_settings_dir = os.path.abspath(os.path.join(__file__,"..","settings"))
 # 
 class Application:    
     def __init__(self, master=None):
+        self.command_msg = StringVar()
         self.fonte = ("Verdana", "8")
         self.container1 = Frame(master)
         self.container1["pady"] = 10
@@ -73,10 +79,33 @@ class Application:
         self.add_drone["command"] = self._add_drone
         self.add_drone.pack(side=RIGHT)
 
-        self.exit_btn = Button(master, text="Exit", 
+        self.exit_frame = Frame(master)
+        self.exit_frame["padx"] = 20
+        self.exit_frame["pady"] = 5
+        self.exit_frame.pack(side=BOTTOM)
+
+        self.exit_btn = Button(self.exit_frame, text="Exit", 
         font=self.fonte, width=5)
         self.exit_btn["command"] = quit
-        self.exit_btn.pack(side=BOTTOM)
+        self.exit_btn.pack(side=RIGHT)
+
+        self.command_frame = Frame(master)
+        self.command_frame["padx"] = 20
+        self.command_frame["pady"] = 5
+        self.command_frame.pack(side=BOTTOM)
+
+        self.lblcomand = Label(self.command_frame, 
+        text="Command print:", font=self.fonte, width=15)
+        self.lblcomand.pack(side=LEFT)
+
+        self.command_entry = Entry(self.command_frame, 
+        font=self.fonte, width=25, state=DISABLED, textvariable=self.command_msg, fg='black')
+        self.command_entry.config( background="white",disabledbackground="white")
+        #self.config_base["command"] = self._config_base
+        self.command_entry.pack(side=RIGHT)
+
+    def command_message_print(self, msg):
+        self.command_msg.set(msg)
 
     def _open_qgc(self):
         print("open_qgc")
@@ -115,9 +144,17 @@ class Application:
         print("config_base")
 
     def _start_drone(self, btn_id):
-        print("Drone ID: ", btn_id)
-        #print("start_drone" + print(self))
-        subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
+        self.command_message_print("Start drone TEDI-GUEST" + str(btn_id))
+        print("Start drone TEDI-GUEST" + str(btn_id))
+        #Start VM related with drone ID
+        #subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
+        #Send Alive Check
+        response = send_command("192.168.56.1", "-A").decode("utf-8")
+        #subprocess.Popen([socket_dir + "/socket", "-C", "vboxnet0", "192.168.56.1", "-A"])
+        #subprocess.call("."+ socket_dir + "/socket -C vboxnet0 192.168.56.1 -A")
+        self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+
+        
 
     def _config_drone(self, btn_id, master=None):
         print("config_drone id: " + str(btn_id))
@@ -152,6 +189,10 @@ class Application:
         # font=self.fonte, width=15)
         # self.newwin.exit_btn["command"] = self.newwin.destroy
         # self.newwin.exit_btn.pack(side=BOTTOM)
+        
+
+    
+
 
 class DroneButton(Button):
     drone_id = 0
@@ -163,7 +204,16 @@ class DroneButton(Button):
 '''
     Function definitions
 '''
-
+def send_command(ip, command):
+    port = 8080
+    buffer_size = 1024
+    message = command
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((ip, port))
+    s.send(message.encode())
+    data = s.recv(buffer_size)
+    s.close()
+    return data
 
 '''
     Function Calls
