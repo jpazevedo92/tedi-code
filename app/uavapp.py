@@ -8,6 +8,11 @@ import shlex
 import json
 import ipaddress
 import socket
+import logging
+import time
+
+from logging.handlers import TimedRotatingFileHandler
+from datetime import datetime
 from tkinter import *
 
 '''
@@ -17,9 +22,12 @@ from tkinter import *
 id = 0
 config_drone_buttons = list()
 add_drone_buttons = list()
+log_file = os.path.abspath(os.path.join(__file__, "..", "log","log.log"))
 app_scripts_dir = os.path.abspath(os.path.join(__file__,"..","scripts"))
 app_settings_dir = os.path.abspath(os.path.join(__file__,"..","settings"))
 socket_dir = os.path.abspath(os.path.join(__file__,"..", "..", "config", "socket"))
+
+
 
 '''
     Class definitions
@@ -108,14 +116,18 @@ class Application:
         self.command_msg.set(msg)
 
     def _open_qgc(self):
-        print("open_qgc")
+        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
+        print(time_str +" Open QGroundControl SW")
+        logger.info(time_str +" Open QGroundControl SW")
         qgc_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "..", ".."))
         subprocess.Popen(qgc_path+"/QGroundControl.AppImage", shell=True)
 
     def _add_drone(self, master=None):
         global id
         id = id + 1
-        print("add_drone opt")
+        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
+        print(time_str +" Button Add Drone pressed")
+        logger.info(time_str +" Button Add Drone pressed")
         self.container5 = Frame(master)
         self.container5["pady"] = 10
         self.container5.pack(side = TOP)
@@ -141,18 +153,25 @@ class Application:
         self.start_drone.pack(side=RIGHT)
         
     def _config_base(self):
-        print("config_base")
+        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
+        print(time_str +" Configure Base Settings")
+        logger.info(time_str +" Configure Base Settings")
 
     def _start_drone(self, btn_id):
+        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
         self.command_message_print("Start drone TEDI-GUEST" + str(btn_id))
-        print("Start drone TEDI-GUEST" + str(btn_id))
+        print(time_str +" Start drone TEDI-GUEST" + str(btn_id))
+        logger.info(time_str +" Start drone TEDI-GUEST" + str(btn_id))
         #Start VM related with drone ID
         #subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
         #Send Alive Check
-        response = send_command("192.168.56.1", "-A").decode("utf-8")
+        #response = send_command("192.168.56.1", "-A").decode("utf-8")
         #subprocess.Popen([socket_dir + "/socket", "-C", "vboxnet0", "192.168.56.1", "-A"])
         #subprocess.call("."+ socket_dir + "/socket -C vboxnet0 192.168.56.1 -A")
+        response = "OK"
+        print(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        logger.info(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
 
         
 
@@ -215,10 +234,26 @@ def send_command(ip, command):
     s.close()
     return data
 
+def create_timed_rotating_log(path):
+    """"""
+    logger = logging.getLogger("Rotating Log")
+    logger.setLevel(logging.INFO)
+    
+    handler = TimedRotatingFileHandler(path,
+                                       when="m",
+                                       interval=1,
+                                       backupCount=5)
+    logger.addHandler(handler)
+    
+    return logger
+
 '''
     Function Calls
 '''
+
 root = Tk()
 Application(root)
 root.geometry("300x350+300+300")
+logger = create_timed_rotating_log(log_file)
+logger.info("------- UAVApp Start Execution -------")
 root.mainloop()
