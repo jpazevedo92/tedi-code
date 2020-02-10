@@ -5,7 +5,7 @@
         {
             "name": "tun1",
             "network": "10.0.10.0",
-            "network_mask": "255.255.255.0",
+            "network_mask": "/24",
             "ip": "10.0.10.2"
         },
         {

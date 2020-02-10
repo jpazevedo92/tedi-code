@@ -17,16 +17,17 @@
 /* Constant variables / MACROS */
 #define PORT 8080
 /* Function Headers */
-void initClient(char *iface_name, char *srv_ip, char *clt_message);
+//void initClient(char *iface_name, char *srv_ip, char *clt_message);
 
 void checkHostName(int hostname);
 void checkHostEntry(struct hostent * hostentry);
 void getHostandIp(char* iface, char *result);
 
-void initServer(char *iface_name);
-void getIp(char* iface, char *result);
+void initServer();
+//void initServer(char *iface_name);
+//void getIp(char* iface, char *result);
 void execCommand(char* command, char *result);
-void execConfig(char* configs, char *result);
+void execConfigTun(char* configs, char *result);
 void printProcessInfo(FILE *pp);
 void execAliveCheck(char *result);
 

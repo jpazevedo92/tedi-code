@@ -111,7 +111,8 @@ void getHostandIp(char* iface, char *result){
 }
 
 /********************** Server Side *********************/
-void initServer(char *iface_name){
+//void initServer(char *iface_name)
+void initServer(){
     int socket_desc , new_socket , c;
     //valread;
 	char command[1024] = {0};
@@ -175,35 +176,35 @@ void initServer(char *iface_name){
     printf("Start socket server\n");
 }
 
-void getIp(char* iface, char *result){
+// void getIp(char* iface, char *result){
 
-    unsigned char ip_address[15];
-    int fd;
-    struct ifreq ifr;
+//     unsigned char ip_address[15];
+//     int fd;
+//     struct ifreq ifr;
      
-    /*AF_INET - to define network interface IPv4*/
-    /*Creating soket for it.*/
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
+//     /*AF_INET - to define network interface IPv4*/
+//     /*Creating soket for it.*/
+//     fd = socket(AF_INET, SOCK_DGRAM, 0);
      
-    /*AF_INET - to define IPv4 Address type.*/
-    ifr.ifr_addr.sa_family = AF_INET;
+//     /*AF_INET - to define IPv4 Address type.*/
+//     ifr.ifr_addr.sa_family = AF_INET;
      
-    /*eth0 - define the ifr_name - port name
-    where network attached.*/
-    memcpy(ifr.ifr_name, iface , IFNAMSIZ-1);
+//     /*eth0 - define the ifr_name - port name
+//     where network attached.*/
+//     memcpy(ifr.ifr_name, iface , IFNAMSIZ-1);
      
-    /*Accessing network interface information by
-    passing address using ioctl.*/
-    ioctl(fd, SIOCGIFADDR, &ifr);
-    /*closing fd*/
-    close(fd);
+//     /*Accessing network interface information by
+//     passing address using ioctl.*/
+//     ioctl(fd, SIOCGIFADDR, &ifr);
+//     /*closing fd*/
+//     close(fd);
      
-    /*Extract IP Address*/
-    strcpy(ip_address,inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+//     /*Extract IP Address*/
+//     strcpy(ip_address,inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
     
-    /*Put IP Address on string to send back to client*/
-    sprintf(result, "Message from Socket Server on %s\n", ip_address);
-}
+//     /*Put IP Address on string to send back to client*/
+//     sprintf(result, "Message from Socket Server on %s\n", ip_address);
+// }
 
 void execCommand(char* command, char *result){
 	
@@ -218,9 +219,13 @@ void execCommand(char* command, char *result){
             execAliveCheck(result);
             //execConfig(command, result);
             break;
-        case 'c':
-        case 'C':
-            execConfig(command, result);
+        case 't':
+        case 'T':
+            execConfigTun(command, result);
+            break;
+        case 'm':
+        case 'M':
+            sprintf(result, "MPLS command\n");
             break;
         case 'x':
         case 'X':
@@ -232,7 +237,7 @@ void execCommand(char* command, char *result){
 	}
 }
 
-void execConfig(char* configs, char *result){
+void execConfigTun(char* configs, char *result){
     printf("enter execConfig function\n");
     char *if_name = strtok(configs, "_");
     printf("Start configuration of %s\n", if_name);

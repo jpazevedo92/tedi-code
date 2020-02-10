@@ -10,6 +10,7 @@ import ipaddress
 import socket
 import logging
 import time
+import re
 
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime
@@ -22,7 +23,7 @@ from tkinter import *
 id = 0
 config_drone_buttons = list()
 add_drone_buttons = list()
-log_file = os.path.abspath(os.path.join(__file__, "..", "log","log.log"))
+log_file = os.path.abspath(os.path.join(__file__, "..", "logs","log.log"))
 app_scripts_dir = os.path.abspath(os.path.join(__file__,"..","scripts"))
 app_settings_dir = os.path.abspath(os.path.join(__file__,"..","settings"))
 socket_dir = os.path.abspath(os.path.join(__file__,"..", "..", "config", "socket"))
@@ -172,6 +173,17 @@ class Application:
         print(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         logger.info(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        
+        #Send config command to base
+        cmd_args = config_tunnel("Host")
+        print(time_str +" Command Arguments: " + cmd_args )
+        logger.info(time_str +" Command Arguments: " + cmd_args )
+        
+        #Send config command to base
+        uav_cmd_args = config_tunnel("uav"+str(btn_id))
+        print(time_str +" UAV Command Arguments: " + uav_cmd_args )
+        logger.info(time_str +" UAV Command Arguments: " + uav_cmd_args )
+
 
         
 
@@ -209,10 +221,6 @@ class Application:
         # self.newwin.exit_btn["command"] = self.newwin.destroy
         # self.newwin.exit_btn.pack(side=BOTTOM)
         
-
-    
-
-
 class DroneButton(Button):
     drone_id = 0
     def __init__(self,master=None, width=10, font=("Verdana", "8")):
@@ -233,6 +241,24 @@ def send_command(ip, command):
     data = s.recv(buffer_size)
     s.close()
     return data
+
+def config_tunnel(host):
+    if host == "Host":
+        with open(app_settings_dir + "/base.json") as json_file:
+            data = json.load(json_file)
+            host_info = data["interfaces"][0]
+            remote_ip = ipaddress.IPv4Address(data["local_ip"])+100
+            arguments = host_info["name"] + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + host_info["ip"] + "_" + host_info["network"] + host_info["network_mask"]
+    else:
+        with open(app_settings_dir + "/"+ host +".json") as json_file:
+            id = int(re.findall(r'\d+', host)[0])
+            print("ID: ", id)
+            data = json.load(json_file)
+            host_info = data["interfaces"][0]
+            remote_ip = ipaddress.IPv4Address(data["local_ip"])-100-id+1
+            arguments = host_info["name"] + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + host_info["ip"] + "_" + host_info["network"] + host_info["network_mask"]
+        
+    return arguments
 
 def create_timed_rotating_log(path):
     """"""
