@@ -166,10 +166,10 @@ class Application:
         #Start VM related with drone ID
         #subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
         #Send Alive Check
-        #response = send_command("192.168.56.1", "-A").decode("utf-8")
+        response = send_command("192.168.56.101", "-A").decode("utf-8")
         #subprocess.Popen([socket_dir + "/socket", "-C", "vboxnet0", "192.168.56.1", "-A"])
         #subprocess.call("."+ socket_dir + "/socket -C vboxnet0 192.168.56.1 -A")
-        response = "OK"
+        #response = "OK"
         print(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         logger.info(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
