@@ -253,7 +253,7 @@ void execConfigTun(char* configs, char *result){
     pp = popen(command_arg, "r");
     printProcessInfo(pp);
     pclose(pp);
-    sprintf(result, "Configuration applied\n");
+    sprintf(result, "Configuration of %s is OK", if_name);
 }
 
 void printProcessInfo(FILE *pp){

@@ -164,25 +164,44 @@ class Application:
         print(time_str +" Start drone TEDI-GUEST" + str(btn_id))
         logger.info(time_str +" Start drone TEDI-GUEST" + str(btn_id))
         #Start VM related with drone ID
-        #subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
+        subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
+        time.sleep(60)
         #Send Alive Check
-        response = send_command("192.168.56.101", "-A").decode("utf-8")
-        #subprocess.Popen([socket_dir + "/socket", "-C", "vboxnet0", "192.168.56.1", "-A"])
-        #subprocess.call("."+ socket_dir + "/socket -C vboxnet0 192.168.56.1 -A")
-        #response = "OK"
+        uav_ip = get_ip("uav"+ str(btn_id))
+        response = send_command(uav_ip, "-A").decode("utf-8")
         print(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         logger.info(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         
         #Send config command to base
         cmd_args = config_tunnel("Host")
-        print(time_str +" Command Arguments: " + cmd_args )
-        logger.info(time_str +" Command Arguments: " + cmd_args )
-        
-        #Send config command to base
+        print(time_str +" Command Arguments: " + cmd_args)
+        logger.info(time_str +" Command Arguments: " + cmd_args)
+        base_ip = get_ip("base")
+        base_response = send_command(base_ip, "-T_" + cmd_args).decode("utf-8")
+        print(time_str +" Tunnel Config on base : " + base_response)
+        self.command_message_print("Tunnel Config on base : " + base_response)
+        logger.info(time_str +" Tunnel Config on base : " + base_response)
+
+        time.sleep(2)
+
+        #Send config command to drone
         uav_cmd_args = config_tunnel("uav"+str(btn_id))
         print(time_str +" UAV Command Arguments: " + uav_cmd_args )
         logger.info(time_str +" UAV Command Arguments: " + uav_cmd_args )
+        uav_response = send_command(uav_ip, "-T_" + uav_cmd_args).decode("utf-8")
+        print(time_str +" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
+        self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
+        logger.info(time_str + " Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
+
+        #Check Alive drone with tunnel
+        # uav_ip = get_ip("uav"+ str(btn_id), "tun")
+        # for i in range(0, 3):   
+        #     response = send_command(uav_ip, "-A").decode("utf-8")
+        #     print(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        #     self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        #     logger.info(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        #     time.sleep(1)
 
 
         
@@ -252,13 +271,23 @@ def config_tunnel(host):
     else:
         with open(app_settings_dir + "/"+ host +".json") as json_file:
             id = int(re.findall(r'\d+', host)[0])
-            print("ID: ", id)
             data = json.load(json_file)
             host_info = data["interfaces"][0]
             remote_ip = ipaddress.IPv4Address(data["local_ip"])-100-id+1
             arguments = host_info["name"] + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + host_info["ip"] + "_" + host_info["network"] + host_info["network_mask"]
         
     return arguments
+
+def get_ip(host, tun=None):
+    with open(app_settings_dir + "/"+ host +".json") as json_file:
+        data = json.load(json_file)
+        if tun is not None:
+            host_info = data["interfaces"][0]
+            ip = host_info["ip"]
+        else:
+            print("is none")
+            ip = data["local_ip"]
+    return ip
 
 def create_timed_rotating_log(path):
     """"""

@@ -16,18 +16,21 @@ NETWORK=$6
 if [ $OPTION = '-a' ]
 then
     sudo TUN_NAME=$2 TUN_IN=$3 TUN_OUT=$4 IP=$5 NETWORK=$6 su -p -c '
-    echo $TUN_NAME
-    ip tun a $TUN_NAME mode gre remote $TUN_OUT local $TUN_IN
-    ip addr a $IP dev $TUN_NAME
-    ip link set $TUN_NAME up
-    ip route add dev $NETWORK
-    exit '
+
+        ip tunnel add $TUN_NAME mode gre remote $TUN_OUT local $TUN_IN
+        ip addr add $IP dev $TUN_NAME
+        ip link set $TUN_NAME up
+        ip route add $NETWORK dev $TUN_NAME
+        exit 
+    
+    '
 
     echo "Tunnel name: $TUN_NAME"
     echo "Tunnel input: $TUN_IN"
     echo "Tunnel output: $TUN_OUT"
     echo "Tunnel IP: $IP"
     echo "Tunnel network: $NETWORK"
+
 
 elif [ $OPTION == '-d'  ]
 then
