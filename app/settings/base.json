@@ -9,6 +9,12 @@
             "ip": "10.0.10.1"
         },
         {
+            "name": "tun2",
+            "network": "10.0.20.0",
+            "network_mask": "/24",
+            "ip": "10.0.20.1"
+        },
+        {
             "name": "lo",
             "network": "127.0.0.1",
             "network_mask": "255.0.0.0",

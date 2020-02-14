@@ -159,6 +159,9 @@ class Application:
         logger.info(time_str +" Configure Base Settings")
 
     def _start_drone(self, btn_id):
+        self.start_drone["text"] = "Stop"
+        self.start_drone["command"] = lambda: self._stop_drone(btn_id)
+
         time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
         self.command_message_print("Start drone TEDI-GUEST" + str(btn_id))
         print(time_str +" Start drone TEDI-GUEST" + str(btn_id))
@@ -166,7 +169,8 @@ class Application:
         
         #Start VM related with drone ID
         subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
-        time.sleep(60)
+        sleep(60)
+        #time.sleep(60)
 
         #Send Alive Check
         uav_ip = get_ip("uav"+ str(btn_id))
@@ -186,7 +190,7 @@ class Application:
         self.command_message_print("Tunnel Config on base : " + base_response)
         logger.info(time_str +" Tunnel Config on base : " + base_response)
 
-        time.sleep(2)
+        sleep(2)
 
         #Send config command to drone
         uav_cmd_args = config_tunnel("uav"+str(btn_id))
@@ -198,16 +202,20 @@ class Application:
         logger.info(time_str + " Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
 
         #Check Alive drone with tunnel
-        # uav_ip = get_ip("uav"+ str(btn_id), "tun")
-        # for i in range(0, 3):   
-        #     response = send_command(uav_ip, "-A").decode("utf-8")
-        #     print(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        #     self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        #     logger.info(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        #     time.sleep(1)
+        uav_ip = get_ip("uav"+ str(btn_id), "tun")
+        for i in range(0, 3):   
+            response = send_command(uav_ip, "-A").decode("utf-8")
+            print(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+            self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+            logger.info(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+            time.sleep(1)
 
+    def _stop_drone(self, btn_id):
+        self.start_drone["text"] = "Start"
+        self.start_drone["command"] = lambda: self._start_drone(btn_id)
 
-        
+        #do stuff for shutdown drone
+
 
     def _config_drone(self, btn_id, master=None):
         print("config_drone id: " + str(btn_id))
@@ -291,6 +299,11 @@ def get_ip(host, tun=None):
             ip = data["local_ip"]
     return ip
 
+def sleep(time_given):
+    for i in range(0, time_given):
+        print("Waiting " + str(i) + "s")
+        time.sleep(1)
+    
 def create_timed_rotating_log(path):
     """"""
     logger = logging.getLogger("Rotating Log")
