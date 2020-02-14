@@ -163,11 +163,14 @@ class Application:
         self.command_message_print("Start drone TEDI-GUEST" + str(btn_id))
         print(time_str +" Start drone TEDI-GUEST" + str(btn_id))
         logger.info(time_str +" Start drone TEDI-GUEST" + str(btn_id))
+        
         #Start VM related with drone ID
         subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
         time.sleep(60)
+
         #Send Alive Check
         uav_ip = get_ip("uav"+ str(btn_id))
+        print(time_str +" Drone TEDI-GUEST: " + uav_ip)
         response = send_command(uav_ip, "-A").decode("utf-8")
         print(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
@@ -285,7 +288,6 @@ def get_ip(host, tun=None):
             host_info = data["interfaces"][0]
             ip = host_info["ip"]
         else:
-            print("is none")
             ip = data["local_ip"]
     return ip
 

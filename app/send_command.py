@@ -11,4 +11,4 @@ def send_command(ip, command):
     s.close()
     return data
 
-print(send_command("10.0.10.2", "-A"))
+print(send_command("192.168.56.1", "-T_tun1_192.168.56.1_192.168.56.101_10.0.10.1_10.0.10.0/24"))
