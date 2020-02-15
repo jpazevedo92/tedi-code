@@ -159,8 +159,8 @@ class Application:
         logger.info(time_str +" Configure Base Settings")
 
     def _start_drone(self, btn_id):
-        self.start_drone["text"] = "Stop"
-        self.start_drone["command"] = lambda: self._stop_drone(btn_id)
+        # self.start_drone["text"] = "Stop"
+        # self.start_drone["command"] = lambda: self._stop_drone(btn_id)
 
         time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
         self.command_message_print("Start drone TEDI-GUEST" + str(btn_id))
@@ -169,9 +169,15 @@ class Application:
         
         #Start VM related with drone ID
         subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
-        sleep(60)
-        #time.sleep(60)
+        ready = receive_ready_status().decode("utf-8")
 
+        if ready == "-R":
+        #sleep(35)
+        #time.sleep(60)
+            self._start_up_system(btn_id, time_str)
+
+        
+    def _start_up_system(self, btn_id, time_str):
         #Send Alive Check
         uav_ip = get_ip("uav"+ str(btn_id))
         print(time_str +" Drone TEDI-GUEST: " + uav_ip)
@@ -181,7 +187,7 @@ class Application:
         logger.info(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         
         #Send config command to base
-        cmd_args = config_tunnel("Host")
+        cmd_args = config_tunnel("Host", btn_id)
         print(time_str +" Command Arguments: " + cmd_args)
         logger.info(time_str +" Command Arguments: " + cmd_args)
         base_ip = get_ip("base")
@@ -193,7 +199,7 @@ class Application:
         sleep(2)
 
         #Send config command to drone
-        uav_cmd_args = config_tunnel("uav"+str(btn_id))
+        uav_cmd_args = config_tunnel("uav"+str(btn_id), btn_id)
         print(time_str +" UAV Command Arguments: " + uav_cmd_args )
         logger.info(time_str +" UAV Command Arguments: " + uav_cmd_args )
         uav_response = send_command(uav_ip, "-T_" + uav_cmd_args).decode("utf-8")
@@ -209,7 +215,7 @@ class Application:
             self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
             logger.info(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
             time.sleep(1)
-
+    
     def _stop_drone(self, btn_id):
         self.start_drone["text"] = "Start"
         self.start_drone["command"] = lambda: self._start_drone(btn_id)
@@ -272,12 +278,29 @@ def send_command(ip, command):
     s.close()
     return data
 
-def config_tunnel(host):
+def receive_ready_status():
+    s = socket.socket()          
+    port = 8080                
+    s.bind(('', port))         
+    print("socket binded to %s" %(port))
+    # put the socket into listening mode 
+    s.listen(5)      
+    print("Wait for drone ready message")            
+    data = None
+    while data == None: 
+        c, addr = s.accept()      
+        print('Got connection from', addr )
+        data = c.recv(1024)
+        c.close()
+    return data
+
+
+def config_tunnel(host, id):
     if host == "Host":
         with open(app_settings_dir + "/base.json") as json_file:
             data = json.load(json_file)
-            host_info = data["interfaces"][0]
-            remote_ip = ipaddress.IPv4Address(data["local_ip"])+100
+            host_info = data["interfaces"][id-1]
+            remote_ip = ipaddress.IPv4Address(data["local_ip"])-1+100+id
             arguments = host_info["name"] + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + host_info["ip"] + "_" + host_info["network"] + host_info["network_mask"]
     else:
         with open(app_settings_dir + "/"+ host +".json") as json_file:
