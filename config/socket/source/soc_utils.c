@@ -17,7 +17,7 @@ void initClient(char *srv_ip, char *clt_message){
     memset(&serv_addr, '0', sizeof(serv_addr)); 
    
     serv_addr.sin_family = AF_INET; 
-    serv_addr.sin_port = htons(PORT_READY); 
+    serv_addr.sin_port = htons(PORT); 
        
     /* Convert IPv4 and IPv6 addresses from text to binary form */
     if(inet_pton(AF_INET, srv_ip, &serv_addr.sin_addr)<=0)  
