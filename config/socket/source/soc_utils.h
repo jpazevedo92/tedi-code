@@ -16,6 +16,7 @@
 
 /* Constant variables / MACROS */
 #define PORT 8080
+#define PORT_READY 8081
 /* Function Headers */
 void initClient(char *srv_ip, char *clt_message);
 //void initClient(char *iface_name, char *srv_ip, char *clt_message);

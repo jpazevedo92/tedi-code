@@ -178,6 +178,8 @@ class Application:
 
         
     def _start_up_system(self, btn_id, time_str):
+        #Init base listen server
+        #subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
         #Send Alive Check
         uav_ip = get_ip("uav"+ str(btn_id))
         print(time_str +" Drone TEDI-GUEST: " + uav_ip)
@@ -280,7 +282,7 @@ def send_command(ip, command):
 
 def receive_ready_status():
     s = socket.socket()          
-    port = 8080                
+    port = 8081                
     s.bind(('', port))         
     print("socket binded to %s" %(port))
     # put the socket into listening mode 
