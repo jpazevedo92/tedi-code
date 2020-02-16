@@ -23,5 +23,5 @@ $(BIN)/soc_utils.o: $(SOURCE)/soc_utils.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/soc_utils.c -o $(BIN)/soc_utils.o
 
 clean:
-	rm -rf *.o ${LIST}
+	rm -rf $(SCKT_OBJS) ${LIST}
 
