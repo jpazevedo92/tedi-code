@@ -227,7 +227,7 @@ void execConfigTun(char* configs, char *result){
     printf("splits all parameters\n");
     FILE *pp;
     char command_arg[1024] = {0};
-    sprintf(command_arg, "cd ../../app/scripts && sh tunnel_config -a %s %s %s %s %s", if_name, tun_ip_in, tun_ip_out, ip_address, nw);
+    sprintf(command_arg, "cd ../../../app/scripts && sh tunnel_config -a %s %s %s %s %s", if_name, tun_ip_in, tun_ip_out, ip_address, nw);
     printf("%s\n", command_arg);
     pp = popen(command_arg, "r");
     printProcessInfo(pp);
