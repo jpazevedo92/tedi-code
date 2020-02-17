@@ -1,8 +1,8 @@
 #include "soc_utils.h"
 
 /********************** Client Side *********************/
-//void initClient(char *srv_ip, char *clt_message)
-void initClient(char *clt_message){
+void initClient(char *srv_ip, char *clt_message)
+{
     printf("Start socket client\n");
     int sockfd; 
     char buffer[MAXLINE]; 
@@ -19,7 +19,7 @@ void initClient(char *clt_message){
     // Filling server information 
     servaddr.sin_family = AF_INET; 
     servaddr.sin_port = htons(PORT1); 
-    servaddr.sin_addr.s_addr = INADDR_ANY; 
+    servaddr.sin_addr.s_addr = inet_addr(srv_ip); 
       
     sendto(sockfd, (const char *)clt_message, strlen(clt_message), 
         MSG_CONFIRM, (const struct sockaddr *) &servaddr,  

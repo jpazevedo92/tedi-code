@@ -20,8 +20,8 @@
 #define MAXLINE 1024 
 
 /* Function Headers */
-void initClient(char *clt_message);
-//void initClient(char *srv_ip, char *clt_message);
+
+void initClient(char *srv_ip, char *clt_message);
 //void initClient(char *iface_name, char *srv_ip, char *clt_message);
 
 void checkHostName(int hostname);
