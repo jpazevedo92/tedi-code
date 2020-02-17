@@ -170,7 +170,7 @@ class Application:
         #Start VM related with drone ID
         subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
         ready = receive_ready_status().decode("utf-8")
-
+        print("Ready: ", ready)
         if ready == "-R":
         #sleep(35)
         #time.sleep(60)
@@ -278,10 +278,12 @@ def send_command(ip, command):
     #Send to server using created UDP socket
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)
-    return msgFromServer
+    data = msgFromServer[0]
+    print(data)
+    return data
 
 def receive_ready_status():
-    localIP     = ""
+    localIP     = "192.168.56.1"
     localPort   = 8001
     bufferSize  = 1024
 
@@ -292,19 +294,17 @@ def receive_ready_status():
     UDPServerSocket.bind((localIP, localPort))
 
     print("Waiting ready status")
-    clientMsg = None
+    msg = None
     # Listen for incoming datagrams
-    while(clientMsg == None):
+    while(msg  == None):
         bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-        message = bytesAddressPair[0]
+        msg= bytesAddressPair[0]
         address = bytesAddressPair[1]
-        clientMsg = "Message from Client:{}".format(message)
         clientIP  = "Client IP Address:{}".format(address)
-        print(clientMsg)
+        print(msg)
         print(clientIP)
 
-    return clientMsg
-
+    return msg
 
 def config_tunnel(host, id):
     if host == "Host":
