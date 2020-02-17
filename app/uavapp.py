@@ -270,31 +270,40 @@ class DroneButton(Button):
     Function definitions
 '''
 def send_command(ip, command):
-    port = 8080
-    buffer_size = 1024
-    message = command
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((ip, port))
-    s.send(message.encode())
-    data = s.recv(buffer_size)
-    s.close()
-    return data
+    bytesToSend         = str.encode(command)
+    serverAddressPort   = ("localhost", 8000)
+    bufferSize          = 1024
+    # Create a UDP socket at client side
+    UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    #Send to server using created UDP socket
+    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+    msgFromServer = UDPClientSocket.recvfrom(bufferSize)
+    return msgFromServer
 
 def receive_ready_status():
-    s = socket.socket()          
-    port = 8081                
-    s.bind(('', port))         
-    print("socket binded to %s" %(port))
-    # put the socket into listening mode 
-    s.listen(5)      
-    print("Wait for drone ready message")            
-    data = None
-    while data == None: 
-        c, addr = s.accept()      
-        print('Got connection from', addr )
-        data = c.recv(1024)
-        c.close()
-    return data
+    localIP     = ""
+    localPort   = 8001
+    bufferSize  = 1024
+
+    # Create a datagram socket
+    UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+
+    # Bind to address and ip
+    UDPServerSocket.bind((localIP, localPort))
+
+    print("Waiting ready status")
+    clientMsg = None
+    # Listen for incoming datagrams
+    while(clientMsg == None):
+        bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+        message = bytesAddressPair[0]
+        address = bytesAddressPair[1]
+        clientMsg = "Message from Client:{}".format(message)
+        clientIP  = "Client IP Address:{}".format(address)
+        print(clientMsg)
+        print(clientIP)
+
+    return clientMsg
 
 
 def config_tunnel(host, id):

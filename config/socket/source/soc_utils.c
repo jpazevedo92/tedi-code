@@ -1,42 +1,32 @@
 #include "soc_utils.h"
 
 /********************** Client Side *********************/
-void initClient(char *srv_ip, char *clt_message){
+//void initClient(char *srv_ip, char *clt_message)
+void initClient(char *clt_message){
     printf("Start socket client\n");
-    int sock = 0; 
-    struct sockaddr_in serv_addr; 
-    char buffer[1024] = {0};
+    int sockfd; 
+    char buffer[MAXLINE]; 
+    struct sockaddr_in     servaddr; 
+  
+    // Creating socket file descriptor 
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+        perror("socket creation failed"); 
+        exit(EXIT_FAILURE); 
+    } 
+  
+    memset(&servaddr, 0, sizeof(servaddr)); 
+      
+    // Filling server information 
+    servaddr.sin_family = AF_INET; 
+    servaddr.sin_port = htons(PORT1); 
+    servaddr.sin_addr.s_addr = INADDR_ANY; 
+      
+    sendto(sockfd, (const char *)clt_message, strlen(clt_message), 
+        MSG_CONFIRM, (const struct sockaddr *) &servaddr,  
+            sizeof(servaddr)); 
 
-    //getHostandIp(iface_name, clt_message);
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
-    { 
-        printf("\n Socket creation error \n"); 
-        //return -1; 
-    } 
+    close(sockfd); 
    
-    memset(&serv_addr, '0', sizeof(serv_addr)); 
-   
-    serv_addr.sin_family = AF_INET; 
-    serv_addr.sin_port = htons(PORT); 
-       
-    /* Convert IPv4 and IPv6 addresses from text to binary form */
-    if(inet_pton(AF_INET, srv_ip, &serv_addr.sin_addr)<=0)  
-    { 
-        printf("\nInvalid address/ Address not supported \n"); 
-        //return -1; 
-    } 
-   
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
-    { 
-        printf("\nConnection Failed \n"); 
-        //return -1; 
-    }
-    
-    send(sock , clt_message , strlen(clt_message) , 0);
-    printf("Message sent\n"); 
-    //read( sock , buffer, 1024); 
-    //printf("%s\n",buffer );
-    //printf("%s\n", clt_message);
 }
 
 /* Returns hostname for the local computer */
@@ -113,66 +103,55 @@ void getHostandIp(char* iface, char *result){
 /********************** Server Side *********************/
 //void initServer(char *iface_name)
 void initServer(){
-    int socket_desc , new_socket , c;
-    //valread;
-	char command[1024] = {0};
-    char result[1024] = {0}; 
-	struct sockaddr_in server , client;
-	//char srv_message[100] = "";
-	
-	/*Create socket*/
-	socket_desc = socket(AF_INET , SOCK_STREAM , 0);
-	if (socket_desc == -1)
-	{
-		printf("Could not create socket");
-	}
-	
-	/*Prepare the sockaddr_in structure*/
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = INADDR_ANY;
-	server.sin_port = htons(PORT);
-	
-	/*Bind*/
-	if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
-	{
-		puts("bind failed");
-		//return 1;
-	}
-	puts("bind done");
-	
-	/* Listen for incoming socket */
-	listen(socket_desc , 3);
-	
-	/*Accept and incoming connection */
-	puts("Waiting for incoming connections...");
-	c = sizeof(struct sockaddr_in);
-	
-	while( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
-	{
-        struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&client;
-        struct in_addr ipAddr = pV4Addr->sin_addr;
+    int sockfd; 
+    char command[MAXLINE]; 
+    char result[MAXLINE];
 
-        char clt_ip[INET_ADDRSTRLEN];
-        inet_ntop( AF_INET, &ipAddr, clt_ip, INET_ADDRSTRLEN );
-
-		printf("Connection accepted from: %s", clt_ip);
-		
-		/*Reply to the client*/
-		read( new_socket , command, 1024);
-        printf("Command received: %s\n", command );
+    struct sockaddr_in servaddr, cliaddr; 
+      
+    // Creating socket file descriptor 
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+        perror("socket creation failed"); 
+        exit(EXIT_FAILURE); 
+    } 
+      
+    memset(&servaddr, 0, sizeof(servaddr)); 
+    memset(&cliaddr, 0, sizeof(cliaddr)); 
+      
+    // Filling server information 
+    servaddr.sin_family    = AF_INET; // IPv4 
+    servaddr.sin_addr.s_addr = INADDR_ANY; 
+    servaddr.sin_port = htons(PORT); 
+      
+    // Bind the socket with the server address 
+    if ( bind(sockfd, (const struct sockaddr *)&servaddr,  
+            sizeof(servaddr)) < 0 ) 
+    { 
+        perror("bind failed"); 
+        exit(EXIT_FAILURE); 
+    } 
+    
+    puts("Waiting for incoming connections...");
+    
+    while(1)
+    {
+        int len, n; 
+        len = sizeof(cliaddr);  //len is value/resuslt 
+        n = recvfrom(sockfd, (char *)command, MAXLINE,  
+            MSG_WAITALL, ( struct sockaddr *) &cliaddr, 
+            &len); 
+        command[n] = '\0'; 
+        printf("Command received: %s\n", command);
         execCommand(command, result);
-        printf("%s\n", result );
-        write(new_socket , result , strlen(result));
+        printf("Command Result: %s\n", result);
+        sendto(sockfd, (const char *)result, strlen(result),  
+              MSG_CONFIRM, (const struct sockaddr *) &cliaddr, 
+              len);
+        printf("Command Result Sent: %s\n", result);
+
         //Wait for new connection
         puts("Waiting for incoming connections...");
-        //getIp(iface_name, srv_message);
-	}
-	
-	if (new_socket < 0)
-	{
-		perror("accept failed");
-		//return 1;
-	}
+    }
     printf("Start socket server\n");
 }
 

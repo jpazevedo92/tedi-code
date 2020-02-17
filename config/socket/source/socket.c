@@ -11,9 +11,9 @@ void chooseOption(int argc, char * argv[]){
     case 'C':
     case 'c':
         printf("Option selected: %c\n", option);
-        char *srv_ip = argv[2];
-        char *command = argv[3];
-        initClient(srv_ip, command);
+        //char *srv_ip = argv[2];
+        char *command = argv[2];
+        initClient(command);
         break;
     case 'S':
     case 's':
