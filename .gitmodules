@@ -1,1 +1,4 @@
 
+[submodule "Firmware"]
+	path = Firmware
+	url = git@github.com:jpazevedo92/Firmware.git
