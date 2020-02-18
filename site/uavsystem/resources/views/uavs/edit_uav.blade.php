@@ -24,4 +24,9 @@
 	@include('forms.uav_net_form')
 @endsection
 
+<!-- @section('scripts')
+    @include('scripts.addrow')
+@endsection
+ -->
+
 

@@ -1,26 +1,27 @@
 CC=gcc
 CFLAGS=-Wall
 
-SRC=socket.c
+SOURCE=./source
+BIN=./bin
 
+SRC=$(SOURCE)/socket.c
 
 socket=socket
-SCKT_OBJS=socket.o soc_utils.o
-all: socket
+SCKT_OBJS=$(BIN)/socket.o $(BIN)/soc_utils.o
 
-socket: $(SCKT_OBJS)
-	$(CC) $(CFLAGS) -o $(socket) $(SCKT_OBJS)
+LIST=$(BIN)/socket
 
-socket.o: ${SRC}
-	$(CC) $(CFLAGS) -c ${SRC} -o socket.o
+all: $(LIST)
 
-soc_utils.o: soc_utils.c
-	$(CC) $(CFLAGS) -c soc_utils.c -o soc_utils.o
+$(BIN)/%: $(SCKT_OBJS)
+	$(CC) $(CFLAGS) -o $(BIN)/socket $(SCKT_OBJS)
 
+$(BIN)/socket.o: ${SRC}
+	$(CC) $(CFLAGS) -c ${SRC} -o $(BIN)/socket.o
 
-#all: $(SCKT_OBJS)
-#	$(CC) $(CFLAGS) -o $(socket) $(SCKT_OBJS)
+$(BIN)/soc_utils.o: $(SOURCE)/soc_utils.c
+	$(CC) $(CFLAGS) -c $(SOURCE)/soc_utils.c -o $(BIN)/soc_utils.o
 
 clean:
-	rm -rf *.o $(socket)
+	rm -rf $(SCKT_OBJS) ${LIST}
 

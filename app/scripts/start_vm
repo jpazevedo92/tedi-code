@@ -1,0 +1,9 @@
+#!/bin/bash
+# Script to Start VMs
+
+NAME=$1
+
+VBoxManage startvm $NAME & echo $!
+
+echo  "End of Script"
+
