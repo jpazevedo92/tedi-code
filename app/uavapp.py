@@ -172,8 +172,7 @@ class Application:
         ready = receive_ready_status().decode("utf-8")
         print("Ready: ", ready)
         if ready == "-R":
-        #sleep(35)
-        #time.sleep(60)
+            sleep(2)
             self._start_up_system(btn_id, time_str)
 
         
@@ -182,7 +181,7 @@ class Application:
         #subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
         #Send Alive Check
         uav_ip = get_ip("uav"+ str(btn_id))
-        print(time_str +" Drone TEDI-GUEST: " + uav_ip)
+        print(time_str +"Send Alive Check: Drone TEDI-GUEST"+ str(btn_id) + ": " + uav_ip)
         response = send_command(uav_ip, "-A").decode("utf-8")
         print(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
@@ -193,6 +192,7 @@ class Application:
         print(time_str +" Command Arguments: " + cmd_args)
         logger.info(time_str +" Command Arguments: " + cmd_args)
         base_ip = get_ip("base")
+        print("Base IP: ", base_ip)
         base_response = send_command(base_ip, "-T_" + cmd_args).decode("utf-8")
         print(time_str +" Tunnel Config on base : " + base_response)
         self.command_message_print("Tunnel Config on base : " + base_response)
@@ -204,6 +204,7 @@ class Application:
         uav_cmd_args = config_tunnel("uav"+str(btn_id), btn_id)
         print(time_str +" UAV Command Arguments: " + uav_cmd_args )
         logger.info(time_str +" UAV Command Arguments: " + uav_cmd_args )
+        print("Drone IP: ", uav_ip)
         uav_response = send_command(uav_ip, "-T_" + uav_cmd_args).decode("utf-8")
         print(time_str +" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
         self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
@@ -271,7 +272,7 @@ class DroneButton(Button):
 '''
 def send_command(ip, command):
     bytesToSend         = str.encode(command)
-    serverAddressPort   = ("localhost", 8000)
+    serverAddressPort   = (ip, 8000)
     bufferSize          = 1024
     # Create a UDP socket at client side
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
