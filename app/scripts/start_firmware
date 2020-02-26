@@ -1,0 +1,15 @@
+#!/bin/bash
+# Script to start firmware
+
+FILENO=$1
+FILENANME="multi_uav${FILENO}_mavros_sitl"
+cd ~/Repos/tedi-uavcommandforward/1_Code/Firmware
+
+DONT_RUN=1 make px4_sitl_default gazebo &
+source Tools/setup_gazebo.bash $(pwd) $(pwd)/build/px4_sitl_default &
+export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd):$(pwd)/Tools/sitl_gazebo &
+
+roslaunch px4 multi_uav${FILENO}_mavros_sitl.launch gui:=false & echo $!
+
+echo  "End of Script"
+

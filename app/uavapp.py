@@ -9,6 +9,7 @@ import json
 import ipaddress
 import socket
 import logging
+import logging.handlers as handlers
 import time
 import re
 
@@ -339,15 +340,19 @@ def sleep(time_given):
         print("Waiting " + str(i) + "s")
         time.sleep(1)
     
-def create_timed_rotating_log(path):
+def create_timed_rotating_log(path,):
     """"""
-    logger = logging.getLogger("Rotating Log")
+    logger = logging.getLogger("UAVApp")
     logger.setLevel(logging.INFO)
+#   fh = logging.FileHandler(path)
     
-    handler = TimedRotatingFileHandler(path,
-                                       when="m",
-                                       interval=1,
-                                       backupCount=5)
+    formatter = logging.Formatter('[%(asctime)s] - %(name)s - %(levelname)s - %(message)s')
+
+    handler = handlers.RotatingFileHandler(path, 
+                                    maxBytes=10000,
+                                    backupCount=5)
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(formatter)                                   
     logger.addHandler(handler)
     
     return logger
