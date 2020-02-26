@@ -120,7 +120,7 @@ class Application:
     def _open_qgc(self):
         time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
         print(time_str +" Open QGroundControl SW")
-        logger.info(time_str +" Open QGroundControl SW")
+        logger.info("Open QGroundControl SW")
         qgc_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "..", ".."))
         subprocess.Popen(qgc_path+"/QGroundControl.AppImage", shell=True)
 
@@ -129,7 +129,7 @@ class Application:
         id = id + 1
         time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
         print(time_str +" Button Add Drone pressed")
-        logger.info(time_str +" Button Add Drone pressed")
+        logger.info("Button Add Drone pressed")
         self.container5 = Frame(master)
         self.container5["pady"] = 10
         self.container5.pack(side = TOP)
@@ -157,7 +157,7 @@ class Application:
     def _config_base(self):
         time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
         print(time_str +" Configure Base Settings")
-        logger.info(time_str +" Configure Base Settings")
+        logger.info("Configure Base Settings")
 
     def _start_drone(self, btn_id):
         # self.start_drone["text"] = "Stop"
@@ -166,7 +166,7 @@ class Application:
         time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
         self.command_message_print("Start drone TEDI-GUEST" + str(btn_id))
         print(time_str +" Start drone TEDI-GUEST" + str(btn_id))
-        logger.info(time_str +" Start drone TEDI-GUEST" + str(btn_id))
+        logger.info("Start drone TEDI-GUEST" + str(btn_id))
         
         #Start VM related with drone ID
         subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
@@ -186,25 +186,25 @@ class Application:
         response = send_command(uav_ip, "-A").decode("utf-8")
         print(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        logger.info(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        logger.info("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         
         #Send config command to base
         cmd_args = config_tunnel("Host", btn_id)
         print(time_str +" Command Arguments: " + cmd_args)
-        logger.info(time_str +" Command Arguments: " + cmd_args)
+        logger.info("Command Arguments: " + cmd_args)
         base_ip = get_ip("base")
         print("Base IP: ", base_ip)
         base_response = send_command(base_ip, "-T_" + cmd_args).decode("utf-8")
         print(time_str +" Tunnel Config on base : " + base_response)
         self.command_message_print("Tunnel Config on base : " + base_response)
-        logger.info(time_str +" Tunnel Config on base : " + base_response)
+        logger.info("Tunnel Config on base : " + base_response)
 
         sleep(2)
 
         #Send config command to drone
         uav_cmd_args = config_tunnel("uav"+str(btn_id), btn_id)
         print(time_str +" UAV Command Arguments: " + uav_cmd_args )
-        logger.info(time_str +" UAV Command Arguments: " + uav_cmd_args )
+        logger.info("UAV Command Arguments: " + uav_cmd_args )
         print("Drone IP: ", uav_ip)
         uav_response = send_command(uav_ip, "-T_" + uav_cmd_args).decode("utf-8")
         print(time_str +" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
@@ -217,8 +217,16 @@ class Application:
             response = send_command(uav_ip, "-A").decode("utf-8")
             print(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
             self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-            logger.info(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+            logger.info("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
             time.sleep(1)
+        
+        #Send Init Firmware
+        response = send_command(uav_ip, "-I_"+str(btn_id)).decode("utf-8")
+        print(time_str +" Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        self.command_message_print("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        logger.info("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        time.sleep(1)
+        
     
     def _stop_drone(self, btn_id):
         self.start_drone["text"] = "Start"

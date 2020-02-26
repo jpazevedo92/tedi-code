@@ -198,18 +198,23 @@ void execCommand(char* command, char *result){
             execAliveCheck(result);
             //execConfig(command, result);
             break;
-        case 't':
-        case 'T':
-            execConfigTun(command, result);
+        case 'i':
+        case 'I':
+            execInitFirmware(command, result);
             break;
         case 'm':
         case 'M':
             sprintf(result, "MPLS command\n");
             break;
+        case 't':
+        case 'T':
+            execConfigTun(command, result);
+            break;
         case 'x':
         case 'X':
             sprintf(result, "X command\n");
             break;
+
         default:
             sprintf(result, "Default command\n");
             break;
@@ -236,13 +241,17 @@ void execConfigTun(char* configs, char *result){
 }
 
 void printProcessInfo(FILE *pp){
+    //printf("printProcessInfo\n");
     if (pp != NULL) {
+        //printf("printProcessInfo: if pp != null\n ");
         while (1) {
+            //printf("printProcessInfo: while(1)\n ");
             char *line;
             char buf[1000];
             line = fgets(buf, sizeof buf, pp);
+            //printf("printProcessInfo: line: %s\n ");
             if (line == NULL) break;
-            if (line[0] == 'd') printf("%s", line); /* line includes '\n' */
+            printf("%s", line); /* line includes '\n' */
         }
     }
 }
@@ -250,4 +259,19 @@ void printProcessInfo(FILE *pp){
 
 void execAliveCheck(char *result){
     sprintf(result, "OK");
+}
+
+void execInitFirmware(char* configs, char *result){
+    char id = configs[0];
+    char *s = {0};
+    printf("ID Received %c\n", id);
+    FILE *pp;
+    char command_arg[1024] = {0};
+    printf("current dir: %s\n", getcwd(s, 100)); 
+    sprintf(command_arg, "cd ../../../app/scripts/ && sh start_firmware %c", id);
+    printf("%s\n", command_arg);
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+    sprintf(result, "Firmware Ready");
 }

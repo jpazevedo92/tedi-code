@@ -35,5 +35,6 @@ void execCommand(char* command, char *result);
 void execConfigTun(char* configs, char *result);
 void printProcessInfo(FILE *pp);
 void execAliveCheck(char *result);
+void execInitFirmware(char* configs, char *result);
 
 #endif /* SOC_UTILS_H_*/
