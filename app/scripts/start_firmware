@@ -2,21 +2,19 @@
 
 # Script to start firmware
 
-FILENO="$1"
+#DIR=~/Repos/tedi-uavcommandforward/1_Code/Firmware ID="$1"
 
-FILENANME="multi_uav${FILENO}_mavros_sitl"
-echo "Drone No. "${FILENO}
-DIR="../../Firmware"
-echo $DIR  
-FILENO="$@"
-ID="$1" gnome-terminal -- /bin/bash  -c  '
-    cd ../../Firmware; 
-    DONT_RUN=1 make px4_sitl_default gazebo; 
-    source Tools/setup_gazebo.bash $(pwd) $(pwd)/build/px4_sitl_default;
-    export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd):$(pwd)/Tools/sitl_gazebo;
-    roslaunch px4 multi_uav${FILENO}_mavros_sitl.launch gui:=false & echo $!;
-    exec bash
+ID="$@" dbus-launch gnome-terminal -- bash  -c '
+	UAV_ID="$ID" su - pi -c "
+		cd ~/Repos/tedi-uavcommandforward/1_Code/Firmware;
+		DONT_RUN=1 make px4_sitl_default gazebo; 
+		source Tools/setup_gazebo.bash $(pwd) $(pwd)/build/px4_sitl_default;	
+		export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd):$(pwd)/Tools/sitl_gazebo;
+		roslaunch px4 multi_uav${UAV_ID}_mavros_sitl.launch gui:=false;
+		exec bash
+	";
+	exec bash
+' 
 
-'
 echo  "End of Script"
 
