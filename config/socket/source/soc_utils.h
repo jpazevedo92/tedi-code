@@ -22,6 +22,7 @@
 /* Function Headers */
 
 void initClient(char *srv_ip, char *clt_message);
+void initUAVClient(char *srv_ip, char *clt_message);
 //void initClient(char *iface_name, char *srv_ip, char *clt_message);
 
 void checkHostName(int hostname);
@@ -36,5 +37,6 @@ void execConfigTun(char* configs, char *result);
 void printProcessInfo(FILE *pp);
 void execAliveCheck(char *result);
 void execInitFirmware(char* configs, char *result);
+void execUavTun(char* configs, char *result);
 
 #endif /* SOC_UTILS_H_*/

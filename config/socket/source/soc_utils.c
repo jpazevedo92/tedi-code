@@ -20,11 +20,43 @@ void initClient(char *srv_ip, char *clt_message)
     servaddr.sin_family = AF_INET; 
     servaddr.sin_port = htons(PORT1); 
     servaddr.sin_addr.s_addr = inet_addr(srv_ip); 
+
+    sendto(sockfd, (const char *)clt_message, strlen(clt_message), 
+        MSG_CONFIRM, (const struct sockaddr *) &servaddr,  
+            sizeof(servaddr));
+
+    close(sockfd); 
+   
+}
+
+void initUAVClient(char *srv_ip, char *clt_message, char *result)
+{
+    printf("Start socket client\n");
+    int sockfd; 
+    struct sockaddr_in     servaddr; 
+    int n, len;
+
+    // Creating socket file descriptor 
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+        perror("socket creation failed"); 
+        exit(EXIT_FAILURE); 
+    } 
+  
+    memset(&servaddr, 0, sizeof(servaddr)); 
+      
+    // Filling server information 
+    servaddr.sin_family = AF_INET; 
+    servaddr.sin_port = htons(PORT); 
+    servaddr.sin_addr.s_addr = inet_addr(srv_ip); 
       
     sendto(sockfd, (const char *)clt_message, strlen(clt_message), 
         MSG_CONFIRM, (const struct sockaddr *) &servaddr,  
             sizeof(servaddr)); 
 
+    n = recvfrom(sockfd, (char *)result, MAXLINE,  
+                MSG_WAITALL, (struct sockaddr *) &servaddr, 
+                &len); 
+    result[n] = '\0'; 
     close(sockfd); 
    
 }
@@ -206,15 +238,22 @@ void execCommand(char* command, char *result){
         case 'M':
             sprintf(result, "MPLS command\n");
             break;
+        case 's':
+        case 'S':
+            sprintf(result, "MPLS command\n");
+            break;
         case 't':
         case 'T':
             execConfigTun(command, result);
+            break;
+        case 'u':
+        case 'U':
+            void execUavTun(command, result);
             break;
         case 'x':
         case 'X':
             sprintf(result, "X command\n");
             break;
-
         default:
             sprintf(result, "Default command\n");
             break;
@@ -274,4 +313,8 @@ void execInitFirmware(char* configs, char *result){
     printProcessInfo(pp);
     pclose(pp);
     sprintf(result, "Firmware Ready");
+}
+
+void execUavTun(char* configs, char *result){
+    sprintf(result, "-A");
 }

@@ -9,7 +9,7 @@
             "ip": "10.0.20.2"
         },
         {
-            "name": "tun1t2",
+            "name": "tun1o2",
             "network": "10.0.12.0",
             "network_mask": "/24",
             "ip": "10.0.12.2"

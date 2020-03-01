@@ -221,11 +221,11 @@ class Application:
             time.sleep(1)
         
         #Send Init Firmware
-        response = send_command(uav_ip, "-I_"+str(btn_id)).decode("utf-8")
-        print(time_str +" Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        self.command_message_print("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        logger.info("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        time.sleep(1)
+        # response = send_command(uav_ip, "-I_"+str(btn_id)).decode("utf-8")
+        # print(time_str +" Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        # self.command_message_print("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        # logger.info("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        # time.sleep(1)
         
     
     def _stop_drone(self, btn_id):
