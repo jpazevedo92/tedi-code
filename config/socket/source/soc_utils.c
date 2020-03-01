@@ -322,7 +322,8 @@ void execUavTun(char* configs, char *result){
 
 void setUAVTunnel(char* configs, char *result){
     
-    char *command_local, command_remote; 
+    char *command_local; 
+    char *command_remote; 
     command_remote = strtok_r(command_local, "_", &command_local);
     printf("Local: %s Remote: %s", command_local, command_remote);
 
