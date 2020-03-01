@@ -240,6 +240,7 @@ void execCommand(char* command, char *result){
             break;
         case 's':
         case 'S':
+            setUAVTunnel(command, result);
             sprintf(result, "MPLS command\n");
             break;
         case 't':
@@ -317,4 +318,12 @@ void execInitFirmware(char* configs, char *result){
 
 void execUavTun(char* configs, char *result){
     sprintf(result, "-A");
+}
+
+void setUAVTunnel(char* configs, char *result){
+    
+    char *command_local, command_remote; 
+    command_remote = strtok_r(command_local, "_", &command_local);
+    printf("Local: %s Remote: %s", command_local, command_remote);
+
 }

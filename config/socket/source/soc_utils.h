@@ -38,5 +38,6 @@ void printProcessInfo(FILE *pp);
 void execAliveCheck(char *result);
 void execInitFirmware(char* configs, char *result);
 void execUavTun(char* configs, char *result);
+void setUAVTunnel(char* configs, char *result);
 
 #endif /* SOC_UTILS_H_*/
