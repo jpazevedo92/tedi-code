@@ -248,7 +248,7 @@ void execCommand(char* command, char *result){
             break;
         case 'u':
         case 'U':
-            void execUavTun(command, result);
+            execUavTun(command, result);
             break;
         case 'x':
         case 'X':

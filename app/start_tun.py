@@ -70,7 +70,7 @@ class Application:
         uav_in_data = config_tunnel(self.tun_in.get(),"tun1o2")
         uav_out_data = config_tunnel(self.tun_out.get(),"tun1o2")
         print(uav_out_ip, uav_in_data, uav_out_data)
-        #data = send_command(uav_out_ip, "-X").decode("utf-8")
+        data = send_command(uav_out_ip, "-X").decode("utf-8")
         #if data == "-A":
          #   send_command(uav_out_ip, "-S " + uav_in_data + " " + uav_out_data)
 

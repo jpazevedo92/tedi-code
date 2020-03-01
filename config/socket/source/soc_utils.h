@@ -22,7 +22,7 @@
 /* Function Headers */
 
 void initClient(char *srv_ip, char *clt_message);
-void initUAVClient(char *srv_ip, char *clt_message);
+void initUAVClient(char *srv_ip, char *clt_message, char *result);
 //void initClient(char *iface_name, char *srv_ip, char *clt_message);
 
 void checkHostName(int hostname);
