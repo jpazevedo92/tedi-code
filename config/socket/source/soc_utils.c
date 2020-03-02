@@ -322,9 +322,19 @@ void execUavTun(char* configs, char *result){
 void setUAVTunnel(char* configs, char *result){
     
     char *command_local = configs; 
-    char *command_remote; 
+    char *command_remote;
+    char *command_to_send;
+    char *command_remote_cpy = command_remote;
+    char *res; 
+    char *result_exp;
     command_remote = strtok_r(command_local, " ", &command_local);
+
+    sprintf("-T_%s", command_remote);
     printf("Local: %s Remote: %s", command_local, command_remote);
-    sprintf(result, "Settings Applied");
+    char* tun_name = strtok(command_remote, "_");
+    char* remote_ip = strtok(NULL, "_");  
+    initUAVClient(remote_ip, command_to_send, result_exp);
+
+    sprintf(result, "Settings Applied %s", result_exp);
 
 }

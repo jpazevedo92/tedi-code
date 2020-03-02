@@ -52,6 +52,19 @@ class Application:
         font=self.fonte, width=10)
         self.start_tun["command"] = self._start_tun
         self.start_tun.pack(side=RIGHT)
+
+        self.container3 = Frame(master)
+        self.container3["padx"] = 20
+        self.container3["pady"] = 5
+        self.container3.pack()
+
+        self.lbltun = Label(self.container3, 
+        text="Tunnel Name:", font=self.fonte, width=15)
+        self.lbltun.pack(side=LEFT)
+
+        self.tun_name = Entry(self.container3, font=self.fonte, width=10)
+        self.tun_name.pack(side=LEFT)
+
     
         self.exit_frame = Frame(master)
         self.exit_frame["padx"] = 20
@@ -67,12 +80,13 @@ class Application:
         print(self.tun_in.get(), self.tun_out.get())
 
         uav_out_ip = get_ip(self.tun_out.get())
-        uav_in_data = config_tunnel(self.tun_in.get(),"tun1o2")
-        uav_out_data = config_tunnel(self.tun_out.get(),"tun1o2")
+        uav_in_data = config_tunnel(self.tun_in.get(), self.tun_name.get())
+        uav_out_data = config_tunnel(self.tun_out.get(), self.tun_name.get())
         print(uav_out_ip, uav_in_data, uav_out_data)
         data = send_command(uav_out_ip, "-U").decode("utf-8")
         if data == "-A":
-            send_command(uav_out_ip, "-S " + uav_in_data + " " + uav_out_data)
+            print("OK")
+        send_command(uav_out_ip, "-S " + uav_in_data + " " + uav_out_data)
 
 
 
@@ -116,6 +130,7 @@ def receive_ready_status():
 def config_tunnel(host, tun_name):
     id = re.findall(r'\d+', host)[0]
     last_tun_element = int(re.findall(r'\d+', tun_name)[1])-1
+    tun_out_id = int(re.findall(r'\d+', tun_name)[1])
     if host == "Host":
         with open(app_settings_dir + "/base.json") as json_file:
             data = json.load(json_file)
@@ -127,7 +142,13 @@ def config_tunnel(host, tun_name):
             id = int(re.findall(r'\d+', host)[0])
             data = json.load(json_file)
             host_info = data["interfaces"][last_tun_element]
-            remote_ip = ipaddress.IPv4Address(data["local_ip"])+1
+            if id > 1:
+                print("here1")
+                remote_ip = ipaddress.IPv4Address(data["local_ip"])-id+1
+            else:
+                print("here2")
+                remote_ip = ipaddress.IPv4Address(data["local_ip"])-id+tun_out_id
+                
             arguments = host_info["name"] + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + host_info["ip"] + "_" + host_info["network"] + host_info["network_mask"]
         
     return arguments
