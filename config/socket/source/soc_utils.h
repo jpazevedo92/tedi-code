@@ -17,7 +17,8 @@
 /* Constant variables / MACROS */
 #define PORT 8000
 #define PORT1 8001
-#define MAXLINE 1024 
+#define MAXLINE 1024
+#define STR_EQUAL 0 
 
 /* Function Headers */
 

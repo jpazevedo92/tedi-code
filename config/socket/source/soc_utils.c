@@ -320,20 +320,30 @@ void execUavTun(char* configs, char *result){
 }
 
 void setUAVTunnel(char* configs, char *result){
-    
     char *command_local = configs; 
     char *command_remote = {0};
-    char *command_to_send = {0};
-    char *command_remote_cpy = command_remote; 
-    char *res = {0};
+    char msg[MAXLINE] = {0};
+    char res[MAXLINE] = {0};
+    char res1[MAXLINE] = {0};
     command_remote = strtok_r(command_local, " ", &command_local);
-
-    sprintf(command_to_send, "-T_%s", command_remote);
-    printf("Local: %s Remote: %s", command_local, command_remote);
+    printf("Local: %s Remote: %s\n", command_local, command_remote);
+    sprintf(msg, "-T_%s", command_remote);
+    
     char* tun_name = strtok(command_remote, "_");
-    char* remote_ip = strtok(NULL, "_");  
-    initUAVClient(remote_ip, command_to_send, res);
+    char* remote_ip = strtok(NULL, "_");
+    printf("Remote IP: %s\n", remote_ip);
 
-    sprintf(result, "Settings Applied %s", res);
+    initUAVClient(remote_ip, msg, res);
+    char compare_string[MAXLINE] = {0};
+    sprintf(compare_string, "Configuration of %s is OK", tun_name);
+    int condition = strcmp(res, compare_string);
+    printf("%s %d\n", res ,condition);
+    if(condition == STR_EQUAL)
+        execConfigTun(command_local, res1);
+
+    int condition2 = strcmp(res, res1);
+    printf("%d\n", condition2);
+    if(condition2 == STR_EQUAL)
+        sprintf(result, "%s configuration applied", tun_name);
 
 }
