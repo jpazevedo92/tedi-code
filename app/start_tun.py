@@ -86,7 +86,7 @@ class Application:
         data = send_command(uav_out_ip, "-U").decode("utf-8")
         if data == "-A":
             print("OK")
-        send_command(uav_out_ip, "-S " + uav_in_data + " " + uav_out_data)
+            send_command(uav_out_ip, "-S_" + uav_in_data + " " + uav_out_data)
 
 
 
@@ -143,10 +143,8 @@ def config_tunnel(host, tun_name):
             data = json.load(json_file)
             host_info = data["interfaces"][last_tun_element]
             if id > 1:
-                print("here1")
                 remote_ip = ipaddress.IPv4Address(data["local_ip"])-id+1
             else:
-                print("here2")
                 remote_ip = ipaddress.IPv4Address(data["local_ip"])-id+tun_out_id
                 
             arguments = host_info["name"] + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + host_info["ip"] + "_" + host_info["network"] + host_info["network_mask"]

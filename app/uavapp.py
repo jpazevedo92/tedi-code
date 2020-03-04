@@ -27,7 +27,7 @@ add_drone_buttons = list()
 log_file = os.path.abspath(os.path.join(__file__, "..", "logs","log.log"))
 app_scripts_dir = os.path.abspath(os.path.join(__file__,"..","scripts"))
 app_settings_dir = os.path.abspath(os.path.join(__file__,"..","settings"))
-socket_dir = os.path.abspath(os.path.join(__file__,"..", "..", "config", "socket"))
+socket_dir = os.path.abspath(os.path.join(__file__,"..", "..", "config"))
 
 
 
@@ -365,6 +365,8 @@ def create_timed_rotating_log(path,):
     
     return logger
 
+def open_server():
+    subprocess.Popen(shlex.split("sh " + socket_dir + "/start_socket_server.sh"))
 '''
     Function Calls
 '''
@@ -374,4 +376,5 @@ Application(root)
 root.geometry("300x350+300+300")
 logger = create_timed_rotating_log(log_file)
 logger.info("------- UAVApp Start Execution -------")
+open_server()
 root.mainloop()
