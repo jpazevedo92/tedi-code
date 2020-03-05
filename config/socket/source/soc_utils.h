@@ -51,6 +51,6 @@ void execUavTun(char* configs, char *result);
 void execConfigRoute(char* configs, char *result);
 void execConfigIpTables(char* configs, char *result);
 void setUAVTunnel(char* configs, char *result);
-
+void getCommand(char* iface, char *result, int option);
 
 #endif /* SOC_UTILS_H_*/

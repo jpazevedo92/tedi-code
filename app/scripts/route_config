@@ -35,7 +35,7 @@ elif [ $OPTION == '-h'  ]
 then
     echo "Add route: route_config -a if_name network via_ip"
     echo "Delete route: route_config -d if_name"
-    echo "IP Tables: route_config -t if_name_1 if_name_1"
+    echo "IP Tables: route_config -t if_name_1 if_name_2"
 fi
 
 

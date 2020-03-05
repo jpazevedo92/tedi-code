@@ -144,6 +144,14 @@ void execCommand(char* command, char *result){
         case 'M':
             sprintf(result, "MPLS command\n");
             break;
+        case 'p':
+        case 'P':
+            execConfigIpTables(command, result);
+            break;
+        case 'r':
+        case 'R':
+            execConfigRoute(command, result);
+            break;
         case 's':
         case 'S':
             setUAVTunnel(command, result);
@@ -221,27 +229,22 @@ void execConfigRoute(char* configs, char *result){
     pp = popen(command_arg, "r");
     printProcessInfo(pp);
     pclose(pp);
-    
     sprintf(result, "Route configuration of %s is OK", if_name);
 }
 
 void execConfigIpTables(char* configs, char *result){
     printf("enter execConfig function\n");
-    char *if_name = strtok(configs, "_");
-    printf("Start configuration of %s\n", if_name);
-    char *tun_ip_in = strtok(NULL, "_");
-    char *tun_ip_out = strtok(NULL, "_");
-    char *ip_address = strtok(NULL, "_");
-    char *nw = strtok(NULL, "_");
-    printf("splits all parameters\n");
+    char *if_name1 = strtok(configs, "_");
+    char *if_name2 = strtok(configs, "_");
+    printf("Start configuration of %s\n", if_name1);
     FILE *pp;
     char command_arg[1024] = {0};
-    sprintf(command_arg, "cd ../../../app/scripts && sh tunnel_config -a %s %s %s %s %s", if_name, tun_ip_in, tun_ip_out, ip_address, nw);
+    sprintf(command_arg, "cd ../../../app/scripts && sh route_config -t %s %s", if_name1, if_name2);
     printf("%s\n", command_arg);
     pp = popen(command_arg, "r");
     printProcessInfo(pp);
     pclose(pp);
-    sprintf(result, "Configuration of %s is OK", if_name);
+    sprintf(result, "IP Tables Configuration of %s is OK", if_name1);
 }
 
 void setUAVTunnel(char* configs, char *result){
@@ -250,6 +253,9 @@ void setUAVTunnel(char* configs, char *result){
     char msg[MAXLINE] = {0};
     char res[MAXLINE] = {0};
     char res1[MAXLINE] = {0};
+    char res2[MAXLINE] = {0};
+    char res3[MAXLINE] = {0};
+    char res4[MAXLINE] = {0};    
     command_remote = strtok_r(command_local, " ", &command_local);
     printf("Local: %s Remote: %s\n", command_local, command_remote);
     sprintf(msg, "-T_%s", command_remote);
@@ -271,22 +277,34 @@ void setUAVTunnel(char* configs, char *result){
 
 
     int n = tun_name[strlen(tun_name)-1] - '0';
-    char *if_name;
-     
+    char route_command[MAXLINE]; 
     for(int i = 0; i < n; i++)
     {
         if(i == 0)
         {
             /* First network node */
-            char route_command[MAXLINE];
-            getCommand(tun_name, route_command);
-            execConfigRoute(route_command, result);
+            char r_command2[MAXLINE] = "-R_";
+            char route_command2[MAXLINE];
+            char base_ip[MAXLINE];
+            sprintf(base_ip, "10.0.%d0.1", n);
+            getCommand(tun_name, route_command2, True);
+            strcat(r_command2, route_command2);
+            initUAVClient(base_ip, r_command2, res2);
+            //execConfigRoute(route_command, res2);
         } else
         {
             /* Intermedious nodes */
-            execConfigIpTables(configs, result);
+            char route_command3[MAXLINE];
+            char tun_input[MAXLINE];
+            getSimpleTunnelName(tun_name, tun_input);
+            sprintf(route_command3, "-P_%s_%s", tun_input, tun_name);
+            initUAVClient(remote_ip, route_command3, res2);
+            //execConfigIpTables(route_command3, res3);
+
         }
     }
+    getCommand(tun_name, route_command, False);
+    execConfigRoute(route_command, res4);
 
     if(condition2 == STR_EQUAL)
         sprintf(result, "%s configuration applied", tun_name);
@@ -313,9 +331,14 @@ void printProcessInfo(FILE *pp){
     }
 }
 
-void getCommand(char* iface, char *result){
+void getCommand(char* iface, char *result, int option){
     char sTunName[MAXLINE];
-    getSimpleTunnelName(iface, sTunName/* , False */);
+    if(option)
+        getSimpleTunnelName(iface, sTunName/* , False */);
+    else if(!option)
+        sprintf(sTunName, "$s", iface);
+    else
+        sprintf(sTunName, "invalid iface");    
     char net_ip[MAXLINE];
     getIfIp(sTunName, net_ip);
     char net_address[MAXLINE];
