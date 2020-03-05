@@ -1,6 +1,8 @@
 #include "soc_utils.h"
 
-/********************** Client Side *********************/
+/*
+    Client init function 
+*/
 void initClient(char *srv_ip, char *clt_message)
 {
     printf("Start socket client\n");
@@ -61,79 +63,9 @@ void initUAVClient(char *srv_ip, char *clt_message, char *result)
    
 }
 
-/* Returns hostname for the local computer */
-void checkHostName(int hostname) 
-{  
-    if (hostname == -1) 
-    { 
-        perror("gethostname"); 
-        exit(1); 
-    } 
-} 
-  
-/* Returns host information corresponding to host name */
-void checkHostEntry(struct hostent * hostentry) 
-{ 
-    if (hostentry == NULL) 
-    { 
-        perror("gethostbyname"); 
-        exit(1); 
-    } 
-} 
-  
-/* 
-    Converts space-delimited IPv4 addresses 
-    to dotted-decimal format              
+/*
+    Server init function 
 */
-void checkIPbuffer(char *IPbuffer) 
-{ 
- 
-   if (NULL == IPbuffer) 
-    { 
-        perror("inet_ntoa"); 
-        exit(1); 
-    } 
-}
-
-void getHostandIp(char* iface, char *result){
-    char hostbuffer[256]; 
-	int hostname;
-
-    /* To retrieve hostname */
-	hostname = gethostname(hostbuffer, sizeof(hostbuffer)); 
-	checkHostName(hostname); 
-
-    unsigned char ip_address[15];
-    int fd;
-    struct ifreq ifr;
-     
-    /*AF_INET - to define network interface IPv4*/
-    /*Creating soket for it.*/
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
-     
-    /*AF_INET - to define IPv4 Address type.*/
-    ifr.ifr_addr.sa_family = AF_INET;
-     
-    /*eth0 - define the ifr_name - port name
-    where network attached.*/
-    memcpy(ifr.ifr_name, iface , IFNAMSIZ-1);
-     
-    /*Accessing network interface information by
-    passing address using ioctl.*/
-    ioctl(fd, SIOCGIFADDR, &ifr);
-    /*closing fd*/
-    close(fd);
-     
-    /*Extract IP Address*/
-    strcpy(ip_address,inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
-     
-    //printf("System IP Address is: %s\n",ip_address);
-
-    sprintf(result, "Message from: %s, on IP %s\n", hostbuffer, ip_address);
-}
-
-/********************** Server Side *********************/
-//void initServer(char *iface_name)
 void initServer(){
     int sockfd; 
     char command[MAXLINE]; 
@@ -187,35 +119,9 @@ void initServer(){
     printf("Start socket server\n");
 }
 
-// void getIp(char* iface, char *result){
-
-//     unsigned char ip_address[15];
-//     int fd;
-//     struct ifreq ifr;
-     
-//     /*AF_INET - to define network interface IPv4*/
-//     /*Creating soket for it.*/
-//     fd = socket(AF_INET, SOCK_DGRAM, 0);
-     
-//     /*AF_INET - to define IPv4 Address type.*/
-//     ifr.ifr_addr.sa_family = AF_INET;
-     
-//     /*eth0 - define the ifr_name - port name
-//     where network attached.*/
-//     memcpy(ifr.ifr_name, iface , IFNAMSIZ-1);
-     
-//     /*Accessing network interface information by
-//     passing address using ioctl.*/
-//     ioctl(fd, SIOCGIFADDR, &ifr);
-//     /*closing fd*/
-//     close(fd);
-     
-//     /*Extract IP Address*/
-//     strcpy(ip_address,inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
-    
-//     /*Put IP Address on string to send back to client*/
-//     sprintf(result, "Message from Socket Server on %s\n", ip_address);
-// }
+/*
+    Protocol Command functions
+*/
 
 void execCommand(char* command, char *result){
 	
@@ -279,23 +185,6 @@ void execConfigTun(char* configs, char *result){
     sprintf(result, "Configuration of %s is OK", if_name);
 }
 
-void printProcessInfo(FILE *pp){
-    //printf("printProcessInfo\n");
-    if (pp != NULL) {
-        //printf("printProcessInfo: if pp != null\n ");
-        while (1) {
-            //printf("printProcessInfo: while(1)\n ");
-            char *line;
-            char buf[1000];
-            line = fgets(buf, sizeof buf, pp);
-            //printf("printProcessInfo: line: %s\n ");
-            if (line == NULL) break;
-            printf("%s", line); /* line includes '\n' */
-        }
-    }
-}
-
-
 void execAliveCheck(char *result){
     sprintf(result, "OK");
 }
@@ -317,6 +206,42 @@ void execInitFirmware(char* configs, char *result){
 
 void execUavTun(char* configs, char *result){
     sprintf(result, "-A");
+}
+
+void execConfigRoute(char* configs, char *result){
+    printf("enter execConfig function\n");
+    char *if_name = strtok(configs, "_");
+    printf("Route configuration of %s\n", if_name);
+    char *tun_network = strtok(NULL, "_");
+    char *tun_ip = strtok(NULL, "_");
+    FILE *pp;
+    char command_arg[1024] = {0};
+    sprintf(command_arg, "cd ../../../app/scripts && sh route_config -a %s %s %s", if_name, tun_network, tun_ip);
+    printf("%s\n", command_arg);
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+    
+    sprintf(result, "Route configuration of %s is OK", if_name);
+}
+
+void execConfigIpTables(char* configs, char *result){
+    printf("enter execConfig function\n");
+    char *if_name = strtok(configs, "_");
+    printf("Start configuration of %s\n", if_name);
+    char *tun_ip_in = strtok(NULL, "_");
+    char *tun_ip_out = strtok(NULL, "_");
+    char *ip_address = strtok(NULL, "_");
+    char *nw = strtok(NULL, "_");
+    printf("splits all parameters\n");
+    FILE *pp;
+    char command_arg[1024] = {0};
+    sprintf(command_arg, "cd ../../../app/scripts && sh tunnel_config -a %s %s %s %s %s", if_name, tun_ip_in, tun_ip_out, ip_address, nw);
+    printf("%s\n", command_arg);
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+    sprintf(result, "Configuration of %s is OK", if_name);
 }
 
 void setUAVTunnel(char* configs, char *result){
@@ -343,7 +268,159 @@ void setUAVTunnel(char* configs, char *result){
 
     int condition2 = strcmp(res, res1);
     printf("%d\n", condition2);
+
+
+    int n = tun_name[strlen(tun_name)-1] - '0';
+    char *if_name;
+     
+    for(int i = 0; i < n; i++)
+    {
+        if(i == 0)
+        {
+            /* First network node */
+            char route_command[MAXLINE];
+            getCommand(tun_name, route_command);
+            execConfigRoute(route_command, result);
+        } else
+        {
+            /* Intermedious nodes */
+            execConfigIpTables(configs, result);
+        }
+    }
+
     if(condition2 == STR_EQUAL)
         sprintf(result, "%s configuration applied", tun_name);
+
+}
+
+/*
+    Auxiliar functions
+*/
+
+void printProcessInfo(FILE *pp){
+    //printf("printProcessInfo\n");
+    if (pp != NULL) {
+        //printf("printProcessInfo: if pp != null\n ");
+        while (1) {
+            //printf("printProcessInfo: while(1)\n ");
+            char *line;
+            char buf[1000];
+            line = fgets(buf, sizeof buf, pp);
+            //printf("printProcessInfo: line: %s\n ");
+            if (line == NULL) break;
+            printf("%s", line); /* line includes '\n' */
+        }
+    }
+}
+
+void getCommand(char* iface, char *result){
+    char sTunName[MAXLINE];
+    getSimpleTunnelName(iface, sTunName/* , False */);
+    char net_ip[MAXLINE];
+    getIfIp(sTunName, net_ip);
+    char net_address[MAXLINE];
+    getNetworkInfo(sTunName, ADDRESS, net_address);
+    char net_mask[MAXLINE];
+    getNetworkInfo(sTunName, MASK, net_address);
+    char network[MAXLINE];
+    sprintf(network, "%s%s", net_address, net_mask);
+    sprintf(result, "%s_%s_%s", sTunName, network, net_ip);
+
+}
+
+void getIfIp(char* iface, char *result){
+    struct ifaddrs *ifaddr, *ifa;
+    int family, s;
+    char host[NI_MAXHOST];
+
+    if (getifaddrs(&ifaddr) == -1) 
+    {
+        perror("getifaddrs");
+        exit(EXIT_FAILURE);
+    }
+
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
+    {
+        if (ifa->ifa_addr == NULL)
+            continue;  
+
+        s=getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in),host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+
+        if((strcmp(ifa->ifa_name, iface)==0)&&(ifa->ifa_addr->sa_family==AF_INET))
+        {
+            if (s != 0)
+            {
+                printf("getnameinfo() failed: %s\n", gai_strerror(s));
+            }
+            printf("\t  Address : <%s>\n", host);
+
+            sprintf(result, "%s", host); 
+        }
+    }
+
+    freeifaddrs(ifaddr);
+}
+
+void getSimpleTunnelName(char *str, char* result/* , int inc */)
+{
+    for(int i = 0; i < sizeof(str)-2; i++){   
+        /* if(inc == False) */
+            result[i] = str[i];
+/*         if(inc == True && i == strlen(str)-3);
+            result[i] = (char)((int)(str[i]-'0')); */
+    }
+}
+
+void getNetworkInfo(char *iface, int option, char *result){
+    struct ifaddrs *id;
+    int val;
+    val = getifaddrs (&id);
+    if(strcmp(id->ifa_name, iface) == 0)
+        switch (option)
+        {
+        case ADDRESS:
+            char net_address[1024];
+            print_ip(id->ifa_data, net_address);
+            sprintf(result, "%s", net_address);
+            break;
+        case MASK:
+            char net_mask[1024];
+            print_ip(id->ifa_netmask, net_mask);
+            char plNetmask[1024];
+            getPrefixLength(net_mask, plNetmask);
+            break;
+        default:
+            sprintf(result, "getNetoworkInfo: option not correct");
+            break;
+        }
+    else
+    {
+       sprintf(result, "getNetoworkInfo: the selected interface not exist");     
+    }
+    
+}
+
+void print_ip(unsigned int ip, char *result)
+{
+  unsigned char bytes[4];
+  bytes[0] = ip & 0xFF;
+  bytes[1] = (ip >> 8) & 0xFF;
+  bytes[2] = (ip >> 16) & 0xFF;
+  bytes[3] = (ip >> 24) & 0xFF;
+  sprintf (result, "%d.%d.%d.%d", bytes[3], bytes[2], bytes[1], bytes[0]);
+}
+
+void getMaskPrefixLength(char *mask, char *result){
+    const char *network = "255.255.255.0";
+    int n;
+    inet_pton(AF_INET, network, &n);
+    int i = 0;
+
+    while (n > 0) {
+            n = n >> 1;
+            i++;
+    }
+    sprintf(result, "/%d", i);
 
 }

@@ -13,12 +13,19 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <net/if.h>
+#include <ifaddrs.h>
 
 /* Constant variables / MACROS */
-#define PORT 8000
-#define PORT1 8001
-#define MAXLINE 1024
-#define STR_EQUAL 0 
+#define PORT        8000
+#define PORT1       8001
+#define MAXLINE     1024
+#define STR_EQUAL   0 
+#define False       0
+#define True        1
+
+#define ADDRESS      1
+#define MASK        2
+
 
 /* Function Headers */
 
@@ -28,7 +35,9 @@ void initUAVClient(char *srv_ip, char *clt_message, char *result);
 
 void checkHostName(int hostname);
 void checkHostEntry(struct hostent * hostentry);
-void getHostandIp(char* iface, char *result);
+void getIfIp(char* iface, char *result);
+void getMaskPrefixLength(char *mask, char *result);
+void print_ip(unsigned int ip, char *result);
 
 void initServer();
 //void initServer(char *iface_name);
@@ -39,6 +48,9 @@ void printProcessInfo(FILE *pp);
 void execAliveCheck(char *result);
 void execInitFirmware(char* configs, char *result);
 void execUavTun(char* configs, char *result);
+void execConfigRoute(char* configs, char *result);
+void execConfigIpTables(char* configs, char *result);
 void setUAVTunnel(char* configs, char *result);
+
 
 #endif /* SOC_UTILS_H_*/
