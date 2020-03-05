@@ -398,20 +398,20 @@ void getSimpleTunnelName(char *str, char* result/* , int inc */)
 void getNetworkInfo(char *iface, int option, char *result){
     struct ifaddrs *id;
     int val;
+    char net_address[1024];
+    char net_mask[1024];
     val = getifaddrs (&id);
     if(strcmp(id->ifa_name, iface) == 0)
         switch (option)
         {
         case ADDRESS:
-            char net_address[1024];
             print_ip(id->ifa_data, net_address);
             sprintf(result, "%s", net_address);
             break;
-        case MASK:
-            char net_mask[1024];
+        case MASK: 
             print_ip(id->ifa_netmask, net_mask);
             char plNetmask[1024];
-            getPrefixLength(net_mask, plNetmask);
+            getMaskPrefixLength(net_mask, plNetmask);
             break;
         default:
             sprintf(result, "getNetoworkInfo: option not correct");
@@ -435,9 +435,9 @@ void print_ip(unsigned int ip, char *result)
 }
 
 void getMaskPrefixLength(char *mask, char *result){
-    const char *network = "255.255.255.0";
+    //const char *network = "255.255.255.0";
     int n;
-    inet_pton(AF_INET, network, &n);
+    inet_pton(AF_INET, mask, &n);
     int i = 0;
 
     while (n > 0) {
