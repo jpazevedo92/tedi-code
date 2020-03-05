@@ -1,12 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "Route Configuration Script"
 #set -x
 
-OPTION = $1
+OPTION=$1
+echo $OPTION
 ########## RUN COMMANDS ############
 
-if [ $OPTION = '-a' ]
+if [ $OPTION == '-a' ]
 then
     sudo IF_NAME=$2 NETWORK=$3 IP=$4  su -p -c '
     ip route add $NETWORK via $IP dev $IF_NAME

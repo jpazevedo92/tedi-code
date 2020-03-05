@@ -4,9 +4,9 @@
     "interfaces": [
         {
             "name": "tun3",
-            "network": "10.0.20.0",
+            "network": "10.0.30.0",
             "network_mask": "/24",
-            "ip": "10.0.20.2"
+            "ip": "10.0.30.2"
         },
         {
             "name": "tun2o3",

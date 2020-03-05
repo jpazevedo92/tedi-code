@@ -170,9 +170,11 @@ class Application:
         
         #Start VM related with drone ID
         subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
+        sleep(1)
         ready = receive_ready_status().decode("utf-8")
-        print("Ready: ", ready)
+        print("Wait ready status")
         if ready == "-R":
+            print("Device {} is ready", btn_id)
             sleep(2)
             self._start_up_system(btn_id, time_str)
 

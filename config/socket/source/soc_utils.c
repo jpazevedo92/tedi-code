@@ -92,7 +92,7 @@ void initServer(){
             sizeof(servaddr)) < 0 ) 
     { 
         perror("bind failed"); 
-        exit(EXIT_FAILURE); 
+        //exit(EXIT_FAILURE); 
     } 
     
     puts("Waiting for incoming connections...");
@@ -275,6 +275,7 @@ void setUAVTunnel(char* configs, char *result){
     int condition2 = strcmp(res, res1);
     printf("%d\n", condition2);
 
+    /* Well */
 
     int n = tun_name[strlen(tun_name)-1] - '0';
     char route_command[MAXLINE]; 
