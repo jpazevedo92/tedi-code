@@ -290,7 +290,7 @@ void setUAVTunnel(char* configs, char *result){
             char base_ip[MAXLINE];
             sprintf(base_ip, "10.0.%d0.1", n);
             getCommand(tun_name, route_command2, True);
-            printf("%s", route_command2);
+            printf("Command %s", route_command2);
             //strcat(r_command2, route_command2);
             //initUAVClient(base_ip, r_command2, res2);
             //execConfigRoute(route_command, res2);
