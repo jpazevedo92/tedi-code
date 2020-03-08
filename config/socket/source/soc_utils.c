@@ -250,18 +250,18 @@ void execConfigIpTables(char* configs, char *result){
 void setUAVTunnel(char* configs, char *result){
     char *command_local = configs; 
     char *command_remote = {0};
-    char msg[MAXLINE] = {0};
+    /*char msg[MAXLINE] = {0};
     char res[MAXLINE] = {0};
     char res1[MAXLINE] = {0};
     char res2[MAXLINE] = {0};
     char res3[MAXLINE] = {0};
-    char res4[MAXLINE] = {0};    
+    char res4[MAXLINE] = {0}; */   
     command_remote = strtok_r(command_local, " ", &command_local);
-    printf("Local: %s Remote: %s\n", command_local, command_remote);
-    sprintf(msg, "-T_%s", command_remote);
+/*     printf("Local: %s Remote: %s\n", command_local, command_remote);
+    sprintf(msg, "-T_%s", command_remote); */
     
     char* tun_name = strtok(command_remote, "_");
-    char* remote_ip = strtok(NULL, "_");
+/*     char* remote_ip = strtok(NULL, "_");
     printf("Remote IP: %s\n", remote_ip);
 
     initUAVClient(remote_ip, msg, res);
@@ -273,7 +273,7 @@ void setUAVTunnel(char* configs, char *result){
         execConfigTun(command_local, res1);
 
     int condition2 = strcmp(res, res1);
-    printf("%d\n", condition2);
+    printf("%d\n", condition2); */
 
     /* Well */
 
@@ -284,13 +284,15 @@ void setUAVTunnel(char* configs, char *result){
         if(i == 0)
         {
             /* First network node */
+            printf("Send command to base");
             char r_command2[MAXLINE] = "-R_";
             char route_command2[MAXLINE];
             char base_ip[MAXLINE];
             sprintf(base_ip, "10.0.%d0.1", n);
             getCommand(tun_name, route_command2, True);
-            strcat(r_command2, route_command2);
-            initUAVClient(base_ip, r_command2, res2);
+            printf("%s", route_command2);
+            //strcat(r_command2, route_command2);
+            //initUAVClient(base_ip, r_command2, res2);
             //execConfigRoute(route_command, res2);
         } else
         {
@@ -299,16 +301,16 @@ void setUAVTunnel(char* configs, char *result){
             char tun_input[MAXLINE];
             getSimpleTunnelName(tun_name, tun_input);
             sprintf(route_command3, "-P_%s_%s", tun_input, tun_name);
-            initUAVClient(remote_ip, route_command3, res2);
+            //initUAVClient(remote_ip, route_command3, res2);
             //execConfigIpTables(route_command3, res3);
 
         }
     }
     getCommand(tun_name, route_command, False);
-    execConfigRoute(route_command, res4);
+    //execConfigRoute(route_command, res4);
 
-    if(condition2 == STR_EQUAL)
-        sprintf(result, "%s configuration applied", tun_name);
+/*     if(condition2 == STR_EQUAL)
+        sprintf(result, "%s configuration applied", tun_name); */
 
 }
 
