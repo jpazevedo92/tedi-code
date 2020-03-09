@@ -248,20 +248,21 @@ void execConfigIpTables(char* configs, char *result){
 }
 
 void setUAVTunnel(char* configs, char *result){
+    printf("Enter on function: Set UAV Tunnel\n");
     char *command_local = configs; 
     char *command_remote = {0};
-    /*char msg[MAXLINE] = {0};
+char msg[MAXLINE] = {0};
     char res[MAXLINE] = {0};
     char res1[MAXLINE] = {0};
     char res2[MAXLINE] = {0};
     char res3[MAXLINE] = {0};
-    char res4[MAXLINE] = {0}; */   
+    char res4[MAXLINE] = {0};
     command_remote = strtok_r(command_local, " ", &command_local);
-/*     printf("Local: %s Remote: %s\n", command_local, command_remote);
-    sprintf(msg, "-T_%s", command_remote); */
+    printf("Local: %s Remote: %s\n", command_local, command_remote);
+    sprintf(msg, "-T_%s", command_remote);
     
     char* tun_name = strtok(command_remote, "_");
-/*     char* remote_ip = strtok(NULL, "_");
+    char* remote_ip = strtok(NULL, "_");
     printf("Remote IP: %s\n", remote_ip);
 
     initUAVClient(remote_ip, msg, res);
@@ -273,7 +274,7 @@ void setUAVTunnel(char* configs, char *result){
         execConfigTun(command_local, res1);
 
     int condition2 = strcmp(res, res1);
-    printf("%d\n", condition2); */
+    printf("%d\n", condition2);
 
     /* Well */
 
@@ -284,29 +285,30 @@ void setUAVTunnel(char* configs, char *result){
         if(i == 0)
         {
             /* First network node */
-            printf("Send command to base");
+            printf("Send command to base\n");
             char r_command2[MAXLINE] = "-R_";
             char route_command2[MAXLINE];
             char base_ip[MAXLINE];
             sprintf(base_ip, "10.0.%d0.1", n);
+            printf("Base IP: %s\n", base_ip);
             getCommand(tun_name, route_command2, True);
             printf("Command %s", route_command2);
             //strcat(r_command2, route_command2);
             //initUAVClient(base_ip, r_command2, res2);
             //execConfigRoute(route_command, res2);
-        } else
+        }/*  else
         {
             /* Intermedious nodes */
-            char route_command3[MAXLINE];
+            /*char route_command3[MAXLINE];
             char tun_input[MAXLINE];
             getSimpleTunnelName(tun_name, tun_input);
             sprintf(route_command3, "-P_%s_%s", tun_input, tun_name);
             //initUAVClient(remote_ip, route_command3, res2);
             //execConfigIpTables(route_command3, res3);
 
-        }
+        } */
     }
-    getCommand(tun_name, route_command, False);
+    //getCommand(tun_name, route_command, False);
     //execConfigRoute(route_command, res4);
 
 /*     if(condition2 == STR_EQUAL)
@@ -319,15 +321,11 @@ void setUAVTunnel(char* configs, char *result){
 */
 
 void printProcessInfo(FILE *pp){
-    //printf("printProcessInfo\n");
     if (pp != NULL) {
-        //printf("printProcessInfo: if pp != null\n ");
         while (1) {
-            //printf("printProcessInfo: while(1)\n ");
             char *line;
             char buf[1000];
             line = fgets(buf, sizeof buf, pp);
-            //printf("printProcessInfo: line: %s\n ");
             if (line == NULL) break;
             printf("%s", line); /* line includes '\n' */
         }
@@ -335,26 +333,36 @@ void printProcessInfo(FILE *pp){
 }
 
 void getCommand(char* iface, char *result, int option){
+    printf("Enter on function: Set UAV Tunnel\n");
     char sTunName[MAXLINE];
     if(option)
+    {
+        printf("Option True\n");
         getSimpleTunnelName(iface, sTunName/* , False */);
-    else if(!option)
+    }
+    else if(!option){
+        printf("Option False\n");
         sprintf(sTunName, "%s", iface);
+    }
+        
     else
-        sprintf(sTunName, "invalid iface");    
+        sprintf(sTunName, "invalid iface");
+    printf("sTunName: %s\n", sTunName);
     char net_ip[MAXLINE];
-    getIfIp(sTunName, net_ip);
-    char net_address[MAXLINE];
+    getIfIp(iface, net_ip);
+    printf("net_ip: %s\n", net_ip);
+/*     char net_address[MAXLINE];
     getNetworkInfo(sTunName, ADDRESS, net_address);
     char net_mask[MAXLINE];
-    getNetworkInfo(sTunName, MASK, net_address);
+    getNetworkInfo(sTunName, MASK, net_mask);
     char network[MAXLINE];
     sprintf(network, "%s%s", net_address, net_mask);
-    sprintf(result, "%s_%s_%s", sTunName, network, net_ip);
+    sprintf(result, "%s_%s_%s", sTunName, network, net_ip); */
 
 }
 
 void getIfIp(char* iface, char *result){
+    printf("Enter on function: getIfIp\n");
     struct ifaddrs *ifaddr, *ifa;
     int family, s;
     char host[NI_MAXHOST];
@@ -380,8 +388,10 @@ void getIfIp(char* iface, char *result){
                 printf("getnameinfo() failed: %s\n", gai_strerror(s));
             }
             printf("\t  Address : <%s>\n", host);
-
             sprintf(result, "%s", host); 
+        }
+        else{
+            sprintf(result, "The interface %s not exist", iface);
         }
     }
 
@@ -390,7 +400,9 @@ void getIfIp(char* iface, char *result){
 
 void getSimpleTunnelName(char *str, char* result/* , int inc */)
 {
-    for(int i = 0; i < sizeof(str)-2; i++){   
+    printf("Enter on function: getSimpleTunnelName\n");
+    int n = strlen(str)-2; 
+    for(int i = 0; i < n; i++){   
         /* if(inc == False) */
             result[i] = str[i];
 /*         if(inc == True && i == strlen(str)-3);
