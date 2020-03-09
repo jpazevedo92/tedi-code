@@ -339,7 +339,7 @@ void getCommand(char* iface, char *result, int option){
     if(option)
         getSimpleTunnelName(iface, sTunName/* , False */);
     else if(!option)
-        sprintf(sTunName, "$s", iface);
+        sprintf(sTunName, "%s", iface);
     else
         sprintf(sTunName, "invalid iface");    
     char net_ip[MAXLINE];
