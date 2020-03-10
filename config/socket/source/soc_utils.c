@@ -335,6 +335,10 @@ void printProcessInfo(FILE *pp){
 void getCommand(char* iface, char *result, int option){
     printf("Enter on function: Set UAV Tunnel\n");
     char sTunName[MAXLINE];
+    char net_ip[MAXLINE];
+    char net_address[MAXLINE];
+    char net_mask[MAXLINE];
+    char network[MAXLINE];
     if(option)
     {
         printf("Option True\n");
@@ -343,21 +347,22 @@ void getCommand(char* iface, char *result, int option){
     else if(!option){
         printf("Option False\n");
         sprintf(sTunName, "%s", iface);
-    }
-        
+    }    
     else
         sprintf(sTunName, "invalid iface");
     printf("sTunName: %s\n", sTunName);
-    char net_ip[MAXLINE];
-    getIfIp(iface, net_ip);
+    printf("--------------IP-----------------------\n");
+    getNetworkInfo(iface, IP, net_ip);
+    //getIfIp(iface, net_ip);
     printf("net_ip: %s\n", net_ip);
-/*     char net_address[MAXLINE];
-    getNetworkInfo(sTunName, ADDRESS, net_address);
-    char net_mask[MAXLINE];
-    getNetworkInfo(sTunName, MASK, net_mask);
-    char network[MAXLINE];
+    printf("--------------ADDRESS-----------------------\n");
+   
+    getNetworkInfo(iface, ADDRESS, net_address);
+    printf("--------------MASK-----------------------\n");
+
+    getNetworkInfo(iface, MASK, net_mask);
     sprintf(network, "%s%s", net_address, net_mask);
-    sprintf(result, "%s_%s_%s", sTunName, network, net_ip); */
+    /*sprintf(result, "%s_%s_%s", sTunName, network, net_ip); */
 
 }
 
@@ -389,8 +394,7 @@ void getIfIp(char* iface, char *result){
             }
             printf("\t  Address : <%s>\n", host);
             sprintf(result, "%s", host); 
-        }
-        else{
+        } else{
             sprintf(result, "The interface %s not exist", iface);
         }
     }
@@ -411,31 +415,66 @@ void getSimpleTunnelName(char *str, char* result/* , int inc */)
 }
 
 void getNetworkInfo(char *iface, int option, char *result){
-    struct ifaddrs *id;
-    int val;
+    struct ifaddrs *ifaddr, *ifa;
+    int family, s;
+    char host[NI_MAXHOST];
+    char net_ip[1024];
     char net_address[1024];
     char net_mask[1024];
-    val = getifaddrs (&id);
-    if(strcmp(id->ifa_name, iface) == 0)
-        switch (option)
-        {
-        case ADDRESS:
-            print_ip(id->ifa_data, net_address);
-            sprintf(result, "%s", net_address);
-            break;
-        case MASK: 
-            print_ip(id->ifa_netmask, net_mask);
-            char plNetmask[1024];
-            getMaskPrefixLength(net_mask, plNetmask);
-            break;
-        default:
-            sprintf(result, "getNetoworkInfo: option not correct");
-            break;
-        }
-    else
+    char plNetmask[1024];
+
+    if (getifaddrs(&ifaddr) == -1) 
     {
-       sprintf(result, "getNetoworkInfo: the selected interface not exist");     
+        perror("getifaddrs");
+        exit(EXIT_FAILURE);
     }
+
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
+    {
+        if (ifa->ifa_addr == NULL)
+            continue;  
+
+        s=getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+
+        if((strcmp(ifa->ifa_name, iface)==0)&&(ifa->ifa_addr->sa_family==AF_INET))
+        {
+            printf("enter if (strcmp(ifa->ifa_name, iface)==0)&&(ifa->ifa_addr->sa_family==AF_INET)\n");
+            if (s != 0)
+            {
+                printf("getnameinfo() failed: %s\n", gai_strerror(s));
+            }
+            
+            switch (option)
+            {
+                case IP:
+                    sprintf(result, "%s", host);
+                    printf("\t  If: %s Address : <%s>\n",ifa->ifa_name, host);
+                    break;
+                case ADDRESS:
+                    print_ip(ifa->ifa_data, net_address);
+                    printf("\t  If: %s\n",ifa->ifa_name);
+                    printf("Net address: %s\n", net_address);
+                    sprintf(result, "%s", net_address);
+                    break;
+                case MASK: 
+                    print_ip(ifa->ifa_netmask, net_mask);
+                    printf("\t  If: %s\n",ifa->ifa_name);
+                    printf("Net mask: %s\n", net_mask);
+                    getMaskPrefixLength(net_mask, plNetmask);
+                    break;
+                default:
+                    sprintf(result, "getNetoworkInfo: option not correct");
+                    break;
+            }
+        } else
+        {
+            printf("enter if (strcmp(ifa->ifa_name, iface)==0)&&(ifa->ifa_addr->sa_family==AF_INET)\n");
+            sprintf(result, "The interface %s not exist", iface);
+        }
+    }
+
+    freeifaddrs(ifaddr);
     
 }
 
@@ -446,6 +485,7 @@ void print_ip(unsigned int ip, char *result)
   bytes[1] = (ip >> 8) & 0xFF;
   bytes[2] = (ip >> 16) & 0xFF;
   bytes[3] = (ip >> 24) & 0xFF;
+  printf("result print_ip: %s\n", result);
   sprintf (result, "%d.%d.%d.%d", bytes[3], bytes[2], bytes[1], bytes[0]);
 }
 

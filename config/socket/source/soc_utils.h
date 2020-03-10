@@ -23,8 +23,9 @@
 #define False       0
 #define True        1
 
-#define ADDRESS      1
-#define MASK        2
+#define IP          1   
+#define ADDRESS     2
+#define MASK        3
 
 
 /* Function Headers */
