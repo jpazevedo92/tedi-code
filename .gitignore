@@ -25,6 +25,7 @@ scratch/*
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
 # should NOT be excluded as they contain compiler settings and other important
 # information for Eclipse / Flash Builder.
+<<<<<<< HEAD
 tests/example
 tests/Makefile
 tests/pyreverse
@@ -32,3 +33,6 @@ tests/pyreverse.c
 tests/reverse.py
 tests/send_command.py
 tests/__pycache__/reverse.cpython-36.pyc
+=======
+tests/void getCommand(char* iface, char *resul.c
+>>>>>>> 68e5cb91f10cf3b4d9eaadda9a7e40957f1ba616
