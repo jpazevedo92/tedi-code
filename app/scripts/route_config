@@ -23,7 +23,7 @@ then
         exit
     '
     echo "Route deleted"
-elif [ $OPTION ='-t'  ]
+elif [ $OPTION = '-t'  ]
 then
     sudo IF1=$2 IF_2=$3 su -p -c '
         echo 1 > /proc/sys/net/ipv4/ip_forward;
