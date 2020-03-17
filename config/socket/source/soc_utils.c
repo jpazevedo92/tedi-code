@@ -251,11 +251,8 @@ void setUAVTunnel(char* configs, char *result){
     char msg[MAXLINE] = {0};
     char res[MAXLINE] = {0};
     char res1[MAXLINE] = {0};
-    char res2[MAXLINE] = {0};
-    char res3[MAXLINE] = {0};
-    char res4[MAXLINE] = {0};
     char base_ip[MAXLINE] = {0};
-
+    char node_ip[MAXLINE] = {0};
     /* commands to send*/
 
     char args[MAXLINE] = {0};
@@ -302,11 +299,14 @@ void setUAVTunnel(char* configs, char *result){
             memset(command, 0, sizeof(command));
             memset(command_args, 0, sizeof(command_args));
             memset(result_config, 0, sizeof(result_config));
+            memset(result_config, 0, sizeof(result_config));
+            memset(node_ip, 0, sizeof(node_ip));
+            sprintf(node_ip, "10.0.%d%d.1", n-1, n);
             sprintf(args, "%d_%s_%s", i, tun_name, "tables");
             get_command_args("get_command", 3, args, command_args);
             sprintf(command, "-P_%s", command_args);
             printf("command: %s base ip:%s\n", command, base_ip);
-            initUAVClient(base_ip, command, result_config);
+            initUAVClient(node_ip, command, result_config);
         }
     }
     /* Last network node */
@@ -317,9 +317,8 @@ void setUAVTunnel(char* configs, char *result){
     printf("UAV%d ID: %d\n", n, n);
     sprintf(args, "%d_%s", n, tun_name);
     get_command_args("get_command", 2, args, command_args);
-    sprintf(command, "-R_%s", command_args);
-    printf("command: %s base ip:%s\n", command, base_ip);
-    initUAVClient(base_ip, command, result_config);
+    execConfigRoute(command_args, result_config);
+    //initUAVClient(base_ip, command, result_config);
 
      if(condition2 == STR_EQUAL)
         sprintf(result, "%s configuration applied", tun_name);
