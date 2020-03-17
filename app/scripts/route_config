@@ -7,7 +7,7 @@ OPTION=$1
 echo $OPTION
 ########## RUN COMMANDS ############
 
-if [ $OPTION == '-a' ]
+if [ $OPTION = '-a' ]
 then
     sudo IF_NAME=$2 NETWORK=$3 IP=$4  su -p -c '
     ip route add $NETWORK via $IP dev $IF_NAME
@@ -15,14 +15,14 @@ then
     '
 echo "Route created"
 
-elif [ $OPTION == '-d'  ]
+elif [ $OPTION = '-d'  ]
 then
     sudo IF_NAME=$2 su -p -c '
         ip route del $TUN_NAME
         exit
     '
     echo "Route deleted"
-elif [ $OPTION == '-t'  ]
+elif [ $OPTION = '-t'  ]
 then
     sudo IF1=$2 IF_2=$3 su -p -c '
         echo 1 > /proc/sys/net/ipv4/ip_forward;
@@ -32,7 +32,7 @@ then
         exit
     '
     echo "Route deleted"
-elif [ $OPTION == '-h'  ]
+elif [ $OPTION = '-h'  ]
 then
     echo "Add route: route_config -a if_name network via_ip"
     echo "Delete route: route_config -d if_name"
