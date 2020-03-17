@@ -9,7 +9,6 @@ app_settings_dir = os.path.abspath(os.path.join(__file__,"..","..","..","..","ap
 #print(app_settings_dir)
 
 def get_command(id, iface, option="route"):
-    print(id, iface, option)
     list_ids = [int(s) for s in re.findall(r'\d+', iface)]
     id_out = list_ids[1]
     if option == "route":
@@ -21,7 +20,8 @@ def get_command(id, iface, option="route"):
                 json_out = open(app_settings_dir + "/uav"+ str(id_out) +".json", 'r')
                 network = get_network(json.load(json_out)["interfaces"], iface)
                 ip_out = str(ipaddress.IPv4Address(host_info["ip"])+1)
-                arguments = "{}_{}_{}".format(if_out, network, ip_out)      
+                arguments = "{}_{}_{}".format(if_out, network, ip_out)
+
         else:
             with open(app_settings_dir + "/uav"+ str(id) +".json") as json_file:
                 data = json.load(json_file)
@@ -29,7 +29,6 @@ def get_command(id, iface, option="route"):
                 network = get_network(json.load(json_out)["interfaces"], "tun1")
                 ip_out =  str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface))-1)
                 arguments = "{}_{}_{}".format(iface, network, ip_out)
-                print(arguments) 
     else:
         if id > 1:
             with open(app_settings_dir + "/uav"+ str(id) +".json") as json_file:

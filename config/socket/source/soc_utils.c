@@ -5,7 +5,7 @@
 */
 void initClient(char *srv_ip, char *clt_message)
 {
-    printf("Start socket client\n");
+    printf("Socket Client: \n\tcommand: %s \n\tserver_ip: %s\n", clt_message, srv_ip);
     int sockfd; 
     char buffer[MAXLINE]; 
     struct sockaddr_in     servaddr; 
@@ -33,8 +33,8 @@ void initClient(char *srv_ip, char *clt_message)
 
 void initUAVClient(char *srv_ip, char *clt_message, char *result)
 {
-    printf("Start socket client\n");
-    printf("%s", clt_message);
+    printf("Socket Client: \n\tcommand: %s \n\tserver_ip: %s\n", clt_message, srv_ip);
+
     int sockfd; 
     struct sockaddr_in     servaddr; 
     int n, len;
@@ -60,7 +60,7 @@ void initUAVClient(char *srv_ip, char *clt_message, char *result)
                 MSG_WAITALL, (struct sockaddr *) &servaddr, 
                 &len); 
     result[n] = '\0'; 
-    close(sockfd); 
+    close(sockfd);  
    
 }
 
@@ -93,7 +93,7 @@ void initServer(){
             sizeof(servaddr)) < 0 ) 
     { 
         perror("bind failed"); 
-        //exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE); 
     } 
     
     puts("Waiting for incoming connections...");
@@ -126,8 +126,6 @@ void initServer(){
 
 void execCommand(char* command, char *result){
 	
-    printf("enter execCommand function\n");
-    
     char *token; 
     token = strtok_r(command, "_", &command);
     char option = token[1];
@@ -135,7 +133,6 @@ void execCommand(char* command, char *result){
         case 'a':
         case 'A':
             execAliveCheck(result);
-            //execConfig(command, result);
             break;
         case 'i':
         case 'I':
@@ -176,14 +173,14 @@ void execCommand(char* command, char *result){
 }
 
 void execConfigTun(char* configs, char *result){
-    printf("enter execConfig function\n");
+
     char *if_name = strtok(configs, "_");
     printf("Start configuration of %s\n", if_name);
     char *tun_ip_in = strtok(NULL, "_");
     char *tun_ip_out = strtok(NULL, "_");
     char *ip_address = strtok(NULL, "_");
     char *nw = strtok(NULL, "_");
-    printf("splits all parameters\n");
+
     FILE *pp;
     char command_arg[1024] = {0};
     sprintf(command_arg, "cd ../../../app/scripts && sh tunnel_config -a %s %s %s %s %s", if_name, tun_ip_in, tun_ip_out, ip_address, nw);
@@ -218,8 +215,7 @@ void execUavTun(char* configs, char *result){
 }
 
 void execConfigRoute(char* configs, char *result){
-    printf("enter execConfig function\n");
-
+    
     char *if_name = strtok(configs, "_");
     printf("Route configuration of %s\n", if_name);
     char *tun_network = strtok(NULL, "_");
@@ -250,7 +246,6 @@ void execConfigIpTables(char* configs, char *result){
 }
 
 void setUAVTunnel(char* configs, char *result){
-    printf("Enter on function: Set UAV Tunnel\n");
     char *command_local = configs; 
     char *command_remote = {0};
     char msg[MAXLINE] = {0};
@@ -259,72 +254,72 @@ void setUAVTunnel(char* configs, char *result){
     char res2[MAXLINE] = {0};
     char res3[MAXLINE] = {0};
     char res4[MAXLINE] = {0};
+    char base_ip[MAXLINE] = {0};
+
+    /* commands to send*/
+
+    char args[MAXLINE] = {0};
+    char command_args[MAXLINE] = {0};
+    char command[MAXLINE] = {0};
+    char result_config[MAXLINE] = {0};
+    
     command_remote = strtok_r(command_local, " ", &command_local);
-    printf("Local: %s Remote: %s\n", command_local, command_remote);
     sprintf(msg, "-T_%s", command_remote);
     
     char* tun_name = strtok(command_remote, "_");
     char* remote_ip = strtok(NULL, "_");
-    printf("Remote IP: %s\n", remote_ip);
 
     initUAVClient(remote_ip, msg, res);
     char compare_string[MAXLINE] = {0};
     sprintf(compare_string, "Configuration of %s is OK", tun_name);
     int condition = strcmp(res, compare_string);
-    printf("%s %d\n", res ,condition);
     if(condition == STR_EQUAL)
         execConfigTun(command_local, res1);
 
     int condition2 = strcmp(res, res1);
-    printf("%d\n", condition2);
-
-    /* Well */
-
     int n = tun_name[strlen(tun_name)-1] - '0';
-    // char route_command[MAXLINE]; 
+    sprintf(base_ip, "10.0.%d0.1", n);
     for(int i = 0; i < n; i++)
-    {
-        printf("%d", i);
+    {        
         if(i == 0)
          {
             /* First network node */
-            printf("Send command to base\n");
-            char base_ip[MAXLINE] = {0};
-            char args[MAXLINE] = {0};
-            char command_args[MAXLINE] = {0};
-            char command[MAXLINE] = {0};
-            char result_config[MAXLINE] = {0};
+            memset(args, 0, sizeof(args));
+            memset(command, 0, sizeof(command));
+            memset(command_args, 0, sizeof(command_args));
+            memset(result_config, 0, sizeof(result_config));
+            printf("Base ID: %d\n", i);
             sprintf(args, "%d_%s", i, tun_name);
             get_command_args("get_command", 2, args, command_args);
             sprintf(command, "-R_%s", command_args);
-            sprintf(base_ip, "10.0.%d0.1", n);
             printf("command: %s base ip:%s\n", command, base_ip);
-    
-            initUAVClient(base_ip, result_config, res2);
-            // char r_command2[MAXLINE] = "-R_";
-            // char route_command2[MAXLINE];
-            // 
-            
-            // printf("Base IP: %s\n", base_ip);
-            // getCommand(tun_name, route_command2, True);
-            // printf("Command %s", route_command2);
-            //strcat(r_command2, route_command2);
-          
-            //execConfigRoute(route_command, res2);
-        }/*  else
-        //{
+            initUAVClient(base_ip, command, result_config);
+        }  else
+        {
             /* Intermedious nodes */
-            /*char route_command3[MAXLINE];
-            char tun_input[MAXLINE];
-            getSimpleTunnelName(tun_name, tun_input);
-            sprintf(route_command3, "-P_%s_%s", tun_input, tun_name);
-            //initUAVClient(remote_ip, route_command3, res2);
-            //execConfigIpTables(route_command3, res3);
-
-        } */
+            printf("UAV%d ID: %d\n", i, i);
+            memset(args, 0, sizeof(args));
+            memset(command, 0, sizeof(command));
+            memset(command_args, 0, sizeof(command_args));
+            memset(result_config, 0, sizeof(result_config));
+            sprintf(args, "%d_%s_%s", i, tun_name, "tables");
+            get_command_args("get_command", 3, args, command_args);
+            sprintf(command, "-P_%s", command_args);
+            printf("command: %s base ip:%s\n", command, base_ip);
+            initUAVClient(base_ip, command, result_config);
+        }
     }
-    //getCommand(tun_name, route_command, False);
-    //execConfigRoute(route_command, res4);
+    /* Last network node */
+    memset(args, 0, sizeof(args));
+    memset(command, 0, sizeof(command));
+    memset(command_args, 0, sizeof(command_args));
+    memset(result_config, 0, sizeof(result_config));
+    printf("UAV%d ID: %d\n", n, n);
+    sprintf(args, "%d_%s", n, tun_name);
+    get_command_args("get_command", 2, args, command_args);
+    sprintf(command, "-R_%s", command_args);
+    printf("command: %s base ip:%s\n", command, base_ip);
+    initUAVClient(base_ip, command, result_config);
 
      if(condition2 == STR_EQUAL)
         sprintf(result, "%s configuration applied", tun_name);
@@ -348,6 +343,10 @@ void printProcessInfo(FILE *pp){
 }
 
 void get_command_args(char *function_name, int n_args, char *args, char * result){
+    printf("get_command_args:\n\
+        \tfunction_name: %s\n\
+        \tn_args: %d\n\
+        \targs: %s\n", function_name, n_args, args);
     PyObject *strret, *pModule, *pFunc, *pArgs;
     Py_Initialize();
     int arg1;
