@@ -17,13 +17,13 @@ LIST=$(BIN)/socket
 all: $(LIST)
 
 $(BIN)/%: $(SCKT_OBJS)
-	$(CC) -g  $(SCKT_OBJS) $(LIBS) $(PYLIBS) -o $(BIN)/socket
+	$(CC) $(CFLAGS) -g  $(SCKT_OBJS) $(LIBS) $(PYLIBS) -o $(BIN)/socket
 
 $(BIN)/socket.o: ${SRC}
 	$(CC) $(CFLAGS) -c ${SRC} -o $(BIN)/socket.o
 
 $(BIN)/soc_utils.o: $(SOURCE)/soc_utils.c
-	$(CC) $(CFLAGS) -g 	$(CC) $(CFLAGS) -g pyreverse.c -c $(PYINC) -o $(BIN)/soc_utils.o
+	$(CC) $(CFLAGS) -g 	$(SOURCE)/soc_utils.c -c $(PYINC) -o $(BIN)/soc_utils.o
 
 clean:
 	rm -rf $(SCKT_OBJS) ${LIST}
