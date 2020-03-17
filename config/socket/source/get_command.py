@@ -6,9 +6,10 @@ import ipaddress
 
 app_settings_dir = os.path.abspath(os.path.join(__file__,"..","..","..","..","app","settings"))
 
-print(app_settings_dir)
+#print(app_settings_dir)
 
 def get_command(id, iface, option="route"):
+    print(id, iface, option)
     list_ids = [int(s) for s in re.findall(r'\d+', iface)]
     id_out = list_ids[1]
     if option == "route":

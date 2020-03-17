@@ -34,6 +34,7 @@ void initClient(char *srv_ip, char *clt_message)
 void initUAVClient(char *srv_ip, char *clt_message, char *result)
 {
     printf("Start socket client\n");
+    printf("%s", clt_message);
     int sockfd; 
     struct sockaddr_in     servaddr; 
     int n, len;
@@ -218,6 +219,7 @@ void execUavTun(char* configs, char *result){
 
 void execConfigRoute(char* configs, char *result){
     printf("enter execConfig function\n");
+
     char *if_name = strtok(configs, "_");
     printf("Route configuration of %s\n", if_name);
     char *tun_network = strtok(NULL, "_");
@@ -282,6 +284,7 @@ void setUAVTunnel(char* configs, char *result){
     // char route_command[MAXLINE]; 
     for(int i = 0; i < n; i++)
     {
+        printf("%d", i);
         if(i == 0)
          {
             /* First network node */
@@ -291,11 +294,12 @@ void setUAVTunnel(char* configs, char *result){
             char command_args[MAXLINE] = {0};
             char command[MAXLINE] = {0};
             char result_config[MAXLINE] = {0};
-            sprintf(args, "%d_$s", i, tun_name);
+            sprintf(args, "%d_%s", i, tun_name);
             get_command_args("get_command", 2, args, command_args);
-
             sprintf(command, "-R_%s", command_args);
             sprintf(base_ip, "10.0.%d0.1", n);
+            printf("command: %s base ip:%s\n", command, base_ip);
+    
             initUAVClient(base_ip, result_config, res2);
             // char r_command2[MAXLINE] = "-R_";
             // char route_command2[MAXLINE];
@@ -391,6 +395,6 @@ void get_command_args(char *function_name, int n_args, char *args, char * result
     
     strret = PyEval_CallObject(pFunc, pArgs);
     sprintf(result, "%s", _PyUnicode_AsString(strret));
-    printf("Reversed string: %s\n", result);
+    printf("Returned string: %s\n", result);
     Py_Finalize();
 }

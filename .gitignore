@@ -26,4 +26,4 @@ scratch/*
 # should NOT be excluded as they contain compiler settings and other important
 # information for Eclipse / Flash Builder.
 tests/*
-
+*.pyc
