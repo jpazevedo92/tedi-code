@@ -251,7 +251,7 @@ void setUAVTunnel(char* configs, char *result){
     printf("Enter on function: Set UAV Tunnel\n");
     char *command_local = configs; 
     char *command_remote = {0};
-char msg[MAXLINE] = {0};
+    char msg[MAXLINE] = {0};
     char res[MAXLINE] = {0};
     char res1[MAXLINE] = {0};
     char res2[MAXLINE] = {0};
@@ -279,25 +279,36 @@ char msg[MAXLINE] = {0};
     /* Well */
 
     int n = tun_name[strlen(tun_name)-1] - '0';
-    char route_command[MAXLINE]; 
+    // char route_command[MAXLINE]; 
     for(int i = 0; i < n; i++)
     {
         if(i == 0)
-        {
+         {
             /* First network node */
             printf("Send command to base\n");
-            char r_command2[MAXLINE] = "-R_";
-            char route_command2[MAXLINE];
-            char base_ip[MAXLINE];
+            char base_ip[MAXLINE] = {0};
+            char args[MAXLINE] = {0};
+            char command_args[MAXLINE] = {0};
+            char command[MAXLINE] = {0};
+            char result_config[MAXLINE] = {0};
+            sprintf(args, "%d_$s", i, tun_name);
+            get_command_args("get_command", 2, args, command_args);
+
+            sprintf(command, "-R_%s", command_args);
             sprintf(base_ip, "10.0.%d0.1", n);
-            printf("Base IP: %s\n", base_ip);
-            getCommand(tun_name, route_command2, True);
-            printf("Command %s", route_command2);
+            initUAVClient(base_ip, result_config, res2);
+            // char r_command2[MAXLINE] = "-R_";
+            // char route_command2[MAXLINE];
+            // 
+            
+            // printf("Base IP: %s\n", base_ip);
+            // getCommand(tun_name, route_command2, True);
+            // printf("Command %s", route_command2);
             //strcat(r_command2, route_command2);
-            //initUAVClient(base_ip, r_command2, res2);
+          
             //execConfigRoute(route_command, res2);
         }/*  else
-        {
+        //{
             /* Intermedious nodes */
             /*char route_command3[MAXLINE];
             char tun_input[MAXLINE];
@@ -311,8 +322,8 @@ char msg[MAXLINE] = {0};
     //getCommand(tun_name, route_command, False);
     //execConfigRoute(route_command, res4);
 
-/*     if(condition2 == STR_EQUAL)
-        sprintf(result, "%s configuration applied", tun_name); */
+     if(condition2 == STR_EQUAL)
+        sprintf(result, "%s configuration applied", tun_name);
 
 }
 
@@ -332,173 +343,54 @@ void printProcessInfo(FILE *pp){
     }
 }
 
-void getCommand(char* iface, char *result, int option){
-    printf("Enter on function: Set UAV Tunnel\n");
-    char sTunName[MAXLINE];
-    char net_ip[MAXLINE];
-    char net_address[MAXLINE];
-    char net_mask[MAXLINE];
-    char network[MAXLINE];
-    if(option)
-    {
-        printf("Option True\n");
-        getSimpleTunnelName(iface, sTunName/* , False */);
+void get_command_args(char *function_name, int n_args, char *args, char * result){
+    PyObject *strret, *pModule, *pFunc, *pArgs;
+    Py_Initialize();
+    int arg1;
+    char *token;
+    char *arg2;
+    char *arg3;
+    PyObject *sys_path = PySys_GetObject("path");
+    //~/Repos/tedi-uavcommandforward/1_Code/tests
+    PyList_Append(sys_path, PyUnicode_FromString("../source"));
+    PyObject* fname = PyUnicode_FromString("get_command");
+    //PyObject* module = PyImport_Import(fname);
+    pModule = PyImport_Import(fname);
+    if (pModule == NULL) {
+        PyErr_Print();
+        exit(-1);
     }
-    else if(!option){
-        printf("Option False\n");
-        sprintf(sTunName, "%s", iface);
-    }    
-    else
-        sprintf(sTunName, "invalid iface");
-    printf("sTunName: %s\n", sTunName);
-    printf("--------------IP-----------------------\n");
-    getNetworkInfo(iface, IP, net_ip);
-    //getIfIp(iface, net_ip);
-    printf("net_ip: %s\n", net_ip);
-    printf("--------------ADDRESS-----------------------\n");
-   
-    getNetworkInfo(iface, ADDRESS, net_address);
-    printf("--------------MASK-----------------------\n");
-
-    getNetworkInfo(iface, MASK, net_mask);
-    sprintf(network, "%s%s", net_address, net_mask);
-    /*sprintf(result, "%s_%s_%s", sTunName, network, net_ip); */
-
-}
-
-void getIfIp(char* iface, char *result){
-    printf("Enter on function: getIfIp\n");
-    struct ifaddrs *ifaddr, *ifa;
-    int family, s;
-    char host[NI_MAXHOST];
-
-    if (getifaddrs(&ifaddr) == -1) 
-    {
-        perror("getifaddrs");
-        exit(EXIT_FAILURE);
-    }
-
-
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
-    {
-        if (ifa->ifa_addr == NULL)
-            continue;  
-
-        s=getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in),host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-
-        if((strcmp(ifa->ifa_name, iface)==0)&&(ifa->ifa_addr->sa_family==AF_INET))
-        {
-            if (s != 0)
-            {
-                printf("getnameinfo() failed: %s\n", gai_strerror(s));
-            }
-            printf("\t  Address : <%s>\n", host);
-            sprintf(result, "%s", host); 
-        } else{
-            sprintf(result, "The interface %s not exist", iface);
-        }
-    }
-
-    freeifaddrs(ifaddr);
-}
-
-void getSimpleTunnelName(char *str, char* result/* , int inc */)
-{
-    printf("Enter on function: getSimpleTunnelName\n");
-    int n = strlen(str)-2; 
-    for(int i = 0; i < n; i++){   
-        /* if(inc == False) */
-            result[i] = str[i];
-/*         if(inc == True && i == strlen(str)-3);
-            result[i] = (char)((int)(str[i]-'0')); */
-    }
-}
-
-void getNetworkInfo(char *iface, int option, char *result){
-    struct ifaddrs *ifaddr, *ifa;
-    int family, s;
-    char host[NI_MAXHOST];
-    char net_ip[1024];
-    char net_address[1024];
-    char net_mask[1024];
-    char plNetmask[1024];
-
-    if (getifaddrs(&ifaddr) == -1) 
-    {
-        perror("getifaddrs");
-        exit(EXIT_FAILURE);
-    }
-
-
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
-    {
-        if (ifa->ifa_addr == NULL)
-            continue;  
-
-        s=getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-
-        if((strcmp(ifa->ifa_name, iface)==0)&&(ifa->ifa_addr->sa_family==AF_INET))
-        {
-            printf("enter if (strcmp(ifa->ifa_name, iface)==0)&&(ifa->ifa_addr->sa_family==AF_INET)\n");
-            if (s != 0)
-            {
-                printf("getnameinfo() failed: %s\n", gai_strerror(s));
-            }
-            
-            switch (option)
-            {
-                case IP:
-                    sprintf(result, "%s", host);
-                    printf("\t  If: %s Address : <%s>\n",ifa->ifa_name, host);
-                    break;
-                case ADDRESS:
-                    print_ip(ifa->ifa_data, net_address);
-                    printf("\t  If: %s\n",ifa->ifa_name);
-                    printf("Net address: %s\n", net_address);
-                    sprintf(result, "%s", net_address);
-                    break;
-                case MASK: 
-                    print_ip(ifa->ifa_netmask, net_mask);
-                    printf("\t  If: %s\n",ifa->ifa_name);
-                    printf("Net mask: %s\n", net_mask);
-                    getMaskPrefixLength(net_mask, plNetmask);
-                    break;
-                default:
-                    sprintf(result, "getNetoworkInfo: option not correct");
-                    break;
-            }
-        } else
-        {
-            printf("enter if (strcmp(ifa->ifa_name, iface)==0)&&(ifa->ifa_addr->sa_family==AF_INET)\n");
-            sprintf(result, "The interface %s not exist", iface);
-        }
-    }
-
-    freeifaddrs(ifaddr);
     
-}
-
-void print_ip(unsigned int ip, char *result)
-{
-  unsigned char bytes[4];
-  bytes[0] = ip & 0xFF;
-  bytes[1] = (ip >> 8) & 0xFF;
-  bytes[2] = (ip >> 16) & 0xFF;
-  bytes[3] = (ip >> 24) & 0xFF;
-  printf("result print_ip: %s\n", result);
-  sprintf (result, "%d.%d.%d.%d", bytes[3], bytes[2], bytes[1], bytes[0]);
-}
-
-void getMaskPrefixLength(char *mask, char *result){
-    //const char *network = "255.255.255.0";
-    int n;
-    inet_pton(AF_INET, mask, &n);
-    int i = 0;
-
-    while (n > 0) {
-            n = n >> 1;
-            i++;
+    pFunc = PyObject_GetAttrString(pModule, function_name);
+    if (pFunc == NULL) {
+        PyErr_Print();
+        exit(-1);
     }
-    sprintf(result, "/%d", i);
 
+    switch (n_args)
+    {
+        case 2:
+            token = strtok(args, "_");
+            arg1 = atoi(token);
+            arg2 = strtok(NULL ,"_");
+            pArgs = Py_BuildValue("(is)", arg1, arg2);
+            break;
+        case 3:
+            token = strtok(args, "_");
+            arg1 = atoi(token);
+            arg2 = strtok(NULL ,"_");
+            arg3 = strtok(NULL ,"_");
+            pArgs = Py_BuildValue("(iss)", arg1, arg2, arg3);
+            /* code */
+            break;
+        default:
+            printf("invalid number of args");
+            pArgs = Py_BuildValue("(is)", "None", "None");
+            break;
+    }
+    
+    strret = PyEval_CallObject(pFunc, pArgs);
+    sprintf(result, "%s", _PyUnicode_AsString(strret));
+    printf("Reversed string: %s\n", result);
+    Py_Finalize();
 }

@@ -14,6 +14,7 @@
 #include <string.h>
 #include <net/if.h>
 #include <ifaddrs.h>
+#include <python3.6/Python.h>
 
 /* Constant variables / MACROS */
 #define PORT        8000
@@ -53,5 +54,8 @@ void execConfigRoute(char* configs, char *result);
 void execConfigIpTables(char* configs, char *result);
 void setUAVTunnel(char* configs, char *result);
 void getCommand(char* iface, char *result, int option);
+
+void get_command_args(char *function_name, int n_args, char *args, char * result);
+
 
 #endif /* SOC_UTILS_H_*/
