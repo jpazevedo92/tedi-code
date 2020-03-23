@@ -19,7 +19,7 @@ bin-release/
 *.o
 
 #bin dir
-*/bin/*
+bin/*
 */scratch/*
 scratch/*
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
