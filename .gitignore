@@ -15,7 +15,6 @@ bin-release/
 *.apk
 *.log
 *.log*
-**/logs
 *.o
 
 #bin dir
