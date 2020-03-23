@@ -233,7 +233,8 @@ void execConfigRoute(char* configs, char *result){
 void execConfigIpTables(char* configs, char *result){
     printf("enter execConfig function\n");
     char *if_name1 = strtok(configs, "_");
-    char *if_name2 = strtok(configs, "_");
+    char *if_name2 = strtok(NULL, "_");
+
     printf("Start configuration of %s\n", if_name1);
     FILE *pp;
     char command_arg[1024] = {0};
