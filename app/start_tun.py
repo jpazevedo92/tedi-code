@@ -77,11 +77,13 @@ class Application:
         self.exit_btn.pack(side=RIGHT)
 
     def _start_tun(self):
-        print(self.tun_in.get(), self.tun_out.get())
+        print("Start Tunnel Configuration")
+        print("\tTun uav_in: {}\n\tTun uav_out: {}\n\ttun_name: {}".format(
+            self.tun_in.get(), self.tun_out.get(), self.tun_name.get()))
 
         uav_out_ip = get_ip(self.tun_out.get())
-        uav_in_data = config_tunnel(self.tun_in.get(), self.tun_name.get())
-        uav_out_data = config_tunnel(self.tun_out.get(), self.tun_name.get())
+        uav_in_data = config_tunnel(self.tun_in.get(), self.tun_name.get(), "in")
+        uav_out_data = config_tunnel(self.tun_out.get(), self.tun_name.get(), "out")
         print(uav_out_ip, uav_in_data, uav_out_data)
         data = send_command(uav_out_ip, "-U").decode("utf-8")
         if data == "-A":
@@ -127,28 +129,18 @@ def receive_ready_status():
 
     return msg
 
-def config_tunnel(host, tun_name):
-    id = re.findall(r'\d+', host)[0]
-    last_tun_element = int(re.findall(r'\d+', tun_name)[1])-1
-    tun_out_id = int(re.findall(r'\d+', tun_name)[1])
-    if host == "Host":
-        with open(app_settings_dir + "/base.json") as json_file:
-            data = json.load(json_file)
-            host_info = data["interfaces"][id-1]
-            remote_ip = ipaddress.IPv4Address(data["local_ip"])-1+100+id
-            arguments = host_info["name"] + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + host_info["ip"] + "_" + host_info["network"] + host_info["network_mask"]
-    else:
-        with open(app_settings_dir + "/"+ host +".json") as json_file:
-            id = int(re.findall(r'\d+', host)[0])
-            data = json.load(json_file)
-            host_info = data["interfaces"][last_tun_element]
-            if id > 1:
-                remote_ip = ipaddress.IPv4Address(data["local_ip"])-id+1
-            else:
-                remote_ip = ipaddress.IPv4Address(data["local_ip"])-id+tun_out_id
-                
-            arguments = host_info["name"] + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + host_info["ip"] + "_" + host_info["network"] + host_info["network_mask"]
-        
+def config_tunnel(host, tun_name, dir):
+    with open(app_settings_dir + "/"+ host +".json") as json_file:
+        data = json.load(json_file)
+        if dir == "in":
+            remote_ip = ipaddress.IPv4Address(data["local_ip"])+1
+        elif dir == "out":
+            remote_ip = ipaddress.IPv4Address(data["local_ip"])-1
+        else: 
+            remote_ip = "ERROR on get remote_ip"
+        network = get_network(data["interfaces"], tun_name)
+        ip = get_tun_ip(data["interfaces"], tun_name)
+        arguments = tun_name + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + ip + "_" + network
     return arguments
 
 def get_ip(host, tun=None):
@@ -160,6 +152,16 @@ def get_ip(host, tun=None):
         else:
             ip = data["local_ip"]
     return ip
+
+def get_network(dict_objects, name):
+    for dict in dict_objects:
+        if dict['name'] == name:
+            return dict['network'] + dict['network_mask']
+
+def get_tun_ip(dict_objects, name):
+    for dict in dict_objects:
+        if dict['name'] == name:
+            return dict['ip']
 
 
 root = Tk()

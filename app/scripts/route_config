@@ -27,9 +27,14 @@ elif [ $OPTION = '-t'  ]
 then
     sudo IF1=$2 IF_2=$3 su -p -c '
         echo 1 > /proc/sys/net/ipv4/ip_forward;
-        iptables -A FORWARD -i $IF_1 -o $IF_2 -j ACCEPT;
-        iptables -A FORWARD -i $IF_2 -o $IF_1 -m state --state ESTABLISHED,RELATED -j ACCEPT;
-        iptables -t nat -A POSTROUTING -o $IF_2 -j MASQUERADE
+        sudo iptables -F;
+        sudo iptables -X;
+        sudo iptables -t nat -A POSTROUTING -o $IF_1 -j MASQUERADE;
+        sudo iptables -A FORWARD -i $IF_1 -o $IF_2 -m state --state RELATED,ESTABLISHED -j ACCEPT;
+        sudo iptables -A FORWARD -i $IF_2 -o $IF_1 -j ACCEPT;
+        sudo iptables -t nat -A POSTROUTING -o $IF_2 -j MASQUERADE;
+        sudo iptables -A FORWARD -i $IF_2 -o $IF_1 -m state --state RELATED,ESTABLISHED -j ACCEPT;
+        sudo iptables -A FORWARD -i $IF_1 -o $IF_2 -j ACCEPT;
         exit
     '
     echo "Route deleted"
