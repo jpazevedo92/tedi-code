@@ -292,7 +292,7 @@ void setUAVTunnel(char* configs, char *result){
             sprintf(command, "-R_%s", command_args);
             printf("command: %s base ip:%s\n", command, base_ip);
             initUAVClient(base_ip, command, result_config);
-        }  else
+        }  else if(i == n-1)
         {
             /* Intermedious nodes */
             printf("UAV%d ID: %d\n", i, i);
