@@ -270,12 +270,23 @@ void setUAVTunnel(char* configs, char *result){
     initUAVClient(remote_ip, msg, res);
     char compare_string[MAXLINE] = {0};
     sprintf(compare_string, "Configuration of %s is OK", tun_name);
+
     int condition = strcmp(res, compare_string);
     if(condition == STR_EQUAL)
         execConfigTun(command_local, res1);
 
     int condition2 = strcmp(res, res1);
-    int n = tun_name[strlen(tun_name)-1] - '0';
+    /* 
+        tun1o3
+        tun2o3
+    */
+    int first_element  = (int) tun_name[strlen(tun_name)-3] - '0';
+    int last_element   = (int) tun_name[strlen(tun_name)-1] - '0';
+    int n = last_element;
+
+    int dif = last_element - first_element;
+
+
     sprintf(base_ip, "10.0.%d0.1", n);
     for(int i = 0; i < n; i++)
     {        
@@ -294,19 +305,30 @@ void setUAVTunnel(char* configs, char *result){
             initUAVClient(base_ip, command, result_config);
         }  else if(i == n-1)
         {
+            
             /* Intermedious nodes */
-            printf("UAV%d ID: %d\n", i, i);
+            
             memset(args, 0, sizeof(args));
             memset(command, 0, sizeof(command));
             memset(command_args, 0, sizeof(command_args));
             memset(result_config, 0, sizeof(result_config));
             memset(result_config, 0, sizeof(result_config));
             memset(node_ip, 0, sizeof(node_ip));
-            sprintf(node_ip, "10.0.%d%d.1", n-1, n);
+            if(dif > 1)
+            {
+                printf("UAV%d ID: %d\n", n-dif, n-dif);
+                sprintf(node_ip, "10.0.%d%d.1", n-dif, n);
+                
+            }
+            else
+            {
+                printf("UAV%d ID: %d\n", i, i);
+                sprintf(node_ip, "10.0.%d%d.1", n-1, n);
+            }
             sprintf(args, "%d_%s_%s", i, tun_name, "tables");
             get_command_args("get_command", 3, args, command_args);
             sprintf(command, "-P_%s", command_args);
-            printf("command: %s base ip:%s\n", command, base_ip);
+            printf("command: %s node ip:%s\n", command, node_ip);
             initUAVClient(node_ip, command, result_config);
         }
     }
