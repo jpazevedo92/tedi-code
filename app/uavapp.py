@@ -24,6 +24,11 @@ from tkinter import *
 id = 0
 config_drone_buttons = list()
 add_drone_buttons = list()
+add_tunnel_buttons = list()
+tun_name_entries = list()
+tun_in_entries = list()
+tun_out_entries = list()
+
 log_file = os.path.abspath(os.path.join(__file__, "..", "logs","log.log"))
 app_scripts_dir = os.path.abspath(os.path.join(__file__,"..","scripts"))
 app_settings_dir = os.path.abspath(os.path.join(__file__,"..","settings"))
@@ -89,6 +94,19 @@ class Application:
         self.add_drone["command"] = self._add_drone
         self.add_drone.pack(side=RIGHT)
 
+        self.container6 = Frame(master)
+        self.container6["pady"] = 10
+        self.container6.pack(side = TOP)
+
+        self.lbluav = Label(self.container6, 
+        text="Add Tunnel:", font=self.fonte, width=15)
+        self.lbluav.pack(side=LEFT)
+
+        self.add_tunnel = Button(self.container6, text="Add", 
+        font=self.fonte, width=15)
+        self.add_tunnel["command"] = self._add_tunnel
+        self.add_tunnel.pack(side=RIGHT)
+
         self.exit_frame = Frame(master)
         self.exit_frame["padx"] = 20
         self.exit_frame["pady"] = 5
@@ -99,37 +117,18 @@ class Application:
         self.exit_btn["command"] = quit
         self.exit_btn.pack(side=RIGHT)
 
-        self.command_frame = Frame(master)
-        self.command_frame["padx"] = 20
-        self.command_frame["pady"] = 5
-        self.command_frame.pack(side=BOTTOM)
-
-        self.lblcomand = Label(self.command_frame, 
-        text="Command print:", font=self.fonte, width=15)
-        self.lblcomand.pack(side=LEFT)
-
-        self.command_entry = Entry(self.command_frame, 
-        font=self.fonte, width=25, state=DISABLED, textvariable=self.command_msg, fg='black')
-        self.command_entry.config( background="white",disabledbackground="white")
-        #self.config_base["command"] = self._config_base
-        self.command_entry.pack(side=RIGHT)
-
-    def command_message_print(self, msg):
-        self.command_msg.set(msg)
 
     def _open_qgc(self):
-        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
-        print(time_str +" Open QGroundControl SW")
+        print(get_time() +" Open QGroundControl SW")
         logger.info("Open QGroundControl SW")
         qgc_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "..", ".."))
         subprocess.Popen(qgc_path+"/QGroundControl.AppImage", shell=True)
 
     def _add_drone(self, master=None):
+        #Define a UAV ID
         global id
         id = id + 1
-        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
-        print(time_str +" Button Add Drone pressed")
-        logger.info("Button Add Drone pressed")
+
         self.container5 = Frame(master)
         self.container5["pady"] = 10
         self.container5.pack(side = TOP)
@@ -149,83 +148,74 @@ class Application:
         font=self.fonte, width=10)
         add_drone_buttons.append(self.start_drone)
         add_index = add_drone_buttons.index(self.start_drone) + 1
-        #self.start_drone.drone_id = id
-        #self.start_drone = Button(self.container5, text="TEDI-GUEST"+str(id), font=self.fonte, width=10)
         self.start_drone["command"] = lambda i=add_index: self._start_drone(i)
         self.start_drone.pack(side=RIGHT)
         
     def _config_base(self):
-        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
-        print(time_str +" Configure Base Settings")
+        print(get_time() +" Configure Base Settings")
         logger.info("Configure Base Settings")
 
     def _start_drone(self, btn_id):
         # self.start_drone["text"] = "Stop"
         # self.start_drone["command"] = lambda: self._stop_drone(btn_id)
-
-        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S]")
-        self.command_message_print("Start drone TEDI-GUEST" + str(btn_id))
-        print(time_str +" Start drone TEDI-GUEST" + str(btn_id))
-        logger.info("Start drone TEDI-GUEST" + str(btn_id))
+        
+        time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S,%f]")
+        print(get_time() +" Start UAV #" + str(btn_id))
+        logger.info(" Start UAV #" + str(btn_id))
         
         #Start VM related with drone ID
         subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
-        sleep(1)
+        sleep(2)
         ready = receive_ready_status().decode("utf-8")
         print("Wait ready status")
         if ready == "-R":
-            print("Device {} is ready", btn_id)
+            print(get_time() + " UAV #{} is ready".format(btn_id))
             sleep(2)
-            self._start_up_system(btn_id, time_str)
-
+            self._start_up_system(btn_id, get_time())
         
     def _start_up_system(self, btn_id, time_str):
-        #Init base listen server
-        #subprocess.Popen(shlex.split("sh " + app_scripts_dir + "/start_vm TEDI-GUEST" + str(btn_id)))
         #Send Alive Check
         uav_ip = get_ip("uav"+ str(btn_id))
-        print(time_str +"Send Alive Check: Drone TEDI-GUEST"+ str(btn_id) + ": " + uav_ip)
+        print(get_time() +" Send Alive Message: UAV #"+ str(btn_id) + ": " + uav_ip)
         response = send_command(uav_ip, "-A").decode("utf-8")
-        print(time_str +" Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        self.command_message_print("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        logger.info("Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        print(get_time() +" UAV #" + str(btn_id)+ " status: " + response)
+        logger.info("UAV #" + str(btn_id)+ " status: " + response)
         
         #Send config command to base
         cmd_args = config_tunnel("Host", btn_id)
-        print(time_str +" Command Arguments: " + cmd_args)
-        logger.info("Command Arguments: " + cmd_args)
+        print_command_args("Base", cmd_args)
+        logger.info(log_command_args("Base", cmd_args))
         base_ip = get_ip("base")
         print("Base IP: ", base_ip)
         base_response = send_command(base_ip, "-T_" + cmd_args).decode("utf-8")
-        print(time_str +" Tunnel Config on base : " + base_response)
-        self.command_message_print("Tunnel Config on base : " + base_response)
-        logger.info("Tunnel Config on base : " + base_response)
+        print(get_time() +" Configuration on Base: " + base_response)
+        logger.info("Configuration on Base: " + base_response)
 
         sleep(2)
 
         #Send config command to drone
         uav_cmd_args = config_tunnel("uav"+str(btn_id), btn_id)
-        print(time_str +" UAV Command Arguments: " + uav_cmd_args )
-        logger.info("UAV Command Arguments: " + uav_cmd_args )
+        print_command_args("UAV #"+ str(btn_id) , uav_cmd_args)
+        logger.info(log_command_args("UAV #"+ str(btn_id) , uav_cmd_args) )
         print("Drone IP: ", uav_ip)
         uav_response = send_command(uav_ip, "-T_" + uav_cmd_args).decode("utf-8")
-        print(time_str +" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
-        self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
-        logger.info(time_str + " Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
+        print(get_time() +" Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
+        # self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
+        logger.info(time_str + " Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
 
         #Check Alive drone with tunnel
         uav_ip = get_ip("uav"+ str(btn_id), "tun")
         for i in range(0, 3):   
             response = send_command(uav_ip, "-A").decode("utf-8")
-            print(time_str +" Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-            self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-            logger.info("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+            print(get_time() +" Alive Check UAV #" + str(btn_id)+ ": " + response)
+            # self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+            logger.info("Alive Check UAV #" + str(btn_id)+ ": " + response)
             time.sleep(1)
         
         #Send Init Firmware
         # response = send_command(uav_ip, "-I_"+str(btn_id)).decode("utf-8")
-        # print(time_str +" Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        # self.command_message_print("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        # print(get_time() +" Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+        # # self.command_message_print("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         # logger.info("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         # time.sleep(1)
         
@@ -235,7 +225,6 @@ class Application:
         self.start_drone["command"] = lambda: self._start_drone(btn_id)
 
         #do stuff for shutdown drone
-
 
     def _config_drone(self, btn_id, master=None):
         print("config_drone id: " + str(btn_id))
@@ -270,6 +259,71 @@ class Application:
         # font=self.fonte, width=15)
         # self.newwin.exit_btn["command"] = self.newwin.destroy
         # self.newwin.exit_btn.pack(side=BOTTOM)
+
+    def _add_tunnel(self, master=None):
+        self.container5 = Frame(master)
+        self.container5["pady"] = 10
+        self.container5.pack(side = TOP)
+ 
+        self.lbluav = Label(self.container5, 
+        text="Tunnel Name: ", font=self.fonte, width=15)
+        self.lbluav.pack(side=LEFT)
+
+        self.tun_name = Entry(self.container5, font=self.fonte, width=10)
+        tun_name_entries.append(self.tun_name)
+        self.tun_name.pack(side=LEFT)
+
+        self.container6 = Frame(master)
+        self.container6["pady"] = 10
+        self.container6.pack(side = TOP)
+
+        self.tun_in = Entry(self.container6, font=self.fonte, width=5)
+        tun_in_entries.append(self.tun_in)
+        self.tun_in.pack(side=LEFT)
+
+        self.lbldir = Label(self.container6, 
+        text="=>", font=self.fonte, width=2)
+        self.lbldir.pack(side=LEFT)
+
+        self.tun_out = Entry(self.container6, font=self.fonte, width=5)
+        tun_out_entries.append(self.tun_out)
+        self.tun_out.pack(side=LEFT)
+
+        self.create_tun = Button(self.container6, text="Create", 
+        font=self.fonte, width=10)
+        add_tunnel_buttons.append(self.create_tun)
+        add_index = add_tunnel_buttons.index(self.create_tun) 
+        self.create_tun["command"] = lambda i=add_index: self._create_tun(i)
+        #self.start_tun["command"] = self._start_tun
+        self.create_tun.pack(side=RIGHT)
+
+        # self.config_drone = Button(self.container5, text="Config", 
+        # font=self.fonte, width=10)
+        # config_drone_buttons.append(self.config_drone)
+        # config_index = config_drone_buttons.index(self.config_drone) + 1
+        # self.config_drone["command"] = lambda i=config_index: self._config_drone(i)
+        # self.config_drone.pack(side=LEFT)
+
+        # self.start_drone = Button(self.container5, text="Start", 
+        # font=self.fonte, width=10)
+        # add_drone_buttons.append(self.start_drone)
+        # add_index = add_drone_buttons.index(self.start_drone) + 1
+        # self.start_drone["command"] = lambda i=add_index: self._start_drone(i)
+        # self.start_drone.pack(side=RIGHT)
+
+    def _create_tun(self, id):
+        print("Start Tunnel Configuration")
+        print("\tTun uav_in: {}\n\tTun uav_out: {}\n\ttun_name: {}".format(
+            tun_in_entries[id].get(), tun_out_entries[id].get(), tun_name_entries[id].get()))
+        
+        uav_out_ip = get_ip(tun_out_entries[id].get())
+        uav_in_data = config_uav_tunnel(tun_in_entries[id].get(), tun_name_entries[id].get(), "in")
+        uav_out_data = config_uav_tunnel(tun_out_entries[id].get(), tun_name_entries[id].get(), "out")
+        print("UAV IP: {}\nUAV IN: {}\nUAV OUT: {}".format(uav_out_ip, uav_in_data, uav_out_data))
+
+        data = send_command(uav_out_ip, "-U").decode("utf-8")
+        if data == "-A":
+            send_command(uav_out_ip, "-S_" + uav_in_data + " " + uav_out_data)
         
 class DroneButton(Button):
     drone_id = 0
@@ -291,7 +345,6 @@ def send_command(ip, command):
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)
     data = msgFromServer[0]
-    print(data)
     return data
 
 def receive_ready_status():
@@ -356,10 +409,10 @@ def create_timed_rotating_log(path,):
     logger.setLevel(logging.INFO)
 #   fh = logging.FileHandler(path)
     
-    formatter = logging.Formatter('[%(asctime)s] - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('[%(asctime)s]|%(name)s|%(levelname)s|%(message)s')
 
     handler = handlers.RotatingFileHandler(path, 
-                                    maxBytes=10000,
+                                    maxBytes=1024000,
                                     backupCount=5)
     handler.setLevel(logging.INFO)
     handler.setFormatter(formatter)                                   
@@ -367,6 +420,61 @@ def create_timed_rotating_log(path,):
     
     return logger
 
+def config_uav_tunnel(host, tun_name, dir):
+    first_element = int(tun_name[3])
+    last_element = int(tun_name[5])
+    dif = last_element - first_element
+    with open(app_settings_dir + "/"+ host +".json") as json_file:
+        data = json.load(json_file)
+        if dif > 1:
+            if dir == "in":
+                remote_ip = ipaddress.IPv4Address(data["local_ip"])+dif
+            elif dir == "out":
+                remote_ip = ipaddress.IPv4Address(data["local_ip"])-dif
+        elif dif == 1: 
+            if dir == "in":
+                remote_ip = ipaddress.IPv4Address(data["local_ip"])+1
+            elif dir == "out":
+                remote_ip = ipaddress.IPv4Address(data["local_ip"])-1
+        else: 
+            remote_ip = "ERROR on get remote_ip"
+        network = get_network(data["interfaces"], tun_name)
+        ip = get_tun_ip(data["interfaces"], tun_name)
+        arguments = tun_name + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + ip + "_" + network
+    return arguments
+
+def get_network(dict_objects, name):
+    for dict in dict_objects:
+        if dict['name'] == name:
+            return dict['network'] + dict['network_mask']
+
+def get_tun_ip(dict_objects, name):
+    for dict in dict_objects:
+        if dict['name'] == name:
+            return dict['ip']
+
+def get_time():
+    now=datetime.now()
+    date_hour=now.strftime("%d/%m/%Y, %H:%M:%S")
+    usecs=int(now.strftime("%f"))
+    msecs=int(round(usecs/1000))
+    time_str = "[{},{}]".format(date_hour, msecs)
+    return time_str
+
+def print_command_args(dst_str ,command_args):
+    tun_name, local_ip, remote_ip, tun_ip, tun_network = command_args.split("_")
+    print(get_time() + 
+        " Configuration Parameters of {}\n\
+        Tunnel Name: {}\n\
+        Local IP: {}\n\
+        Remote IP: {}\n\
+        Tunnel IP: {}\n\
+        Tunnel Network: {}".format(dst_str,tun_name, local_ip, remote_ip, tun_ip, tun_network)
+    )
+def log_command_args(dst_str, command_args):
+    tun_name, local_ip, remote_ip, tun_ip, tun_network = command_args.split("_")
+    log_str = "Configuration Parameters of {}\n\tTunnel Name: {}\n\tLocal IP: {}\n\tRemote IP: {}\n\tTunnel IP: {}\n\tTunnel Network: {}".format(dst_str, tun_name, local_ip, remote_ip, tun_ip, tun_network)
+    return log_str
 def open_server():
     subprocess.Popen(shlex.split("sh " + socket_dir + "/start_socket_server.sh"))
 '''
@@ -375,7 +483,7 @@ def open_server():
 
 root = Tk()
 Application(root)
-root.geometry("300x350+300+300")
+root.geometry("300x650+300+300")
 logger = create_timed_rotating_log(log_file)
 logger.info("------- UAVApp Start Execution -------")
 open_server()
