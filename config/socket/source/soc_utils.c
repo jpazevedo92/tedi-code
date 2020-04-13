@@ -5,9 +5,7 @@
 */
 void initClient(char *srv_ip, char *clt_message)
 {
-    printf("Socket Client: \n\tcommand: %s \n\tserver_ip: %s\n", clt_message, srv_ip);
     int sockfd; 
-    char buffer[MAXLINE]; 
     struct sockaddr_in     servaddr; 
   
     // Creating socket file descriptor 
@@ -33,11 +31,13 @@ void initClient(char *srv_ip, char *clt_message)
 
 void initUAVClient(char *srv_ip, char *clt_message, char *result)
 {
-    printf("Socket Client: \n\tcommand: %s \n\tserver_ip: %s\n", clt_message, srv_ip);
+    printf("UAVProtocol Client\n");
+    printf("\tSend command %s to %s", clt_message, srv_ip);
 
     int sockfd; 
     struct sockaddr_in     servaddr; 
-    int n, len;
+    int n;
+    socklen_t len;
 
     // Creating socket file descriptor 
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
@@ -71,7 +71,7 @@ void initServer(){
     int sockfd; 
     char command[MAXLINE]; 
     char result[MAXLINE];
-
+    socklen_t len;
     struct sockaddr_in servaddr, cliaddr; 
       
     // Creating socket file descriptor 
@@ -96,11 +96,12 @@ void initServer(){
         exit(EXIT_FAILURE); 
     } 
     
-    puts("Waiting for incoming connections...");
+    printf("UAVProtocol Server:\n\tWaiting for new commands\n");
     
     while(1)
     {
-        int len, n; 
+        int n;
+
         len = sizeof(cliaddr);  //len is value/resuslt 
         n = recvfrom(sockfd, (char *)command, MAXLINE,  
             MSG_WAITALL, ( struct sockaddr *) &cliaddr, 
@@ -108,16 +109,14 @@ void initServer(){
         command[n] = '\0'; 
         printf("Command received: %s\n", command);
         execCommand(command, result);
-        printf("Command Result: %s\n", result);
         sendto(sockfd, (const char *)result, strlen(result),  
               MSG_CONFIRM, (const struct sockaddr *) &cliaddr, 
               len);
-        printf("Command Result Sent: %s\n", result);
+        printf("Response to command %s: %s\n", command,result);
 
         //Wait for new connection
-        puts("Waiting for incoming connections...");
+        printf("UAVProtocol Server:\n\tWaiting for new commands\n");
     }
-    printf("Start socket server\n");
 }
 
 /*
@@ -138,10 +137,10 @@ void execCommand(char* command, char *result){
         case 'I':
             execInitFirmware(command, result);
             break;
-        case 'm':
+/*         case 'm':
         case 'M':
             sprintf(result, "MPLS command\n");
-            break;
+            break; */
         case 'p':
         case 'P':
             execConfigIpTables(command, result);
@@ -162,14 +161,19 @@ void execCommand(char* command, char *result){
         case 'U':
             execUavTun(command, result);
             break;
-        case 'x':
-        case 'X':
-            sprintf(result, "X command\n");
-            break;
+        // case 'x':
+        // case 'X':
+        //     sprintf(result, "X command\n");
+        //     break;
         default:
             sprintf(result, "Default command\n");
             break;
 	}
+}
+
+void execAliveCheck(char *result){
+    printf("\tAlive Check Command\n");
+    sprintf(result, "OK");
 }
 
 void execConfigTun(char* configs, char *result){
@@ -189,10 +193,6 @@ void execConfigTun(char* configs, char *result){
     printProcessInfo(pp);
     pclose(pp);
     sprintf(result, "Configuration of %s is OK", if_name);
-}
-
-void execAliveCheck(char *result){
-    sprintf(result, "OK");
 }
 
 void execInitFirmware(char* configs, char *result){
@@ -254,38 +254,38 @@ void setUAVTunnel(char* configs, char *result){
     char res1[MAXLINE] = {0};
     char base_ip[MAXLINE] = {0};
     char node_ip[MAXLINE] = {0};
+    
     /* commands to send*/
 
     char args[MAXLINE] = {0};
     char command_args[MAXLINE] = {0};
     char command[MAXLINE] = {0};
     char result_config[MAXLINE] = {0};
-    
+
     command_remote = strtok_r(command_local, " ", &command_local);
+    /*Set Tunnel Between UAVs*/
     sprintf(msg, "-T_%s", command_remote);
-    
     char* tun_name = strtok(command_remote, "_");
     char* remote_ip = strtok(NULL, "_");
-
+    
     initUAVClient(remote_ip, msg, res);
+
     char compare_string[MAXLINE] = {0};
-    sprintf(compare_string, "Configuration of %s is OK", tun_name);
+    sprintf(compare_string, "-", tun_name);
 
     int condition = strcmp(res, compare_string);
     if(condition == STR_EQUAL)
         execConfigTun(command_local, res1);
 
     int condition2 = strcmp(res, res1);
-    /* 
-        tun1o3
-        tun2o3
-    */
+    /* Set Tunnel Between UAVs finished */
+
+    /* set routes */
     int first_element  = (int) tun_name[strlen(tun_name)-3] - '0';
     int last_element   = (int) tun_name[strlen(tun_name)-1] - '0';
     int n = last_element;
 
     int dif = last_element - first_element;
-
 
     sprintf(base_ip, "10.0.%d0.1", n);
     for(int i = 0; i < n; i++)

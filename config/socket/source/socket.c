@@ -10,16 +10,16 @@ void chooseOption(int argc, char * argv[]){
     {
     case 'C':
     case 'c':
-        printf("Option selected: %c\n", option);
+        printf("UAVProtocol Client\n");
         char *srv_ip = argv[2];
         char *command = argv[3];
+        printf("\tSend command %s to %s", command, srv_ip);
         initClient(srv_ip, command);
         break;
     case 'S':
     case 's':
-        printf("Option selected: %c\n", option);
+        
         initServer();
-        //initServer(if_name);
         break;
     
     default:

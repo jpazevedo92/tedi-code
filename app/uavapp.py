@@ -117,7 +117,6 @@ class Application:
         self.exit_btn["command"] = quit
         self.exit_btn.pack(side=RIGHT)
 
-
     def _open_qgc(self):
         print(get_time() +" Open QGroundControl SW")
         logger.info("Open QGroundControl SW")
@@ -176,6 +175,7 @@ class Application:
     def _start_up_system(self, btn_id, time_str):
         #Send Alive Check
         uav_ip = get_ip("uav"+ str(btn_id))
+        logger.info("Send Alive Check Message: UAV #"+ str(btn_id) + ": " + uav_ip)
         print(get_time() +" Send Alive Message: UAV #"+ str(btn_id) + ": " + uav_ip)
         response = send_command(uav_ip, "-A").decode("utf-8")
         print(get_time() +" UAV #" + str(btn_id)+ " status: " + response)
@@ -201,7 +201,7 @@ class Application:
         uav_response = send_command(uav_ip, "-T_" + uav_cmd_args).decode("utf-8")
         print(get_time() +" Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
         # self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
-        logger.info(time_str + " Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
+        logger.info(" Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
 
         #Check Alive drone with tunnel
         uav_ip = get_ip("uav"+ str(btn_id), "tun")
@@ -218,8 +218,7 @@ class Application:
         # # self.command_message_print("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         # logger.info("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         # time.sleep(1)
-        
-    
+            
     def _stop_drone(self, btn_id):
         self.start_drone["text"] = "Start"
         self.start_drone["command"] = lambda: self._start_drone(btn_id)
@@ -294,7 +293,6 @@ class Application:
         add_tunnel_buttons.append(self.create_tun)
         add_index = add_tunnel_buttons.index(self.create_tun) 
         self.create_tun["command"] = lambda i=add_index: self._create_tun(i)
-        #self.start_tun["command"] = self._start_tun
         self.create_tun.pack(side=RIGHT)
 
         # self.config_drone = Button(self.container5, text="Config", 
@@ -325,11 +323,11 @@ class Application:
         if data == "-A":
             send_command(uav_out_ip, "-S_" + uav_in_data + " " + uav_out_data)
         
-class DroneButton(Button):
-    drone_id = 0
-    def __init__(self,master=None, width=10, font=("Verdana", "8")):
-        Button.__init__(self, master, text="Start", font=font, width=width)
-        #self.drone_button = Button(master, text="Start", font=font, width=width)
+# class DroneButton(Button):
+#     drone_id = 0
+#     def __init__(self,master=None, width=10, font=("Verdana", "8")):
+#         Button.__init__(self, master, text="Start", font=font, width=width)
+#         #self.drone_button = Button(master, text="Start", font=font, width=width)
         
                 
 '''
