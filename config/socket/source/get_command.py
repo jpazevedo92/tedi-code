@@ -56,4 +56,8 @@ def get_ip(dict_objects, name):
 
     #print(dict_objects)
 
+# def turn_off_tunnel(in_tun):
+
+#     return result
+
 print(get_command(1, "tun1o2", "tables"))

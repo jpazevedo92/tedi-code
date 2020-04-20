@@ -141,6 +141,10 @@ void execCommand(char* command, char *result){
         case 'M':
             sprintf(result, "MPLS command\n");
             break; */
+        case 'o':
+        case 'O':
+            setLinkDown(command, result);
+            break;
         case 'p':
         case 'P':
             execConfigIpTables(command, result);
@@ -261,6 +265,7 @@ void setUAVTunnel(char* configs, char *result){
     char command_args[MAXLINE] = {0};
     char command[MAXLINE] = {0};
     char result_config[MAXLINE] = {0};
+    char result_tun_down[MAXLINE] = {0};
 
     command_remote = strtok_r(command_local, " ", &command_local);
     /*Set Tunnel Between UAVs*/
@@ -271,7 +276,7 @@ void setUAVTunnel(char* configs, char *result){
     initUAVClient(remote_ip, msg, res);
 
     char compare_string[MAXLINE] = {0};
-    sprintf(compare_string, "-", tun_name);
+    sprintf(compare_string, "Configuration of %s is OK", tun_name);
 
     int condition = strcmp(res, compare_string);
     if(condition == STR_EQUAL)
@@ -340,12 +345,30 @@ void setUAVTunnel(char* configs, char *result){
     printf("UAV%d ID: %d\n", n, n);
     sprintf(args, "%d_%s", n, tun_name);
     get_command_args("get_command", 2, args, command_args);
+    memset(result_tun_down, 0, sizeof(result_tun_down));
+    if(strcmp(tun_name, "tun2o3") == 0 )
+        setLinkDown("tun1o3",  result_tun_down);
     execConfigRoute(command_args, result_config);
     //initUAVClient(base_ip, command, result_config);
 
      if(condition2 == STR_EQUAL)
         sprintf(result, "%s configuration applied", tun_name);
 
+}
+
+void setLinkDown(char* configs, char *result){
+    printf("enter setLinkDown function\n");
+    char *if_name = strtok(configs, "_");
+
+    printf("Set Link Down: %s\n", if_name);
+    FILE *pp;
+    char command_arg[1024] = {0};
+    sprintf(command_arg, "cd ../../../app/scripts && sh route_config -o %s", if_name);
+    //printf("%s\n", command_arg);
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+    sprintf(result, "Set Link Down of %s: OK", if_name);
 }
 
 /*
@@ -394,6 +417,8 @@ void get_command_args(char *function_name, int n_args, char *args, char * result
 
     switch (n_args)
     {
+        // case 1:
+        //     pArgs = Py_BuildValue("(s)", arg1, arg2);
         case 2:
             token = strtok(args, "_");
             arg1 = atoi(token);

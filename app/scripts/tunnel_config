@@ -35,6 +35,11 @@ then
         exit
     '
     echo "Tunnel deleted"
+elif [ $OPTION = '-d'  ]
+then
+    sudo TUN_NAME=$2 su -p -c '
+    ip link set $TUN_NAME down
+    exit '
 elif [ $OPTION = '-h'  ]
 then
     echo "Add tunnel: tunnel_config -a tunnel_name tunnel_ip_in tunnel_ip_out tunnel_given_ip tunnel_network"
