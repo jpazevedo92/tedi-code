@@ -367,7 +367,7 @@ void getLinkDownIface(char* iface_name, char *result){
         else
         {
             int n_ant = (int)iface_name[i] - '0' - 1;
-            result[i] = (char)n_ant;
+            result[i] = n_ant + '0';
         }
     }
 }
@@ -378,7 +378,7 @@ void setLinkDown(char* configs, char *result){
     printf("Set Link Down: %s\n", if_name);
     FILE *pp;
     char command_arg[1024] = {0};
-    sprintf(command_arg, "cd ../../../app/scripts && sh route_config -o %s", if_name);
+    sprintf(command_arg, "cd ../../../app/scripts && sh tunnel_config -o %s", if_name);
     //printf("%s\n", command_arg);
     pp = popen(command_arg, "r");
     printProcessInfo(pp);

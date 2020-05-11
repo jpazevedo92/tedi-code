@@ -35,7 +35,7 @@ then
         exit
     '
     echo "Tunnel deleted"
-elif [ $OPTION = '-d'  ]
+elif [ $OPTION = '-o'  ]
 then
     sudo TUN_NAME=$2 su -p -c '
     ip link set $TUN_NAME down
