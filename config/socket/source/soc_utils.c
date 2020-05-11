@@ -265,6 +265,7 @@ void setUAVTunnel(char* configs, char *result){
     char command_args[MAXLINE] = {0};
     char command[MAXLINE] = {0};
     char result_config[MAXLINE] = {0};
+    char tun_down[MAXLINE] = {0};
     char result_tun_down[MAXLINE] = {0};
 
     command_remote = strtok_r(command_local, " ", &command_local);
@@ -289,7 +290,7 @@ void setUAVTunnel(char* configs, char *result){
     int first_element  = (int) tun_name[strlen(tun_name)-3] - '0';
     int last_element   = (int) tun_name[strlen(tun_name)-1] - '0';
     int n = last_element;
-
+    
     int dif = last_element - first_element;
 
     sprintf(base_ip, "10.0.%d0.1", n);
@@ -346,16 +347,30 @@ void setUAVTunnel(char* configs, char *result){
     sprintf(args, "%d_%s", n, tun_name);
     get_command_args("get_command", 2, args, command_args);
     memset(result_tun_down, 0, sizeof(result_tun_down));
-    if(strcmp(tun_name, "tun2o3") == 0 )
-        setLinkDown("tun1o3",  result_tun_down);
+    
+    if(dif == 1)
+    {
+        memset(tun_down, 0, sizeof(tun_down));
+        getLinkDownIface(tun_name, tun_down);
+        setLinkDown(tun_down,  result_tun_down);
+    }
     execConfigRoute(command_args, result_config);
-    //initUAVClient(base_ip, command, result_config);
-
      if(condition2 == STR_EQUAL)
         sprintf(result, "%s configuration applied", tun_name);
 
 }
 
+void getLinkDownIface(char* iface_name, char *result){
+    for (int i=0; i<sizeof(iface_name); i++){
+        if(i!=3)
+            result[i] = iface_name[i];
+        else
+        {
+            int n_ant = (int)iface_name[i] - '0' - 1;
+            result[i] = (char)n_ant;
+        }
+    }
+}
 void setLinkDown(char* configs, char *result){
     printf("enter setLinkDown function\n");
     char *if_name = strtok(configs, "_");
