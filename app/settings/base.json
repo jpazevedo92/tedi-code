@@ -31,6 +31,12 @@
         {
             "in_if": "none",
             "in_label": "none",
+            "out_if": "lo",
+            "out_label": "100"
+        },
+        {
+            "in_if": "none",
+            "in_label": "none",
             "out_if": "tun1",
             "out_label": "200"
         },
@@ -45,12 +51,6 @@
             "in_label": "none",
             "out_if": "tun1",
             "out_label": "204"
-        },
-        {
-            "in_if": "none",
-            "in_label": "none",
-            "out_if": "lo",
-            "out_label": "100"
         }
     ]
 }

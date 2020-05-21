@@ -25,6 +25,10 @@ id = 0
 config_drone_buttons = list()
 add_drone_buttons = list()
 add_tunnel_buttons = list()
+
+route_base_entries = list()
+route_uav_entries = list()
+
 tun_name_entries = list()
 tun_in_entries = list()
 tun_out_entries = list()
@@ -47,6 +51,7 @@ class Application:
         self.container1 = Frame(master)
         self.container1["pady"] = 10
         self.container1.pack()
+        
 
         self.title = Label(self.container1, text="UAVConfig")
         self.title["font"] = ("Calibri", "9", "bold")
@@ -147,9 +152,28 @@ class Application:
         font=self.fonte, width=10)
         add_drone_buttons.append(self.start_drone)
         add_index = add_drone_buttons.index(self.start_drone) + 1
+
         self.start_drone["command"] = lambda i=add_index: self._start_drone(i)
         self.start_drone.pack(side=RIGHT)
+
+        self.container7 = Frame(master)
+        self.container7["pady"] = 10
+        self.container7.pack(side = TOP)
         
+        self.routing_label = Label(self.container7, text="Route Method: ", font=self.fonte, width=15)
+        self.routing_label.pack(anchor = W, side = LEFT)
+
+        self.var = IntVar()
+        self.var.set(2)
+
+        route_base_entries.append(self.var)
+        
+        self.ip = Radiobutton(self.container7, text="IP", variable=self.var, value=1)
+        self.ip.pack( side = LEFT )
+
+        self.mpls = Radiobutton(self.container7, text="MPLS", variable=self.var, value=2)
+        self.mpls.pack( side = LEFT )
+
     def _config_base(self):
         print(get_time() +" Configure Base Settings")
         logger.info("Configure Base Settings")
@@ -157,7 +181,7 @@ class Application:
     def _start_drone(self, btn_id):
         # self.start_drone["text"] = "Stop"
         # self.start_drone["command"] = lambda: self._stop_drone(btn_id)
-        
+
         time_str = datetime.now().strftime("[%d/%m/%Y, %H:%M:%S,%f]")
         print(get_time() +" Start UAV #" + str(btn_id))
         logger.info(" Start UAV #" + str(btn_id))
@@ -167,12 +191,13 @@ class Application:
         sleep(2)
         ready = receive_ready_status().decode("utf-8")
         print("Wait ready status")
+        route_type = route_base_entries[btn_id-1].get()
         if ready == "-R":
             print(get_time() + " UAV #{} is ready".format(btn_id))
             sleep(2)
-            self._start_up_system(btn_id, get_time())
+            self._start_up_system(btn_id, route_type, get_time())
         
-    def _start_up_system(self, btn_id, time_str):
+    def _start_up_system(self, btn_id, route_type,time_str):
         #Send Alive Check
         uav_ip = get_ip("uav"+ str(btn_id))
         logger.info("Send Alive Check Message: UAV #"+ str(btn_id) + ": " + uav_ip)
@@ -208,9 +233,36 @@ class Application:
         for i in range(0, 3):   
             response = send_command(uav_ip, "-A").decode("utf-8")
             print(get_time() +" Alive Check UAV #" + str(btn_id)+ ": " + response)
-            # self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+            #self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
             logger.info("Alive Check UAV #" + str(btn_id)+ ": " + response)
             time.sleep(1)
+        
+        #Config MPLS
+        
+        if route_type == 2:
+            #BASE
+            base_args = config_mpls("Host", btn_id)
+            print_command_args("Base", base_args, "route")
+            logger.info(log_command_args("Base", base_args, "route"))
+            base_ip = get_ip("base",  "tun")
+            print("Base IP: ", base_ip)
+            base_response = send_command(base_ip, "-M_" + cmd_args).decode("utf-8")
+            print(get_time() +" MPLS configuration on Base: " + base_response)
+            logger.info("MPLS configuration on Base: " + base_response)
+            
+            sleep(2)
+
+            #UAV
+            uav_cmd_args = config_mpls("uav" + str(btn_id), btn_id)
+            print_command_args("UAV #"+ str(btn_id) , uav_cmd_args)
+            logger.info(log_command_args("UAV #" + str(btn_id) , uav_cmd_args) )
+            uav_ip = get_ip("uav"+ str(btn_id), "tun")
+            print("Drone IP: ", uav_ip)
+            uav_response = send_command(uav_ip, "-M_" + uav_cmd_args).decode("utf-8")
+            print(get_time() +" MPLS Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
+            # self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
+            logger.info(" MPLS Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
+            #print(uav_cmd_args)
         
         #Send Init Firmware
         # response = send_command(uav_ip, "-I_"+str(btn_id)).decode("utf-8")
@@ -386,12 +438,32 @@ def config_tunnel(host, id):
         
     return arguments
 
+def config_mpls(host, id):
+    if host == "Host":
+        with open(app_settings_dir + "/base.json") as json_file:
+            data = json.load(json_file)
+            host_info = data["interfaces"][id-1]
+            routes = data["routes"]
+            tagOut = routes[id]["out_label"] #get_iface_label(routes, host_info["name"], "out")
+            tagLocalOut = get_iface_label(routes, "lo", "out")
+            result = host_info["name"] + "_" + host_info["network"] + host_info["network_mask"] + "_" + tagOut + "_" + tagLocalOut
+    else:
+        with open(app_settings_dir + "/"+ host +".json") as json_file:
+            data = json.load(json_file)
+            host_info = data["interfaces"][id-1]
+            routes = data["routes"]
+            tagOut = routes[id]["out_label"] #get_iface_label(routes, host_info["name"], "out") #100
+            tagLocalOut = get_iface_label(routes, "lo", "out") #200
+            result = host_info["name"] + "_" + host_info["network"] + host_info["network_mask"] + "_" + tagOut + "_" + tagLocalOut
+    return result
+
 def get_ip(host, tun=None):
     with open(app_settings_dir + "/"+ host +".json") as json_file:
         data = json.load(json_file)
         if tun is not None:
             host_info = data["interfaces"][0]
             ip = host_info["ip"]
+
         else:
             ip = data["local_ip"]
     return ip
@@ -450,6 +522,15 @@ def get_tun_ip(dict_objects, name):
     for dict in dict_objects:
         if dict['name'] == name:
             return dict['ip']
+def get_iface_label(dict_objects, name, type):
+    for dict in dict_objects:
+        if type == "in":
+            if dict['in_if'] == name:
+                result = dict["in_label"]
+        else:
+            if dict['out_if'] == name:
+                result = dict["out_label"]
+    return result
 
 def get_time():
     now=datetime.now()
@@ -459,19 +540,35 @@ def get_time():
     time_str = "[{},{}]".format(date_hour, msecs)
     return time_str
 
-def print_command_args(dst_str ,command_args):
-    tun_name, local_ip, remote_ip, tun_ip, tun_network = command_args.split("_")
-    print(get_time() + 
-        " Configuration Parameters of {}\n\
-        Tunnel Name: {}\n\
-        Local IP: {}\n\
-        Remote IP: {}\n\
-        Tunnel IP: {}\n\
-        Tunnel Network: {}".format(dst_str,tun_name, local_ip, remote_ip, tun_ip, tun_network)
-    )
-def log_command_args(dst_str, command_args):
-    tun_name, local_ip, remote_ip, tun_ip, tun_network = command_args.split("_")
-    log_str = "Configuration Parameters of {}\n\tTunnel Name: {}\n\tLocal IP: {}\n\tRemote IP: {}\n\tTunnel IP: {}\n\tTunnel Network: {}".format(dst_str, tun_name, local_ip, remote_ip, tun_ip, tun_network)
+def print_command_args(dst_str ,command_args, arg_type="tunnel"):
+    if arg_type == "tunnel":
+        tun_name, local_ip, remote_ip, tun_ip, tun_network = command_args.split("_")
+        print(get_time() + 
+            " Configuration Parameters of {}\n\
+            Tunnel Name: {}\n\
+            Local IP: {}\n\
+            Remote IP: {}\n\
+            Tunnel IP: {}\n\
+            Tunnel Network: {}".format(dst_str,tun_name, local_ip, remote_ip, tun_ip, tun_network)
+        )
+    elif arg_type == "route":
+        tun_name, network, label_out, label_out_local = command_args.split("_")
+        print(get_time() + 
+            " Configuration Parameters of {}\n\
+            Iface Name: {}\n\
+            Network: {}\n\
+            Label Out: {}\n\
+            Local Label Out: {}".format(dst_str, tun_name, network, label_out, label_out_local)
+        )
+
+def log_command_args(dst_str, command_args, arg_type="tunnel"):
+
+    if arg_type == "tunnel":
+        tun_name, local_ip, remote_ip, tun_ip, tun_network = command_args.split("_")
+        log_str = "Configuration Parameters of {}\n\tTunnel Name: {}\n\tLocal IP: {}\n\tRemote IP: {}\n\tTunnel IP: {}\n\tTunnel Network: {}".format(dst_str, tun_name, local_ip, remote_ip, tun_ip, tun_network)
+    elif arg_type == "route":
+        tun_name, network, label_out, label_out_local = command_args.split("_")
+        log_str = "Configuration Parameters of {}\n\tIface Name: {}\n\tNetwork: {}\n\tLabel Out: {}\n\tLocal Label Out: {}".format(dst_str, tun_name, network, label_out, label_out_local)
     return log_str
 def open_server():
     subprocess.Popen(shlex.split("sh " + socket_dir + "/start_socket_server.sh"))
@@ -481,7 +578,7 @@ def open_server():
 
 root = Tk()
 Application(root)
-root.geometry("300x650+300+300")
+root.geometry("700x650+300+300")
 logger = create_timed_rotating_log(log_file)
 logger.info("------- UAVApp Start Execution -------")
 open_server()

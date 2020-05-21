@@ -137,10 +137,10 @@ void execCommand(char* command, char *result){
         case 'I':
             execInitFirmware(command, result);
             break;
-/*         case 'm':
+        case 'm':
         case 'M':
-            sprintf(result, "MPLS command\n");
-            break; */
+            execConfigMPLS(command, result);
+            break;
         case 'o':
         case 'O':
             setLinkDown(command, result);
@@ -197,6 +197,56 @@ void execConfigTun(char* configs, char *result){
     printProcessInfo(pp);
     pclose(pp);
     sprintf(result, "Configuration of %s is OK", if_name);
+}
+
+void execConfigMPLS(char* configs, char *result){
+
+    char *if_name = strtok(configs, "_");
+    printf("Start configuration of %s\n", if_name);
+    char *nw = strtok(NULL, "_");
+    char *label_out = strtok(NULL, "_");
+    char *label_out_local = strtok(NULL, "_");
+    
+
+    FILE *pp;
+    char command_arg[1024] = {0};
+    //sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s %s %s", if_name, nw, label_out, label_out_local );
+    
+    //printf("%s\n", command_arg);
+    /*
+    Enable ifaces
+    */
+    
+    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -c %s", if_name);
+    printf("%s\n", command_arg);
+
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+ 
+    /*
+    Add MLPLS to network
+    */
+    memset(command_arg, 0, sizeof(command_arg));
+    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s", if_name, nw, label_out);
+    printf("%s\n", command_arg);
+
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+ 
+    /*
+    Add MLPLS to loopback iface
+    */
+    memset(command_arg, 0, sizeof(command_arg));
+    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -l %s", label_out_local);
+    printf("%s\n", command_arg);
+
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+
+    sprintf(result, "MPLS configuration of %s is OK", if_name);
 }
 
 void execInitFirmware(char* configs, char *result){
