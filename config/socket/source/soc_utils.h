@@ -52,6 +52,7 @@ void execInitFirmware(char* configs, char *result);
 void execUavTun(char* configs, char *result);
 void execConfigRoute(char* configs, char *result);
 void execConfigIpTables(char* configs, char *result);
+void execConfigMPLS(char* configs, char *result);
 void setUAVTunnel(char* configs, char *result);
 void getCommand(char* iface, char *result, int option);
 void setLinkDown(char* configs, char *result);
