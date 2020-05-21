@@ -254,8 +254,8 @@ class Application:
 
             #UAV
             uav_cmd_args = config_mpls("uav" + str(btn_id), btn_id)
-            print_command_args("UAV #"+ str(btn_id) , uav_cmd_args)
-            logger.info(log_command_args("UAV #" + str(btn_id) , uav_cmd_args) )
+            print_command_args("UAV #"+ str(btn_id) , uav_cmd_args, "route")
+            logger.info(log_command_args("UAV #" + str(btn_id) , uav_cmd_args, "route") )
             uav_ip = get_ip("uav"+ str(btn_id), "tun")
             print("Drone IP: ", uav_ip)
             uav_response = send_command(uav_ip, "-M_" + uav_cmd_args).decode("utf-8")
@@ -263,6 +263,13 @@ class Application:
             # self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
             logger.info(" MPLS Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
             #print(uav_cmd_args)
+
+            for i in range(0, 3):   
+                response = send_command(uav_ip, "-A").decode("utf-8")
+                print(get_time() +" Alive Check UAV #" + str(btn_id)+ ": " + response)
+                #self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
+                logger.info("Alive Check UAV #" + str(btn_id)+ ": " + response)
+                time.sleep(1)
         
         #Send Init Firmware
         # response = send_command(uav_ip, "-I_"+str(btn_id)).decode("utf-8")

@@ -18,22 +18,22 @@ then
         sysctl -w net.mpls.platform_labels=1048575
         sysctl -w net.ipv4.conf.all.rp_filter=2 
     '
-elif [ $OPTION == '-a' ]
+elif [ $OPTION = '-a' ]
 then
     sudo IF_NAME=$2 NET=$3 TAG=$4 su -p -c '
         ip rou c $NET encap mpls $TAG dev $IF_NAME
     '
-elif [ $OPTION == '-c' ]
+elif [ $OPTION = '-c' ]
 then
     sudo IN_TAG=$2 OUT_TAG=$3 IP_OUT=$4 su -p -c '
         ip -f mpls route add $IN_TAG as $OUT_TAG via inet $IP_OUT
     '
-elif [ $OPTION == '-l' ]
+elif [ $OPTION = '-l' ]
 then
     sudo TAG=$2 su -p -c '
         ip -f mpls rou a $TAG dev lo
     '
-elif [ $OPTION == '-h' ]
+elif [ $OPTION = '-h' ]
 then
     echo "Config: mpls_config-c if_name"
 fi
