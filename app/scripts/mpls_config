@@ -10,7 +10,7 @@ OPTION=$1
 
 ######################################################################## RUN COMMANDS ############################################################################### 
 
-if [ $OPTION == '-c' ]
+if [ $OPTION = '-c' ]
 then
     sudo IF_NAME=$2 su -p -c '
         sysctl -w net.mpls.conf.$IF_NAME.input=1
@@ -23,7 +23,7 @@ then
     sudo IF_NAME=$2 NET=$3 TAG=$4 su -p -c '
         ip rou c $NET encap mpls $TAG dev $IF_NAME
     '
-elif [ $OPTION = '-c' ]
+elif [ $OPTION = '-s' ]
 then
     sudo IN_TAG=$2 OUT_TAG=$3 IP_OUT=$4 su -p -c '
         ip -f mpls route add $IN_TAG as $OUT_TAG via inet $IP_OUT
