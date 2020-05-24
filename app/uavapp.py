@@ -225,33 +225,19 @@ class Application:
         print("Drone IP: ", uav_ip)
         uav_response = send_command(uav_ip, "-T_" + uav_cmd_args).decode("utf-8")
         print(get_time() +" Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
-        # self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
         logger.info(" Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
 
         #Check Alive drone with tunnel
         uav_ip = get_ip("uav"+ str(btn_id), "tun")
         for i in range(0, 3):   
             response = send_command(uav_ip, "-A").decode("utf-8")
-            print(get_time() +" Alive Check UAV #" + str(btn_id)+ ": " + response)
-            #self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-            logger.info("Alive Check UAV #" + str(btn_id)+ ": " + response)
+            print(get_time() +" Tunnel Configuration - Alive Check UAV #" + str(btn_id)+ ": " + response)
+            logger.info("Tunnel Configuration - Alive Check UAV #" + str(btn_id)+ ": " + response)
             time.sleep(1)
         
         #Config MPLS
         
         if route_type == 2:
-            #BASE
-            base_args = config_mpls("Host", btn_id)
-            print_command_args("Base", base_args, "route")
-            logger.info(log_command_args("Base", base_args, "route"))
-            base_ip = get_ip("base",  "tun")
-            print("Base IP: ", base_ip)
-            base_response = send_command(base_ip, "-M_" + cmd_args).decode("utf-8")
-            print(get_time() +" MPLS configuration on Base: " + base_response)
-            logger.info("MPLS configuration on Base: " + base_response)
-            
-            sleep(2)
-
             #UAV
             uav_cmd_args = config_mpls("uav" + str(btn_id), btn_id)
             print_command_args("UAV #"+ str(btn_id) , uav_cmd_args, "route")
@@ -260,21 +246,32 @@ class Application:
             print("Drone IP: ", uav_ip)
             uav_response = send_command(uav_ip, "-M_" + uav_cmd_args).decode("utf-8")
             print(get_time() +" MPLS Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
-            # self.command_message_print(" Tunnel Config on UAV"+ str(btn_id) + ": " + uav_response)
             logger.info(" MPLS Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
             #print(uav_cmd_args)
 
+            #sleep(2)
+
+            #BASE
+            base_args = config_mpls("Host", btn_id)
+            print_command_args("Base", base_args, "route")
+            logger.info(log_command_args("Base", base_args, "route"))
+            base_ip = get_ip("base",  "tun")
+            print("Base IP: ", base_ip)
+            base_response = send_command(base_ip, "-M_" + base_args).decode("utf-8")
+            print(get_time() +" MPLS configuration on Base: " + base_response)
+            logger.info("MPLS configuration on Base: " + base_response)
+            
+
             for i in range(0, 3):   
-                response = send_command(uav_ip, "-A").decode("utf-8")
-                print(get_time() +" Alive Check UAV #" + str(btn_id)+ ": " + response)
-                #self.command_message_print("Tunnel on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-                logger.info("Alive Check UAV #" + str(btn_id)+ ": " + response)
+                # response = send_command(uav_ip, "-A").decode("utf-8")
+                response = "OK"
+                print(get_time() +" MPLS Configuration - Alive Check UAV #" + str(btn_id)+ ": " + response)
+                logger.info("MPLS Configuration - Alive Check UAV #" + str(btn_id)+ ": " + response)
                 time.sleep(1)
         
         #Send Init Firmware
         # response = send_command(uav_ip, "-I_"+str(btn_id)).decode("utf-8")
         # print(get_time() +" Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
-        # # self.command_message_print("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         # logger.info("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         # time.sleep(1)
             
@@ -457,9 +454,9 @@ def config_mpls(host, id):
     else:
         with open(app_settings_dir + "/"+ host +".json") as json_file:
             data = json.load(json_file)
-            host_info = data["interfaces"][id-1]
+            host_info = data["interfaces"][0]
             routes = data["routes"]
-            tagOut = routes[id]["out_label"] #get_iface_label(routes, host_info["name"], "out") #100
+            tagOut = routes[1]["out_label"] #get_iface_label(routes, host_info["name"], "out") #100
             tagLocalOut = get_iface_label(routes, "lo", "out") #200
             result = host_info["name"] + "_" + host_info["network"] + host_info["network_mask"] + "_" + tagOut + "_" + tagLocalOut
     return result

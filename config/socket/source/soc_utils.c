@@ -202,14 +202,14 @@ void execConfigTun(char* configs, char *result){
 void execConfigMPLS(char* configs, char *result){
 
     char *if_name = strtok(configs, "_");
-    printf("Start configuration of %s\n", if_name);
+    printf("Start MPLS configuration of %s\n", if_name);
     char *nw = strtok(NULL, "_");
     char *label_out = strtok(NULL, "_");
     char *label_out_local = strtok(NULL, "_");
     
-
     FILE *pp;
     char command_arg[1024] = {0};
+    
     //sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s %s %s", if_name, nw, label_out, label_out_local );
     
     //printf("%s\n", command_arg);

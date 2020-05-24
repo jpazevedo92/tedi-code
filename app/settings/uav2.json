@@ -33,19 +33,13 @@
             "in_if": "none",
             "in_label": "none",
             "out_if": "lo",
-            "out_label": "200"
-        },
-        {
-            "in_if": "none",
-            "in_label": "none",
-            "out_if": "tun1",
-            "out_label": "100"
+            "out_label": "300"
         },
         {
             "in_if": "none",
             "in_label": "none",
             "out_if": "tun2",
-            "out_label": "300"
+            "out_label": "100"
         },
         {
             "in_if": "none",
