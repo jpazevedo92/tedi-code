@@ -12,6 +12,7 @@ import logging
 import logging.handlers as handlers
 import time
 import re
+import _thread
 
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime
@@ -243,24 +244,20 @@ class Application:
             print_command_args("UAV #"+ str(btn_id) , uav_cmd_args, "route")
             logger.info(log_command_args("UAV #" + str(btn_id) , uav_cmd_args, "route") )
             uav_ip = get_ip("uav"+ str(btn_id), "tun")
-            print("Drone IP: ", uav_ip)
-            uav_response = send_command(uav_ip, "-M_" + uav_cmd_args).decode("utf-8")
-            print(get_time() +" MPLS Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
-            logger.info(" MPLS Configuration on UAV #"+ str(btn_id) + ": " + uav_response)
-            #print(uav_cmd_args)
-
-            #sleep(2)
-
             #BASE
             base_args = config_mpls("Host", btn_id)
             print_command_args("Base", base_args, "route")
             logger.info(log_command_args("Base", base_args, "route"))
             base_ip = get_ip("base",  "tun")
-            print("Base IP: ", base_ip)
-            base_response = send_command(base_ip, "-M_" + base_args).decode("utf-8")
-            print(get_time() +" MPLS configuration on Base: " + base_response)
-            logger.info("MPLS configuration on Base: " + base_response)
-            
+
+            # Create two threads as follows
+            try:
+                _thread.start_new_thread( t_send_command, ("UAV", uav_ip, "-M_" + uav_cmd_args, ) )
+                _thread.start_new_thread( t_send_command, ("BASE", base_ip, "-M_" + base_args,  ) )
+            except:
+                print("Error: unable to start thread")
+
+            sleep(2)
 
             for i in range(0, 3):   
                 # response = send_command(uav_ip, "-A").decode("utf-8")
@@ -351,19 +348,23 @@ class Application:
         self.create_tun["command"] = lambda i=add_index: self._create_tun(i)
         self.create_tun.pack(side=RIGHT)
 
-        # self.config_drone = Button(self.container5, text="Config", 
-        # font=self.fonte, width=10)
-        # config_drone_buttons.append(self.config_drone)
-        # config_index = config_drone_buttons.index(self.config_drone) + 1
-        # self.config_drone["command"] = lambda i=config_index: self._config_drone(i)
-        # self.config_drone.pack(side=LEFT)
+        self.container8 = Frame(master)
+        self.container8["pady"] = 10
+        self.container8.pack(side = TOP)
 
-        # self.start_drone = Button(self.container5, text="Start", 
-        # font=self.fonte, width=10)
-        # add_drone_buttons.append(self.start_drone)
-        # add_index = add_drone_buttons.index(self.start_drone) + 1
-        # self.start_drone["command"] = lambda i=add_index: self._start_drone(i)
-        # self.start_drone.pack(side=RIGHT)
+        self.routing_label = Label(self.container8, text="Route Method: ", font=self.fonte, width=15)
+        self.routing_label.pack(anchor = W, side = LEFT)
+
+        self.uav_var = IntVar()
+        self.uav_var.set(2)
+
+        route_uav_entries.append(self.uav_var)
+        
+        self.ip = Radiobutton(self.container8, text="IP", variable=self.uav_var, value=1)
+        self.ip.pack( side = LEFT )
+
+        self.mpls = Radiobutton(self.container8, text="MPLS", variable=self.uav_var, value=2)
+        self.mpls.pack( side = LEFT )
 
     def _create_tun(self, id):
         print("Start Tunnel Configuration")
@@ -375,9 +376,16 @@ class Application:
         uav_out_data = config_uav_tunnel(tun_out_entries[id].get(), tun_name_entries[id].get(), "out")
         print("UAV IP: {}\nUAV IN: {}\nUAV OUT: {}".format(uav_out_ip, uav_in_data, uav_out_data))
 
+        uav_route_type = route_base_entries[id-1].get()
+        if uav_route_type == 1:
+            uav_route_method = "IP"
+        else:
+            uav_route_method = "MPLS"
+
+
         data = send_command(uav_out_ip, "-U").decode("utf-8")
         if data == "-A":
-            send_command(uav_out_ip, "-S_" + uav_in_data + " " + uav_out_data)
+            send_command(uav_out_ip, "-S_" + uav_in_data + " " + uav_out_data + " " + uav_route_method)
         
 # class DroneButton(Button):
 #     drone_id = 0
@@ -389,6 +397,30 @@ class Application:
 '''
     Function definitions
 '''
+
+def t_send_command(threadName, ip, command, btn_id):
+    bytesToSend         = str.encode(command)
+    serverAddressPort   = (ip, 8000)
+    bufferSize          = 1024
+    # Create a UDP socket at client side
+    UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    #Send to server using created UDP socket
+    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+    msgFromServer = UDPClientSocket.recvfrom(bufferSize)
+    data = msgFromServer[0]
+    response = data.decode("utf-8")
+    if threadName == "UAV":
+        print(get_time() +" MPLS Configuration on "+ threadName +"#"+ str(btn_id) + ": " + response)
+        logger.info(" MPLS Configuration on "+ threadName +"#"+ str(btn_id) + ": " + response)
+    else:
+        print(get_time() +" MPLS configuration on "+ threadName +": " + response)
+        logger.info("MPLS configuration on "+ threadName +": " + response)
+
+
+    print(data)
+    #return data
+
+
 def send_command(ip, command):
     bytesToSend         = str.encode(command)
     serverAddressPort   = (ip, 8000)
@@ -582,7 +614,7 @@ def open_server():
 
 root = Tk()
 Application(root)
-root.geometry("700x650+300+300")
+root.geometry("700x950+300+300")
 logger = create_timed_rotating_log(log_file)
 logger.info("------- UAVApp Start Execution -------")
 open_server()
