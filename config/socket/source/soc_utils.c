@@ -320,8 +320,12 @@ void setUAVTunnel(char* configs, char *result){
     char result_tun_down[MAXLINE] = {0};
 
     command_remote = strtok_r(command_local, " ", &command_local);
-    route_method = strtok_r(command_local, " ", &command_local);
-    printf("Route Method: %s", route_method);
+    printf("Command Remote: %s", command_remote);
+    printf("Commnad Local: %s", command_local;
+    
+    //route_method = strtok_r(command_local, " ", &command_local);
+    
+    //printf("Route Method: %s", route_method);
     /*Set Tunnel Between UAVs*/
     sprintf(msg, "-T_%s", command_remote);
     char* tun_name = strtok(command_remote, "_");
