@@ -321,7 +321,7 @@ void setUAVTunnel(char* configs, char *result){
 
     command_remote = strtok_r(command_local, " ", &command_local);
     printf("Command Remote: %s", command_remote);
-    printf("Commnad Local: %s", command_local;
+    printf("Commnad Local: %s", command_local);
     
     //route_method = strtok_r(command_local, " ", &command_local);
     
