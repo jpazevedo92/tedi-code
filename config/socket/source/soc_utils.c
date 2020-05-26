@@ -307,25 +307,16 @@ void setUAVTunnel(char* configs, char *result){
     char msg[MAXLINE] = {0};
     char res[MAXLINE] = {0};
     char res1[MAXLINE] = {0};
-    char base_ip[MAXLINE] = {0};
-    char node_ip[MAXLINE] = {0};
-    
-    /* commands to send*/
-
-    char args[MAXLINE] = {0};
-    char command_args[MAXLINE] = {0};
-    char command[MAXLINE] = {0};
-    char result_config[MAXLINE] = {0};
-    char tun_down[MAXLINE] = {0};
-    char result_tun_down[MAXLINE] = {0};
+    char route_impl_res[MAXLINE] = {0};
 
     command_remote = strtok_r(command_local, " ", &command_local);
-    printf("Command Remote: %s", command_remote);
-    printf("Commnad Local: %s", command_local);
+    printf("\nCommnad Remote: %s\n", command_remote);
+    command_local = strtok(command_local, " ");
+    route_method = strtok(NULL, " ");
+
+    printf("\nCommnad Local: %s\n", command_local);
+    printf("Route Method: %s\n", route_method);
     
-    //route_method = strtok_r(command_local, " ", &command_local);
-    
-    //printf("Route Method: %s", route_method);
     /*Set Tunnel Between UAVs*/
     sprintf(msg, "-T_%s", command_remote);
     char* tun_name = strtok(command_remote, "_");
@@ -341,7 +332,70 @@ void setUAVTunnel(char* configs, char *result){
         execConfigTun(command_local, res1);
 
     int condition2 = strcmp(res, res1);
-    /* Set Tunnel Between UAVs finished */
+    if(condition2 == STR_EQUAL)
+        sprintf(result, "%s configuration applied", tun_name);
+    /* Tunnel configuration finish */
+    /* Set Routes */
+    int route_type;
+    if (strcmp(route_method, "IP") == STR_EQUAL)
+        route_type = 1;
+    if (strcmp(route_method, "MPLS") == STR_EQUAL)
+        route_type = 2;
+
+    switch(route_type){
+        case 1:
+            setIPRoute(tun_name, route_impl_res);
+            break;
+        case 2:
+            setMPLSRoute(tun_name, route_impl_res);
+            break;
+        default:
+            break;
+    }
+
+
+
+
+}
+
+void getLinkDownIface(char* iface_name, char *result){
+    for (int i=0; i<sizeof(iface_name); i++){
+        if(i!=3)
+            result[i] = iface_name[i];
+        else
+        {
+            int n_ant = (int)iface_name[i] - '0' - 1;
+            result[i] = n_ant + '0';
+        }
+    }
+}
+
+void setLinkDown(char* configs, char *result){
+    printf("enter setLinkDown function\n");
+    char *if_name = strtok(configs, "_");
+
+    printf("Set Link Down: %s\n", if_name);
+    FILE *pp;
+    char command_arg[1024] = {0};
+    sprintf(command_arg, "cd ../../../app/scripts && sh tunnel_config -o %s", if_name);
+    //printf("%s\n", command_arg);
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+    sprintf(result, "Set Link Down of %s: OK", if_name);
+}
+
+void setIPRoute(char *tun_name, char *result){
+    char base_ip[MAXLINE] = {0};
+    char node_ip[MAXLINE] = {0};
+
+    /* commands to send*/
+    char args[MAXLINE] = {0};
+    char command_args[MAXLINE] = {0};
+    char command[MAXLINE] = {0};
+    char result_config[MAXLINE] = {0};
+    char tun_down[MAXLINE] = {0};
+    char result_tun_down[MAXLINE] = {0};
 
     /* set routes */
     int first_element  = (int) tun_name[strlen(tun_name)-3] - '0';
@@ -412,36 +466,13 @@ void setUAVTunnel(char* configs, char *result){
         setLinkDown(tun_down,  result_tun_down);
     }
     execConfigRoute(command_args, result_config);
-     if(condition2 == STR_EQUAL)
-        sprintf(result, "%s configuration applied", tun_name);
 
 }
 
-void getLinkDownIface(char* iface_name, char *result){
-    for (int i=0; i<sizeof(iface_name); i++){
-        if(i!=3)
-            result[i] = iface_name[i];
-        else
-        {
-            int n_ant = (int)iface_name[i] - '0' - 1;
-            result[i] = n_ant + '0';
-        }
-    }
+void setMPLSRoute(char *tun_name, char *result){
+    printf("MPLS Route config");
 }
-void setLinkDown(char* configs, char *result){
-    printf("enter setLinkDown function\n");
-    char *if_name = strtok(configs, "_");
 
-    printf("Set Link Down: %s\n", if_name);
-    FILE *pp;
-    char command_arg[1024] = {0};
-    sprintf(command_arg, "cd ../../../app/scripts && sh tunnel_config -o %s", if_name);
-    //printf("%s\n", command_arg);
-    pp = popen(command_arg, "r");
-    printProcessInfo(pp);
-    pclose(pp);
-    sprintf(result, "Set Link Down of %s: OK", if_name);
-}
 
 /*
     Auxiliar functions
