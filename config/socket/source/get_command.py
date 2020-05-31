@@ -6,7 +6,11 @@ import ipaddress
 
 app_settings_dir = os.path.abspath(os.path.join(__file__,"..","..","..","..","app","settings"))
 
-#print(app_settings_dir)
+"""
+
+    IP Section
+
+"""
 
 def get_command(id, iface, option="route"):
     list_ids = [int(s) for s in re.findall(r'\d+', iface)]
@@ -54,10 +58,37 @@ def get_ip(dict_objects, name):
         if dict['name'] == name:
             return dict['ip']
 
-    #print(dict_objects)
+"""
 
-# def turn_off_tunnel(in_tun):
+    MPLS Section
 
-#     return result
+"""
+def get_mpls_command(id, iface):
+    uav_out_id = str(int(iface[3:-2]) + int(iface[5:]))
+    if id == 0:
+        with open(app_settings_dir + "/base.json") as json_file:
+            data = json.load(json_file)
+            #Get Network
+            json_out = open(app_settings_dir + "/uav"+ str(id + 1) +".json", 'r')
+            network = get_network(json.load(json_out)["interfaces"], iface)
+            #Get Out Tag
+            routes = data["routes"]
+            iface_out=iface[:4]
+            tagOut = get_iface_label(routes, iface_out, "out", uav_out_id)
+            arguments = "{}_{}_{}".format(network, tagOut, iface_out)
+    return arguments
 
-print(get_command(1, "tun1o2", "tables"))
+
+def get_iface_label(dict_objects, name, type, label_contains):
+    count = 0
+    for dict in dict_objects:
+        if type == "in":
+            if dict['in_if'] == name and label_contains in dict["in_label"]:
+                result = dict["in_label"]
+        else:
+            if dict['out_if'] == name and label_contains in dict["out_label"]:
+                result = dict["out_label"]
+    return result
+
+
+print(get_mpls_command(0, "tun1o3"))

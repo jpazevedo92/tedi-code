@@ -558,6 +558,7 @@ def get_tun_ip(dict_objects, name):
     for dict in dict_objects:
         if dict['name'] == name:
             return dict['ip']
+
 def get_iface_label(dict_objects, name, type):
     for dict in dict_objects:
         if type == "in":
