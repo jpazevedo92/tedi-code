@@ -133,6 +133,7 @@ void execCommand(char* command, char *result){
         case 'A':
             execAliveCheck(result);
             break;
+        
         case 'i':
         case 'I':
             execInitFirmware(command, result);
@@ -140,6 +141,10 @@ void execCommand(char* command, char *result){
         case 'm':
         case 'M':
             execConfigMPLS(command, result);
+            break;
+        case 'n':
+        case 'N':
+            execAddMPLSRoute(command, result);
             break;
         case 'o':
         case 'O':
@@ -271,7 +276,7 @@ void execAddMPLSRoute(char* configs, char *result){
     printProcessInfo(pp);
     pclose(pp);
 
-    sprintf(result, "MPLS added route with success");
+    sprintf(result, "MPLS added route to %s: OK");
 
 }
 
@@ -514,7 +519,7 @@ void setMPLSRoute(char *tun_name, char *result){
     int config_verifiction[n];
     int counter = 0;
     int dif = last_element - first_element;
-
+    int check_base_result;
     sprintf(base_ip, "10.0.%d0.1", n);
     printf("MPLS Route config\n");
     for(int i = 0; i < n; i++)
@@ -529,13 +534,10 @@ void setMPLSRoute(char *tun_name, char *result){
             memset(result_config, 0, sizeof(result_config));
             sprintf(args, "%d_%s", i, tun_name);
             get_mpls_command_args("get_mpls_command", args, command_args);
-            memset(args, 0, sizeof(args));
-            sprintf(args, "%s_%s","Base" , command_args);
-            
-            //execAddMPLSRoute(command_args, result_config);
-            //if(strcmp(result_config, "MPLS route added successfully") == STR_EQUAL);
-
-            
+            sprintf(command, "-N_Base_%s", command_args);
+            initUAVClient(base_ip, command, result_config);
+            if(strcmp(result_config, "MPLS added route to Base: OK") == STR_EQUAL)
+                check_base_result = 1;  
         }
     }
 }
