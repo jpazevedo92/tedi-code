@@ -260,8 +260,7 @@ class Application:
             sleep(2)
 
             for i in range(0, 3):   
-                # response = send_command(uav_ip, "-A").decode("utf-8")
-                response = "OK"
+                response = send_command(uav_ip, "-A").decode("utf-8")
                 print(get_time() +" MPLS Configuration - Alive Check UAV #" + str(btn_id)+ ": " + response)
                 logger.info("MPLS Configuration - Alive Check UAV #" + str(btn_id)+ ": " + response)
                 time.sleep(1)
@@ -415,9 +414,6 @@ def t_send_command(threadName, ip, command, btn_id):
     else:
         print(get_time() +" MPLS configuration on "+ threadName +": " + response)
         logger.info("MPLS configuration on "+ threadName +": " + response)
-
-
-    print(data)
     #return data
 
 
