@@ -53,11 +53,13 @@ void execUavTun(char* configs, char *result);
 void execConfigRoute(char* configs, char *result);
 void execConfigIpTables(char* configs, char *result);
 void execConfigMPLS(char* configs, char *result);
+void execAddMPLSRoute(char* configs, char *result);
 void setUAVTunnel(char* configs, char *result);
 void getCommand(char* iface, char *result, int option);
 void setLinkDown(char* configs, char *result);
 void getLinkDownIface(char* iface_name, char *result);
 void get_command_args(char *function_name, int n_args, char *args, char * result);
+void get_mpls_command_args(char *function_name, /* int n_args, */ char *args, char * result);
 void setIPRoute(char *tun_name, char *result);
 void setMPLSRoute(char *tun_name, char *result);
 

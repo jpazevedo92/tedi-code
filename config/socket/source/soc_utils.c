@@ -213,6 +213,7 @@ void execConfigMPLS(char* configs, char *result){
     //sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s %s %s", if_name, nw, label_out, label_out_local );
     
     //printf("%s\n", command_arg);
+
     /*
     Enable ifaces
     */
@@ -247,6 +248,31 @@ void execConfigMPLS(char* configs, char *result){
     pclose(pp);
 
     sprintf(result, "MPLS configuration of %s is OK", if_name);
+}
+
+void execAddMPLSRoute(char* configs, char *result){
+    char *machine_name = strtok(configs, "_");
+    printf("Add MPLS route to %s\n", machine_name);
+
+    char *nw = strtok(NULL, "_");
+    char *label_out = strtok(NULL, "_");
+    char *if_name = strtok(NULL, "_");
+    FILE *pp;
+    char command_arg[1024] = {0};
+
+    /*
+    Add MLPLS to network
+    */
+    memset(command_arg, 0, sizeof(command_arg));
+    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s", if_name, nw, label_out);
+    printf("%s\n", command_arg);
+
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+
+    sprintf(result, "MPLS added route with success");
+
 }
 
 void execInitFirmware(char* configs, char *result){
@@ -418,7 +444,7 @@ void setIPRoute(char *tun_name, char *result){
             sprintf(args, "%d_%s", i, tun_name);
             get_command_args("get_command", 2, args, command_args);
             sprintf(command, "-R_%s", command_args);
-            printf("command: %s base ip:%s\n", command, base_ip);
+            printf("command: %s base ip: %s\n", command, base_ip);
             initUAVClient(base_ip, command, result_config);
         }  else if(i == n-1)
         {
@@ -470,7 +496,48 @@ void setIPRoute(char *tun_name, char *result){
 }
 
 void setMPLSRoute(char *tun_name, char *result){
-    printf("MPLS Route config");
+    char base_ip[MAXLINE] = {0};
+    char node_ip[MAXLINE] = {0};
+
+    /* commands to send*/
+    char args[MAXLINE] = {0};
+    char command_args[MAXLINE] = {0};
+    char command[MAXLINE] = {0};
+    char result_config[MAXLINE] = {0};
+    char tun_down[MAXLINE] = {0};
+    char result_tun_down[MAXLINE] = {0};
+
+    /* set routes */
+    int first_element  = (int) tun_name[strlen(tun_name)-3] - '0';
+    int last_element   = (int) tun_name[strlen(tun_name)-1] - '0';
+    int n = last_element;
+    int config_verifiction[n];
+    int counter = 0;
+    int dif = last_element - first_element;
+
+    sprintf(base_ip, "10.0.%d0.1", n);
+    printf("MPLS Route config\n");
+    for(int i = 0; i < n; i++)
+    {        
+        
+        if(i == 0)
+        {
+            /* Base Network Node */
+            memset(args, 0, sizeof(args));
+            memset(command, 0, sizeof(command));
+            memset(command_args, 0, sizeof(command_args));
+            memset(result_config, 0, sizeof(result_config));
+            sprintf(args, "%d_%s", i, tun_name);
+            get_mpls_command_args("get_mpls_command", args, command_args);
+            memset(args, 0, sizeof(args));
+            sprintf(args, "%s_%s","Base" , command_args);
+            
+            //execAddMPLSRoute(command_args, result_config);
+            //if(strcmp(result_config, "MPLS route added successfully") == STR_EQUAL);
+
+            
+        }
+    }
 }
 
 
@@ -490,12 +557,13 @@ void printProcessInfo(FILE *pp){
     }
 }
 
-void get_command_args(char *function_name, int n_args, char *args, char * result){
+void get_command_args(char *function_name, int n_args, char *args, char *result){
+    PyObject *strret, *pModule, *pFunc, *pArgs;
     printf("get_command_args:\n\
         \tfunction_name: %s\n\
         \tn_args: %d\n\
         \targs: %s\n", function_name, n_args, args);
-    PyObject *strret, *pModule, *pFunc, *pArgs;
+    
     Py_Initialize();
     int arg1;
     char *token;
@@ -511,7 +579,7 @@ void get_command_args(char *function_name, int n_args, char *args, char * result
         PyErr_Print();
         exit(-1);
     }
-    
+
     pFunc = PyObject_GetAttrString(pModule, function_name);
     if (pFunc == NULL) {
         PyErr_Print();
@@ -543,6 +611,50 @@ void get_command_args(char *function_name, int n_args, char *args, char * result
     }
     
     strret = PyEval_CallObject(pFunc, pArgs);
+    //printf("Returned string: %s\n", strret);
+
+    sprintf(result, "%s", _PyUnicode_AsString(strret));
+    
+    printf("Returned string: %s\n", result);
+    Py_Finalize();
+}
+
+void get_mpls_command_args(char *function_name, /* int n_args, */ char *args, char *result){
+     printf("get_mpls_command_args:\n\
+        \tfunction_name: %s\n\
+        \targs: %s\n", function_name, /* n_args, */ args);
+
+    PyObject *strret, *pModule, *pFunc, *pArgs;
+    char *token;
+    int arg1;
+    char *arg2;
+
+    Py_Initialize();
+    PyObject *sys_path = PySys_GetObject("path");
+    // //~/Repos/tedi-uavcommandforward/1_Code/tests
+    
+    PyList_Append(sys_path, PyUnicode_FromString("../source"));
+    PyObject* fname = PyUnicode_FromString("get_command");
+    // //PyObject* module = PyImport_Import(fname);
+    pModule = PyImport_Import(fname);
+    if (pModule == NULL) {
+         PyErr_Print();
+         exit(-1);
+    }
+    
+    pFunc = PyObject_GetAttrString(pModule, function_name);
+    if (pFunc == NULL) {
+        PyErr_Print();
+        exit(-1);
+     }
+
+    token = strtok(args, "_");
+    arg1 = atoi(token);
+    arg2 = strtok(NULL ,"_");
+    pArgs = Py_BuildValue("(is)", arg1, arg2);
+    
+    strret = PyEval_CallObject(pFunc, pArgs);
+    //printf("Returned string: %s\n", strret);
     sprintf(result, "%s", _PyUnicode_AsString(strret));
     printf("Returned string: %s\n", result);
     Py_Finalize();
