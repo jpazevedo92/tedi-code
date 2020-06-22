@@ -206,52 +206,123 @@ void execConfigTun(char* configs, char *result){
 
 void execConfigMPLS(char* configs, char *result){
 
+    char *token; 
+    token = strtok_r(configs, "'", &configs);
+    char option = token[0];
     char *if_name = strtok(configs, "_");
-    printf("Start MPLS configuration of %s\n", if_name);
-    char *nw = strtok(NULL, "_");
-    char *label_out = strtok(NULL, "_");
-    char *label_out_local = strtok(NULL, "_");
-    
     FILE *pp;
     char command_arg[1024] = {0};
-    
-    //sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s %s %s", if_name, nw, label_out, label_out_local );
-    
-    //printf("%s\n", command_arg);
+    printf("Start MPLS configuration of %s\n", if_name);
 
-    /*
-    Enable ifaces
-    */
-    
-    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -c %s", if_name);
-    printf("%s\n", command_arg);
-
-    pp = popen(command_arg, "r");
-    printProcessInfo(pp);
-    pclose(pp);
+    char  *nw, *label_out, *label_out_local, *label_in, *ip_out;
  
-    /*
-    Add MLPLS to network
-    */
-    memset(command_arg, 0, sizeof(command_arg));
-    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s", if_name, nw, label_out);
-    printf("%s\n", command_arg);
+    switch (option)
+    {
+        
+        case 'a':
+        case 'A':
+            nw = strtok(NULL, "_");
+            label_out = strtok(NULL, "_");
+            /*
+            Add MLPLS to network
+            */
+            memset(command_arg, 0, sizeof(command_arg));
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s", if_name, nw, label_out);
+            printf("%s\n", command_arg);
 
-    pp = popen(command_arg, "r");
-    printProcessInfo(pp);
-    pclose(pp);
- 
-    /*
-    Add MLPLS to loopback iface
-    */
-    memset(command_arg, 0, sizeof(command_arg));
-    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -l %s", label_out_local);
-    printf("%s\n", command_arg);
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+            break;
+        case 'c':
+        case 'C':
 
-    pp = popen(command_arg, "r");
-    printProcessInfo(pp);
-    pclose(pp);
+            /*
+            Enable ifaces
+            */
 
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -c %s", if_name);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+            break;
+        case 'e':
+        case 'E':
+            nw = strtok(NULL, "_");
+            label_out = strtok(NULL, "_");
+            label_out_local = strtok(NULL, "_");   
+    
+            /*
+            Enable ifaces
+            */
+
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -c %s", if_name);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+
+            /*
+            Add MLPLS to network
+            */
+            memset(command_arg, 0, sizeof(command_arg));
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s", if_name, nw, label_out);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+
+            /*
+            Add MLPLS to loopback iface
+            */
+            memset(command_arg, 0, sizeof(command_arg));
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -l %s", label_out_local);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+            break;
+        case 'l':
+        case 'L':
+            break;
+            char *label_out_local = strtok(NULL, "_");
+            /*
+            Add MLPLS to loopback iface
+            */
+            memset(command_arg, 0, sizeof(command_arg));
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -l %s", label_out_local);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+
+        case 's':
+        case 'S':
+            label_in = strtok(NULL, "_");
+            label_out = strtok(NULL, "_");
+            ip_out = strtok(NULL, "_");
+            /*
+            Add MLPLS to loopback iface
+            */
+            memset(command_arg, 0, sizeof(command_arg));
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -S %s %s %s", label_in, label_out, ip_out);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+            break;
+        default:
+            sprintf(result, "MPLS configuration of %s went wrong", if_name); 
+            break;
+    }
+    
     sprintf(result, "MPLS configuration of %s is OK", if_name);
 }
 
@@ -276,7 +347,7 @@ void execAddMPLSRoute(char* configs, char *result){
     printProcessInfo(pp);
     pclose(pp);
 
-    sprintf(result, "MPLS added route to %s: OK");
+    sprintf(result, "MPLS added route to %s: OK", machine_name);
 
 }
 
@@ -538,6 +609,44 @@ void setMPLSRoute(char *tun_name, char *result){
             initUAVClient(base_ip, command, result_config);
             if(strcmp(result_config, "MPLS added route to Base: OK") == STR_EQUAL)
                 check_base_result = 1;  
+        }
+        else if(i == n-1)
+        {
+            
+            /* Intermedious nodes */
+            memset(args, 0, sizeof(args));
+            memset(command, 0, sizeof(command));
+            memset(command_args, 0, sizeof(command_args));
+            memset(result_config, 0, sizeof(result_config));
+            memset(result_config, 0, sizeof(result_config));
+            memset(node_ip, 0, sizeof(node_ip));
+            if(dif > 1)
+            {
+                printf("UAV%d ID: %d\n", n-dif, n-dif);
+                sprintf(node_ip, "10.0.%d%d.1", n-dif, n);
+                
+            }
+            else
+            {
+                printf("UAV%d ID: %d\n", i, i);
+                sprintf(node_ip, "10.0.%d%d.1", n-1, n);
+            }
+            sprintf(args, "%d_%s", i, tun_name);
+            get_mpls_command_args("get_mpls_command", args, command_args);
+            char *token = strtok(command_args, "|");
+            char *add_route_args = token;
+            while (token!=NULL)
+            {
+                memset(command, 0, sizeof(command));
+                token = strtok(NULL, "|");
+                sprintf(command, "-M'S_%s", token);
+                initUAVClient(node_ip, command, result_config);
+
+            }
+            memset(command, 0, sizeof(command));
+            sprintf(command, "-M'A_%s", token);
+            initUAVClient(node_ip, command, result_config);
+                    
         }
     }
 }

@@ -252,8 +252,8 @@ class Application:
 
             # Create two threads as follows
             try:
-                _thread.start_new_thread( t_send_command, ("UAV", uav_ip, "-M_" + uav_cmd_args, btn_id,  ) )
-                _thread.start_new_thread( t_send_command, ("BASE", base_ip, "-M_" + base_args,  btn_id) )
+                _thread.start_new_thread( t_send_command, ("UAV", uav_ip, "-M'E_" + uav_cmd_args, btn_id,  ) )
+                _thread.start_new_thread( t_send_command, ("BASE", base_ip, "-M'E_" + base_args,  btn_id) )
             except:
                 print("Error: unable to start thread")
 

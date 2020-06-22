@@ -65,6 +65,7 @@ def get_ip(dict_objects, name):
 """
 def get_mpls_command(id, iface):
     uav_out_id = str(int(iface[3:-2]) + int(iface[5:]))
+    print("uav_out_id: ", uav_out_id)
     if id == 0:
         with open(app_settings_dir + "/base.json") as json_file:
             data = json.load(json_file)
@@ -74,21 +75,36 @@ def get_mpls_command(id, iface):
             #Get Out Tag
             routes = data["routes"]
             iface_out=iface[:4]
-            tagOut = get_iface_label(routes, iface_out, "out", uav_out_id)
+            tagOut = get_iface_label(routes, "none" ,iface_out, uav_out_id)
             arguments = "{}_{}_{}".format(network, tagOut, iface_out)
+    else:
+        with open(app_settings_dir + "/uav"+ str(id) +".json") as json_file:
+            data = json.load(json_file)
+            routes = data["routes"]
+            iface_in=iface[:4]
+            json_out = open(app_settings_dir + "/base.json", 'r')
+            uav_network = get_network(data["interfaces"], iface)
+            base_to_uav_ip = str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface)) + 1)
+            uav_to_base_ip = get_ip(data["interfaces"], iface_in)
+            tagOut = get_iface_label(routes, "none", iface, uav_out_id)
+            tagsOut = get_iface_label(routes, iface_in, iface, uav_out_id)
+            tagsOut2 = get_iface_label(routes, iface ,iface_in, uav_out_id)
+            arguments = "{}_{}_{}|{}_{}_{}|{}_{}_{}".format(iface, uav_network, tagOut, 
+                                            iface,tagsOut, base_to_uav_ip,
+                                            iface, tagsOut2, uav_to_base_ip
+            )
     return arguments
 
 
-def get_iface_label(dict_objects, name, type, label_contains):
-    count = 0
+def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
     for dict in dict_objects:
-        if type == "in":
-            if dict['in_if'] == name and label_contains in dict["in_label"]:
-                result = dict["in_label"]
-        else:
-            if dict['out_if'] == name and label_contains in dict["out_label"]:
-                result = dict["out_label"]
+        if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains in dict["out_label"]:
+            result = dict["out_label"]
+        if dict['out_if'] == out_if and dict['in_if'] != "none" and dict['in_if'] == in_if:
+            result = dict["in_label"]+ "_" + dict["out_label"]
     return result
 
 
-print(get_mpls_command(0, "tun1o3"))
+print(get_mpls_command(1, "tun1o3"))
+
+
