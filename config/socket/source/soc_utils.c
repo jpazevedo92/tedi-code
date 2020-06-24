@@ -591,6 +591,7 @@ void setMPLSRoute(char *tun_name, char *result){
     int counter = 0;
     int dif = last_element - first_element;
     int check_base_result;
+    char *token, *add_route_args; 
     sprintf(base_ip, "10.0.%d0.1", n);
     printf("MPLS Route config\n");
     for(int i = 0; i < n; i++)
@@ -604,7 +605,7 @@ void setMPLSRoute(char *tun_name, char *result){
             memset(command_args, 0, sizeof(command_args));
             memset(result_config, 0, sizeof(result_config));
             sprintf(args, "%d_%s", i, tun_name);
-            get_mpls_command_args("get_mpls_command", args, command_args);
+            get_mpls_command_args("get_mpls_command", 2, args, command_args);
             sprintf(command, "-N_Base_%s", command_args);
             initUAVClient(base_ip, command, result_config);
             if(strcmp(result_config, "MPLS added route to Base: OK") == STR_EQUAL)
@@ -632,9 +633,9 @@ void setMPLSRoute(char *tun_name, char *result){
                 sprintf(node_ip, "10.0.%d%d.1", n-1, n);
             }
             sprintf(args, "%d_%s", i, tun_name);
-            get_mpls_command_args("get_mpls_command", args, command_args);
-            char *token = strtok(command_args, "|");
-            char *add_route_args = token;
+            get_mpls_command_args("get_mpls_command", 2, args, command_args);
+            token = strtok(command_args, "|");
+            add_route_args = token;
             while (token!=NULL)
             {
                 memset(command, 0, sizeof(command));
@@ -649,6 +650,39 @@ void setMPLSRoute(char *tun_name, char *result){
                     
         }
     }
+    
+    /* Last network node */
+    memset(args, 0, sizeof(args));
+    memset(command, 0, sizeof(command));
+    memset(command_args, 0, sizeof(command_args));
+    memset(result_config, 0, sizeof(result_config));
+    printf("UAV%d ID: %d\n", n, n);
+    sprintf(args, "%d_%s", n, tun_name);
+    get_mpls_command_args("get_mpls_command", 3 ,args, command_args);
+    memset(token, 0, sizeof(token));
+    memset(add_route_args, 0, sizeof(add_route_args));
+    token = strtok(command_args, "|");
+    add_route_args = token;
+    while (token!=NULL)
+    {
+        memset(command, 0, sizeof(command));
+        token = strtok(NULL, "|");
+        sprintf(command, "-A_%s", token);
+        execConfigMPLS(command, result);
+    }
+    memset(command, 0, sizeof(command));
+    sprintf(command, "-A_%s", token);
+    execConfigMPLS(command, result);
+    
+    // if(dif == 1)
+    // {
+    //     memset(result_tun_down, 0, sizeof(result_tun_down));
+    //     memset(tun_down, 0, sizeof(tun_down));
+    //     getLinkDownIface(tun_name, tun_down);
+    //     setLinkDown(tun_down,  result_tun_down);
+    // }
+    execConfigRoute(command_args, result_config);
+
 }
 
 
@@ -730,7 +764,7 @@ void get_command_args(char *function_name, int n_args, char *args, char *result)
     Py_Finalize();
 }
 
-void get_mpls_command_args(char *function_name, /* int n_args, */ char *args, char *result){
+void get_mpls_command_args(char *function_name, int n_args, char *args, char *result){
      printf("get_mpls_command_args:\n\
         \tfunction_name: %s\n\
         \targs: %s\n", function_name, /* n_args, */ args);
@@ -738,7 +772,7 @@ void get_mpls_command_args(char *function_name, /* int n_args, */ char *args, ch
     PyObject *strret, *pModule, *pFunc, *pArgs;
     char *token;
     int arg1;
-    char *arg2;
+    char *arg2, *arg3;
 
     Py_Initialize();
     PyObject *sys_path = PySys_GetObject("path");
@@ -759,10 +793,26 @@ void get_mpls_command_args(char *function_name, /* int n_args, */ char *args, ch
         exit(-1);
      }
 
-    token = strtok(args, "_");
-    arg1 = atoi(token);
-    arg2 = strtok(NULL ,"_");
-    pArgs = Py_BuildValue("(is)", arg1, arg2);
+    switch (n_args)
+    {
+    case 2:
+        token = strtok(args, "_");
+        arg1 = atoi(token);
+        arg2 = strtok(NULL ,"_");
+        pArgs = Py_BuildValue("(is)", arg1, arg2);
+        break;
+    case 3:
+        token = strtok(args, "_");
+        arg1 = atoi(token);
+        arg2 = strtok(NULL ,"_");
+        arg3 = strtok(NULL ,"_");
+        pArgs = Py_BuildValue("(iss)", arg1, arg2, arg3);
+        break;
+    
+    default:
+        break;
+    }
+    
     
     strret = PyEval_CallObject(pFunc, pArgs);
     //printf("Returned string: %s\n", strret);

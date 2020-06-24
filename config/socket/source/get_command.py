@@ -63,9 +63,8 @@ def get_ip(dict_objects, name):
     MPLS Section
 
 """
-def get_mpls_command(id, iface):
+def get_mpls_command(id, iface, operation="switch"):
     uav_out_id = str(int(iface[3:-2]) + int(iface[5:]))
-    print("uav_out_id: ", uav_out_id)
     if id == 0:
         with open(app_settings_dir + "/base.json") as json_file:
             data = json.load(json_file)
@@ -84,27 +83,40 @@ def get_mpls_command(id, iface):
             iface_in=iface[:4]
             json_out = open(app_settings_dir + "/base.json", 'r')
             uav_network = get_network(data["interfaces"], iface)
-            base_to_uav_ip = str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface)) + 1)
-            uav_to_base_ip = get_ip(data["interfaces"], iface_in)
-            tagOut = get_iface_label(routes, "none", iface, uav_out_id)
-            tagsOut = get_iface_label(routes, iface_in, iface, uav_out_id)
-            tagsOut2 = get_iface_label(routes, iface ,iface_in, uav_out_id)
-            arguments = "{}_{}_{}|{}_{}_{}|{}_{}_{}".format(iface, uav_network, tagOut, 
-                                            iface,tagsOut, base_to_uav_ip,
-                                            iface, tagsOut2, uav_to_base_ip
-            )
+            print("uav_network: ", uav_network)
+            if operation == "switch":
+                base_to_uav_ip = str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface)) + 1)
+                uav_to_base_ip = get_ip(data["interfaces"], iface_in)
+                tagOut = get_iface_label(routes, "none", iface, uav_out_id)
+                tagsOut = get_iface_label(routes, iface_in, iface, uav_out_id)
+                tagsOut2 = get_iface_label(routes, iface ,iface_in, uav_out_id)
+                arguments = "{}_{}_{}|{}_{}_{}|{}_{}_{}".format(iface, uav_network, tagOut, 
+                                                iface,tagsOut, base_to_uav_ip,
+                                                iface, tagsOut2, uav_to_base_ip)
+            else:
+                base_data = json.load(json_out)
+                base_network = get_network(base_data["interfaces"], iface_in)
+                base_tagOut = get_iface_label(routes, "none", iface)
+                uav_tagOut = get_iface_label(routes, "none", iface, uav_out_id)
+                arguments = "{}_{}_{}|{}_{}_{}".format(iface, base_network, base_tagOut, iface, uav_network, uav_tagOut)            
     return arguments
 
 
 def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
+    print("in_if: ", in_if)
+    print("ouf_if: ", out_if)
+    print("label_contains: ", label_contains)
     for dict in dict_objects:
         if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains in dict["out_label"]:
+            result = dict["out_label"]
+        if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains == "None":
             result = dict["out_label"]
         if dict['out_if'] == out_if and dict['in_if'] != "none" and dict['in_if'] == in_if:
             result = dict["in_label"]+ "_" + dict["out_label"]
     return result
 
 
-print(get_mpls_command(1, "tun1o3"))
+print(get_mpls_command(2, "tun1o2", "add"))
+
 
 
