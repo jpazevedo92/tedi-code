@@ -116,7 +116,7 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
     return result
 
 
-print(get_mpls_command(2, "tun1o2", "add"))
+print(get_mpls_command(3, "tun1o3", "add"))
 
 
 
