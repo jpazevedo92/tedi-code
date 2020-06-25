@@ -124,7 +124,8 @@ void initServer(){
 */
 
 void execCommand(char* command, char *result){
-	
+	printf("\tEnter execCommand\n");
+    printf("\tIncomnig args: %s\n", command);
     char *token; 
     token = strtok_r(command, "_", &command);
     char option = token[1];
@@ -140,6 +141,7 @@ void execCommand(char* command, char *result){
             break;
         case 'm':
         case 'M':
+            printf("\tIncomnig args: %s\n", command);
             execConfigMPLS(command, result);
             break;
         case 'n':
@@ -205,7 +207,8 @@ void execConfigTun(char* configs, char *result){
 }
 
 void execConfigMPLS(char* configs, char *result){
-    printf("\tIncomnig args: %s ", configs);
+    printf("\tEnter execConfigMPLS\n");
+    printf("\tIncomnig args: %s\n", configs);
     char *token; 
     token = strtok_r(configs, "'", &configs);
 
