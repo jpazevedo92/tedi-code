@@ -127,8 +127,8 @@ void execCommand(char* command, char *result){
 	printf("\tEnter execCommand\n");
     printf("\tIncomnig args: %s\n", command);
     char *token;
-    if(strchr(command, "'") != NULL)
-        token = strtok_r(command, "'", &command);
+    if(strchr(command, ".") != NULL)
+        token = strtok_r(command, ".", &command);
     else
         token = strtok_r(command, "_", &command);
     
