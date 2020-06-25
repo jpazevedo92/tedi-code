@@ -126,8 +126,11 @@ void initServer(){
 void execCommand(char* command, char *result){
 	printf("\tEnter execCommand\n");
     printf("\tIncomnig args: %s\n", command);
-    char *token; 
-    token = strtok_r(command, "_", &command);
+    char *token;
+    if(strchr(command, "'") != NULL)
+        token = strtok_r(command, "'", &command);
+    else
+        token = strtok_r(command, "_", &command);
     char option = token[1];
     switch(option){
         case 'a':
@@ -210,7 +213,7 @@ void execConfigMPLS(char* configs, char *result){
     printf("\tEnter execConfigMPLS\n");
     printf("\tIncomnig args: %s\n", configs);
     char *token; 
-    token = strtok_r(configs, "'", &configs);
+    token = strtok_r(configs, "_", &configs);
 
     char option = token[0];
 
