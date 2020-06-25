@@ -205,11 +205,14 @@ void execConfigTun(char* configs, char *result){
 }
 
 void execConfigMPLS(char* configs, char *result){
-
+    printf("\tIncomnig args: %s ", configs);
     char *token; 
     token = strtok_r(configs, "'", &configs);
+
     char option = token[0];
+
     char *if_name = strtok(configs, "_");
+    printf("\tSplit args: \n\t\tOption: %c\n\t\t Interface Name: %s", option, if_name);
     FILE *pp;
     char command_arg[1024] = {0};
     printf("Start MPLS configuration of %s\n", if_name);
