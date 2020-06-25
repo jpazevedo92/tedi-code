@@ -131,6 +131,7 @@ void execCommand(char* command, char *result){
         token = strtok_r(command, "'", &command);
     else
         token = strtok_r(command, "_", &command);
+    printf("\tToken: %s\n", token);
     char option = token[1];
     switch(option){
         case 'a':
