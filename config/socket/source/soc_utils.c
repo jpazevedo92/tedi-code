@@ -131,57 +131,57 @@ void execCommand(char* command, char *result){
     printf("\tIncomnig args: %s\n", command);
     printf("\tOption %s\n", option);
 
-    switch(option){
-        case 'a':
-        case 'A':
-            execAliveCheck(result);
-            break;
+    // switch(option){
+    //     case 'a':
+    //     case 'A':
+    //         execAliveCheck(result);
+    //         break;
         
-        case 'i':
-        case 'I':
-            execInitFirmware(command, result);
-            break;
-        case 'm':
-        case 'M':
-            printf("\tIncomnig args: %s\n", command);
-            execConfigMPLS(command, result);
-            break;
-        case 'n':
-        case 'N':
-            execAddMPLSRoute(command, result);
-            break;
-        case 'o':
-        case 'O':
-            setLinkDown(command, result);
-            break;
-        case 'p':
-        case 'P':
-            execConfigIpTables(command, result);
-            break;
-        case 'r':
-        case 'R':
-            execConfigRoute(command, result);
-            break;
-        case 's':
-        case 'S':
-            setUAVTunnel(command, result);
-            break;
-        case 't':
-        case 'T':
-            execConfigTun(command, result);
-            break;
-        case 'u':
-        case 'U':
-            execUavTun(command, result);
-            break;
-        // case 'x':
-        // case 'X':
-        //     sprintf(result, "X command\n");
-        //     break;
-        default:
-            sprintf(result, "Default command\n");
-            break;
-	}
+    //     case 'i':
+    //     case 'I':
+    //         execInitFirmware(command, result);
+    //         break;
+    //     case 'm':
+    //     case 'M':
+    //         printf("\tIncomnig args: %s\n", command);
+    //         execConfigMPLS(command, result);
+    //         break;
+    //     case 'n':
+    //     case 'N':
+    //         execAddMPLSRoute(command, result);
+    //         break;
+    //     case 'o':
+    //     case 'O':
+    //         setLinkDown(command, result);
+    //         break;
+    //     case 'p':
+    //     case 'P':
+    //         execConfigIpTables(command, result);
+    //         break;
+    //     case 'r':
+    //     case 'R':
+    //         execConfigRoute(command, result);
+    //         break;
+    //     case 's':
+    //     case 'S':
+    //         setUAVTunnel(command, result);
+    //         break;
+    //     case 't':
+    //     case 'T':
+    //         execConfigTun(command, result);
+    //         break;
+    //     case 'u':
+    //     case 'U':
+    //         execUavTun(command, result);
+    //         break;
+    //     // case 'x':
+    //     // case 'X':
+    //     //     sprintf(result, "X command\n");
+    //     //     break;
+    //     default:
+    //         sprintf(result, "Default command\n");
+    //         break;
+	// }
 }
 
 void execAliveCheck(char *result){
