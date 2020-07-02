@@ -126,11 +126,16 @@ void initServer(){
 void execCommand(char* command, char *result){
 	printf("\tEnter execCommand\n");
     printf("\tIncomnig args: %s\n", command);
+
     char *token;
-    if(strchr(command, "'") != NULL)
+    if(strchr(command, "'") != NULL){
+        printf("The symbol is on command\n");
         token = strtok_r(command, "'", &command);
-    else
+    }   
+    else{
+        printf("The symbol is on command\n");
         token = strtok_r(command, "_", &command);
+    }
     char option = token[1];
     switch(option){
         case 'a':
