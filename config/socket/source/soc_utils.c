@@ -126,8 +126,10 @@ void initServer(){
 void execCommand(char* command, char *result){
 	printf("\tEnter execCommand\n");
     printf("\tIncomnig args: %s\n", command);
-    char *token; 
-    token = strtok_r(command, "_", &command);
+    char *token;
+    
+    //token = strtok_r(command, "_", &command);
+    token   = strtok(command, "_");
     char option = token[1];
     printf("\tOption %s\n", option);
 
