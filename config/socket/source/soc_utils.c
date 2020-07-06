@@ -123,71 +123,94 @@ void initServer(){
     Protocol Command functions
 */
 
+int find_char(char *str_to_search, char to_search){
+    int f;
+    for(int i=0;i<strlen(str_to_search);i++)
+    {
+        if(str_to_search[i]==to_search)
+        {
+            f=1;
+        }
+    }
+    return f;
+}
+
 void execCommand(char* command, char *result){
 	printf("\tEnter execCommand\n");
-    printf("\tIncomnig args: %s\n", command);
+	printf("\tIncomnig args: %s\n", command);
     char *token;
-    
-    //token = strtok_r(command, "_", &command);
-    token   = strtok(command, "_");
+    printf("\t%c\n", '\'');
+    int char_found = find_char(command, '\'');
+    printf("\tchar_found: %d",char_found);
+    if(char_found != 0){
+        printf("\tChar \"\'\" found \n", command);
+        token = strtok_r(command, "\'", &command);
+    } else
+    {
+        printf("\tChar \"#\"  not found \n", command);
+        token = strtok_r(command, "_", &command);
+    }
+    //token   = strtok(command, "_");
     char option = token[1];
-    printf("\tOption %s\n", option);
+    printf("\tOption %c\n", option);
 
-    // switch(option){
-    //     case 'a':
-    //     case 'A':
-    //         execAliveCheck(result);
-    //         break;
+    switch(option){
+	 
+         case 'a':
+         case 'A':
+             printf("\tEnter execCommand: 'A' option\n");
+             execAliveCheck(result);
+             break;
         
-    //     case 'i':
-    //     case 'I':
-    //         execInitFirmware(command, result);
-    //         break;
-    //     case 'm':
-    //     case 'M':
-    //         printf("\tIncomnig args: %s\n", command);
-    //         execConfigMPLS(command, result);
-    //         break;
-    //     case 'n':
-    //     case 'N':
-    //         execAddMPLSRoute(command, result);
-    //         break;
-    //     case 'o':
-    //     case 'O':
-    //         setLinkDown(command, result);
-    //         break;
-    //     case 'p':
-    //     case 'P':
-    //         execConfigIpTables(command, result);
-    //         break;
-    //     case 'r':
-    //     case 'R':
-    //         execConfigRoute(command, result);
-    //         break;
-    //     case 's':
-    //     case 'S':
-    //         setUAVTunnel(command, result);
-    //         break;
-    //     case 't':
-    //     case 'T':
-    //         execConfigTun(command, result);
-    //         break;
-    //     case 'u':
-    //     case 'U':
-    //         execUavTun(command, result);
-    //         break;
-    //     // case 'x':
-    //     // case 'X':
-    //     //     sprintf(result, "X command\n");
-    //     //     break;
-    //     default:
-    //         sprintf(result, "Default command\n");
-    //         break;
-	// }
+        case 'i':
+        case 'I':
+            execInitFirmware(command, result);
+            break;
+        case 'm':
+        case 'M':
+            printf("\tIncomnig args: %s\n", command);
+            execConfigMPLS(command, result);
+            break;
+        case 'n':
+        case 'N':
+            execAddMPLSRoute(command, result);
+            break;
+        case 'o':
+        case 'O':
+            setLinkDown(command, result);
+            break;
+        case 'p':
+        case 'P':
+            execConfigIpTables(command, result);
+            break;
+        case 'r':
+        case 'R':
+            execConfigRoute(command, result);
+            break;
+        case 's':
+        case 'S':
+            setUAVTunnel(command, result);
+            break;
+        case 't':
+        case 'T':
+            execConfigTun(command, result);
+            break;
+        case 'u':
+        case 'U':
+            execUavTun(command, result);
+            break;
+        // case 'x':
+        // case 'X':
+        //     sprintf(result, "X command\n");
+        //     break;
+         default:
+             sprintf(result, "Default command\n");
+             break;
+	}
 }
 
 void execAliveCheck(char *result){
-    printf("\tAlive Check Command\n");
+    printf("\t\tAlive Check Command\n");
     sprintf(result, "OK");
 }
 
