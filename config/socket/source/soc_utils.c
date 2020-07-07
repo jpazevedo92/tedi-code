@@ -137,30 +137,26 @@ int find_char(char *str_to_search, char to_search){
 
 void execCommand(char* command, char *result){
 	printf("\tEnter execCommand\n");
-	printf("\tIncomnig args: %s\n", command);
     char *token;
-    printf("\t%c\n", '\'');
+    
     int char_found = find_char(command, '\'');
-    printf("\tchar_found: %d",char_found);
     if(char_found != 0){
-        printf("\tChar \"\'\" found \n", command);
         token = strtok_r(command, "\'", &command);
     } else
     {
-        printf("\tChar \"#\"  not found \n", command);
         token = strtok_r(command, "_", &command);
     }
-    //token   = strtok(command, "_");
+
     char option = token[1];
     printf("\tOption %c\n", option);
-
+    
     switch(option){
 	 
-         case 'a':
-         case 'A':
-             printf("\tEnter execCommand: 'A' option\n");
-             execAliveCheck(result);
-             break;
+        case 'a':
+        case 'A':
+            printf("\tEnter execCommand: 'A' option\n");
+            execAliveCheck(result);
+            break;
         
         case 'i':
         case 'I':
@@ -215,7 +211,8 @@ void execAliveCheck(char *result){
 }
 
 void execConfigTun(char* configs, char *result){
-
+    printf("\tenter execConfigTun\n ");
+    printf("\t%s\n", configs);
     char *if_name = strtok(configs, "_");
     printf("Start configuration of %s\n", if_name);
     char *tun_ip_in = strtok(NULL, "_");
