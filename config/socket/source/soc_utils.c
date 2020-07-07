@@ -32,7 +32,7 @@ void initClient(char *srv_ip, char *clt_message)
 void initUAVClient(char *srv_ip, char *clt_message, char *result)
 {
     printf("UAVProtocol Client\n");
-    printf("\tSend command %s to %s", clt_message, srv_ip);
+    printf("\tSend command %s to %s\n", clt_message, srv_ip);
 
     int sockfd; 
     struct sockaddr_in     servaddr; 
