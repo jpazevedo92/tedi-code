@@ -123,30 +123,15 @@ void initServer(){
     Protocol Command functions
 */
 
-int find_char(char *str_to_search, char to_search){
-    int f;
-    for(int i=0;i<strlen(str_to_search);i++)
-    {
-        if(str_to_search[i]==to_search)
-        {
-            f=1;
-        }
-    }
-    return f;
-}
-
 void execCommand(char* command, char *result){
-	printf("\tEnter execCommand\n");
+    printf("\tEnter execCommand\n");
     char *token;
-    
-    int char_found = find_char(command, '\'');
-    if(char_found != 0){
-        token = strtok_r(command, "\'", &command);
+    if(command[2] != '_'){
+         token = strtok_r(command, "\'", &command);
     } else
-    {
+     {
         token = strtok_r(command, "_", &command);
-    }
-
+     }
     char option = token[1];
     printf("\tOption %c\n", option);
     
@@ -189,7 +174,7 @@ void execCommand(char* command, char *result){
             break;
         case 't':
         case 'T':
-            execConfigTun(command, result);
+	        execConfigTun(command, result);
             break;
         case 'u':
         case 'U':
@@ -212,7 +197,7 @@ void execAliveCheck(char *result){
 
 void execConfigTun(char* configs, char *result){
     printf("\tenter execConfigTun\n ");
-    printf("\t%s\n", configs);
+    printf("\texecConfigTun configs: %s\n", configs);
     char *if_name = strtok(configs, "_");
     printf("Start configuration of %s\n", if_name);
     char *tun_ip_in = strtok(NULL, "_");
