@@ -103,9 +103,6 @@ def get_mpls_command(id, iface, operation="switch"):
 
 
 def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
-    print("in_if: ", in_if)
-    print("ouf_if: ", out_if)
-    print("label_contains: ", label_contains)
     for dict in dict_objects:
         if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains in dict["out_label"]:
             result = dict["out_label"]
@@ -114,9 +111,6 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
         if dict['out_if'] == out_if and dict['in_if'] != "none" and dict['in_if'] == in_if:
             result = dict["in_label"]+ "_" + dict["out_label"]
     return result
-
-
-print(get_mpls_command(3, "tun1o3", "add"))
 
 
 

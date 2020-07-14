@@ -21,7 +21,7 @@ then
 elif [ $OPTION = '-a' ]
 then
     sudo IF_NAME=$2 NET=$3 TAG=$4 su -p -c '
-        ip rou c $NET encap mpls $TAG dev $IF_NAME
+        ip rou a $NET encap mpls $TAG dev $IF_NAME
     '
 elif [ $OPTION = '-s' ]
 then

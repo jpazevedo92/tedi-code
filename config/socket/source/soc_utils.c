@@ -326,7 +326,7 @@ void execConfigMPLS(char* configs, char *result){
             Add MLPLS to loopback iface
             */
             memset(command_arg, 0, sizeof(command_arg));
-            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -S %s %s %s", label_in, label_out, ip_out);
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -s %s %s %s", label_in, label_out, ip_out);
             printf("%s\n", command_arg);
 
             pp = popen(command_arg, "r");
@@ -606,7 +606,8 @@ void setMPLSRoute(char *tun_name, char *result){
     int counter = 0;
     int dif = last_element - first_element;
     int check_base_result;
-    char *token, *add_route_args; 
+    char *token, *add_route_args;
+
     sprintf(base_ip, "10.0.%d0.1", n);
     printf("MPLS Route config\n");
     for(int i = 0; i < n; i++)
@@ -615,6 +616,7 @@ void setMPLSRoute(char *tun_name, char *result){
         if(i == 0)
         {
             /* Base Network Node */
+            printf("\tBase Configurations\n");
             memset(args, 0, sizeof(args));
             memset(command, 0, sizeof(command));
             memset(command_args, 0, sizeof(command_args));
@@ -622,6 +624,7 @@ void setMPLSRoute(char *tun_name, char *result){
             sprintf(args, "%d_%s", i, tun_name);
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
             sprintf(command, "-N_Base_%s", command_args);
+            printf("\tcommand_to_send: %s\n", command);
             initUAVClient(base_ip, command, result_config);
             if(strcmp(result_config, "MPLS added route to Base: OK") == STR_EQUAL)
                 check_base_result = 1;  
@@ -651,18 +654,21 @@ void setMPLSRoute(char *tun_name, char *result){
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
             token = strtok(command_args, "|");
             add_route_args = token;
-            while (token!=NULL)
-            {
-                memset(command, 0, sizeof(command));
-                token = strtok(NULL, "|");
-                sprintf(command, "-M'S_%s", token);
-                initUAVClient(node_ip, command, result_config);
+            printf("First token: %s", add_route_args);
 
-            }
             memset(command, 0, sizeof(command));
-            sprintf(command, "-M'A_%s", token);
+            token = strtok(NULL, "|");
+            sprintf(command, "-M'S_%s", token);
             initUAVClient(node_ip, command, result_config);
-                    
+
+            memset(command, 0, sizeof(command));
+            token = strtok(NULL, "|");
+            sprintf(command, "-M'S_%s", token);
+            initUAVClient(node_ip, command, result_config);
+
+            memset(command, 0, sizeof(command));
+            sprintf(command, "-M'A_%s", add_route_args);
+            initUAVClient(node_ip, command, result_config);           
         }
     }
     
@@ -685,9 +691,10 @@ void setMPLSRoute(char *tun_name, char *result){
         sprintf(command, "-A_%s", token);
         execConfigMPLS(command, result);
     }
+
     memset(command, 0, sizeof(command));
-    sprintf(command, "-A_%s", token);
-    execConfigMPLS(command, result);
+    sprintf(command, "-A_%s", add_route_args);
+    execConfigMPLS(command, result); 
     
     // if(dif == 1)
     // {
