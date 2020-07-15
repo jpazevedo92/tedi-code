@@ -263,6 +263,21 @@ void execConfigMPLS(char* configs, char *result){
             printProcessInfo(pp);
             pclose(pp);
             break;
+        case 'd':
+        case 'D':
+            nw = strtok(NULL, "_");
+            label_out = strtok(NULL, "_");
+            /*
+            Add MLPLS to network
+            */
+            memset(command_arg, 0, sizeof(command_arg));
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -d %s %s %s", if_name, nw, label_out);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+            break;
         case 'e':
         case 'E':
             nw = strtok(NULL, "_");
@@ -355,7 +370,7 @@ void execAddMPLSRoute(char* configs, char *result){
     Add MLPLS to network
     */
     memset(command_arg, 0, sizeof(command_arg));
-    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s", if_name, nw, label_out);
+    sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -d %s %s %s", if_name, nw, label_out);
     printf("%s\n", command_arg);
 
     pp = popen(command_arg, "r");
