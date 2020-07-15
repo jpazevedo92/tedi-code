@@ -244,7 +244,7 @@ void execConfigMPLS(char* configs, char *result){
             memset(command_arg, 0, sizeof(command_arg));
             sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s", if_name, nw, label_out);
             printf("%s\n", command_arg);
-
+            sprintf(result, "MPLS configuration of %s is OK", if_name);
             pp = popen(command_arg, "r");
             printProcessInfo(pp);
             pclose(pp);
@@ -353,7 +353,8 @@ void execConfigMPLS(char* configs, char *result){
             break;
     }
     
-    sprintf(result, "MPLS configuration of %s is OK", if_name);
+    if(option != 'a' || option != 'A')
+        sprintf(result, "MPLS configuration of %s is OK", if_name);
 }
 
 void execAddMPLSRoute(char* configs, char *result){
