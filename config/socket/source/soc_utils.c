@@ -641,6 +641,7 @@ void setMPLSRoute(char *tun_name, char *result){
             sprintf(command, "-N_Base_%s", command_args);
             printf("\tcommand_to_send: %s\n", command);
             initUAVClient(base_ip, command, result_config);
+            printf("Response from Base: %s\n", result_config);
             if(strcmp(result_config, "MPLS added route to Base: OK") == STR_EQUAL)
                 check_base_result = 1;  
         }
@@ -652,7 +653,7 @@ void setMPLSRoute(char *tun_name, char *result){
             memset(command, 0, sizeof(command));
             memset(command_args, 0, sizeof(command_args));
             memset(result_config, 0, sizeof(result_config));
-            memset(result_config, 0, sizeof(result_config));
+            
             memset(node_ip, 0, sizeof(node_ip));
             if(dif > 1)
             {
@@ -671,19 +672,25 @@ void setMPLSRoute(char *tun_name, char *result){
             add_route_args = token;
             printf("First token: %s", add_route_args);
 
+            memset(result_config, 0, sizeof(result_config));
             memset(command, 0, sizeof(command));
             token = strtok(NULL, "|");
             sprintf(command, "-M'S_%s", token);
             initUAVClient(node_ip, command, result_config);
+            printf("1st Response from UAV1: %s\n", result_config);
 
+            memset(result_config, 0, sizeof(result_config));
             memset(command, 0, sizeof(command));
             token = strtok(NULL, "|");
             sprintf(command, "-M'S_%s", token);
             initUAVClient(node_ip, command, result_config);
-
+            printf("2nd Response from UAV1: %s\n", result_config);
+            
+            memset(result_config, 0, sizeof(result_config));
             memset(command, 0, sizeof(command));
             sprintf(command, "-M'A_%s", add_route_args);
-            initUAVClient(node_ip, command, result_config);           
+            initUAVClient(node_ip, command, result_config);
+            printf("3rd Response from UAV1: %s\n", result_config);           
         }
     }
     
