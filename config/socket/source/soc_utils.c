@@ -64,6 +64,35 @@ void initUAVClient(char *srv_ip, char *clt_message, char *result)
    
 }
 
+void initUavMplsClient(char *srv_ip, char *clt_message, char *result)
+{
+    printf("UAVProtocol Client\n");
+    printf("\tSend command %s to %s\n", clt_message, srv_ip);
+
+    int sockfd; 
+    struct sockaddr_in     servaddr; 
+    int n;
+    socklen_t len;
+
+    // Creating socket file descriptor 
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+        perror("socket creation failed"); 
+        exit(EXIT_FAILURE); 
+    } 
+  
+    memset(&servaddr, 0, sizeof(servaddr)); 
+      
+    // Filling server information 
+    servaddr.sin_family = AF_INET; 
+    servaddr.sin_port = htons(PORT); 
+    servaddr.sin_addr.s_addr = inet_addr(srv_ip); 
+      
+    sendto(sockfd, (const char *)clt_message, strlen(clt_message), 
+        MSG_CONFIRM, (const struct sockaddr *) &servaddr,  
+            sizeof(servaddr));
+    close(sockfd);  
+   
+}
 /*
     Server init function 
 */
@@ -690,7 +719,7 @@ void setMPLSRoute(char *tun_name, char *result){
             memset(result_config, 0, sizeof(result_config));
             memset(command, 0, sizeof(command));
             sprintf(command, "-M'A_%s", add_route_args);
-            initUAVClient(node_ip, command, result_config);
+            initUavMplsClient(node_ip, command, result_config);
             printf("3rd Response from UAV1: %s\n", result_config);           
         }
     }
