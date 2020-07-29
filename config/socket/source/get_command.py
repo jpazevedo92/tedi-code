@@ -83,10 +83,10 @@ def get_mpls_command(id, iface, operation="switch"):
             iface_in=iface[:4]
             json_out = open(app_settings_dir + "/base.json", 'r')
             uav_network = get_network(data["interfaces"], iface)
-            print("uav_network: ", uav_network)
+            #print("uav_network: ", uav_network)
             if operation == "switch":
                 base_to_uav_ip = str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface)) + 1)
-                uav_to_base_ip = get_ip(data["interfaces"], iface_in)
+                uav_to_base_ip = ipaddress.IPv4Address(get_ip(data["interfaces"], iface_in)) - 1
                 tagOut = get_iface_label(routes, "none", iface, uav_out_id)
                 tagsOut = get_iface_label(routes, iface_in, iface, uav_out_id)
                 tagsOut2 = get_iface_label(routes, iface ,iface_in, uav_out_id)
@@ -96,8 +96,12 @@ def get_mpls_command(id, iface, operation="switch"):
             else:
                 base_data = json.load(json_out)
                 base_network = get_network(base_data["interfaces"], iface_in)
-                base_tagOut = get_iface_label(routes, "none", iface)
-                uav_tagOut = get_iface_label(routes, "none", iface, uav_out_id)
+                if operation == "lastNode":
+                    base_tagOut = get_iface_label(routes, "none", iface, uav_out_id)
+                    uav_tagOut = get_iface_label(routes, "none", iface)
+                else:    
+                    base_tagOut = get_iface_label(routes, "none", iface)
+                    uav_tagOut = get_iface_label(routes, "none", iface, uav_out_id)
                 arguments = "{}_{}_{}|{}_{}_{}".format(iface, base_network, base_tagOut, iface, uav_network, uav_tagOut)            
     return arguments
 
@@ -112,5 +116,6 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
             result = dict["in_label"]+ "_" + dict["out_label"]
     return result
 
+#print(get_mpls_command(1 , "tun1o2"))
 
 
