@@ -366,16 +366,22 @@ class Application:
         self.mpls.pack( side = LEFT )
 
     def _create_tun(self, id):
+        id_cont = tun_name_entries[id].get()[5:]
         print("Start Tunnel Configuration")
         print("\tTun uav_in: {}\n\tTun uav_out: {}\n\ttun_name: {}".format(
             tun_in_entries[id].get(), tun_out_entries[id].get(), tun_name_entries[id].get()))
         
+        uav_route_type = route_base_entries[id-1].get()
+        
         uav_out_ip = get_ip(tun_out_entries[id].get())
         uav_in_data = config_uav_tunnel(tun_in_entries[id].get(), tun_name_entries[id].get(), "in")
-        uav_out_data = config_uav_tunnel(tun_out_entries[id].get(), tun_name_entries[id].get(), "out")
+        if uav_route_type == 1:
+            uav_out_data = config_uav_tunnel(tun_out_entries[id].get(), tun_name_entries[id].get(), "out" )
+        else:
+            uav_out_data = config_uav_tunnel(tun_out_entries[id].get(), tun_name_entries[id].get(), "out", id_cont)
         print("UAV IP: {}\nUAV IN: {}\nUAV OUT: {}".format(uav_out_ip, uav_in_data, uav_out_data))
 
-        uav_route_type = route_base_entries[id-1].get()
+        
         if uav_route_type == 1:
             uav_route_method = "IP"
         else:
@@ -522,7 +528,7 @@ def create_timed_rotating_log(path,):
     
     return logger
 
-def config_uav_tunnel(host, tun_name, dir):
+def config_uav_tunnel(host, tun_name, dir, contains="None"):
     first_element = int(tun_name[3])
     last_element = int(tun_name[5])
     dif = last_element - first_element
@@ -542,7 +548,8 @@ def config_uav_tunnel(host, tun_name, dir):
             remote_ip = "ERROR on get remote_ip"
         network = get_network(data["interfaces"], tun_name)
         ip = get_tun_ip(data["interfaces"], tun_name)
-        arguments = tun_name + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + ip + "_" + network
+        tag = get_iface_label_mpls(data["routes"], "none", tun_name, contains)
+        arguments = tun_name + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + ip + "_" + network + "_" + tag
     return arguments
 
 def get_network(dict_objects, name):
@@ -563,6 +570,17 @@ def get_iface_label(dict_objects, name, type):
         else:
             if dict['out_if'] == name:
                 result = dict["out_label"]
+    return result
+
+
+def get_iface_label_mpls(dict_objects, in_if, out_if, label_contains="None"):
+    for dict in dict_objects:
+        if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains in dict["out_label"]:
+            result = dict["out_label"]
+        if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains == "None":
+            result = dict["out_label"]
+        if dict['out_if'] == out_if and dict['in_if'] != "none" and dict['in_if'] == in_if:
+            result = dict["in_label"]+ "_" + dict["out_label"]
     return result
 
 def get_time():

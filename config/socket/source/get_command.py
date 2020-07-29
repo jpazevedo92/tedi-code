@@ -111,6 +111,3 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
         if dict['out_if'] == out_if and dict['in_if'] != "none" and dict['in_if'] == in_if:
             result = dict["in_label"]+ "_" + dict["out_label"]
     return result
-
-
-

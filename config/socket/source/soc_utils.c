@@ -700,7 +700,7 @@ void setMPLSRoute(char *tun_name, char *result){
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
             token = strtok(command_args, "|");
             add_route_args = token;
-            printf("First token: %s", add_route_args);
+            printf("First token: %s\n", add_route_args);
 
             memset(result_config, 0, sizeof(result_config));
             memset(command, 0, sizeof(command));
