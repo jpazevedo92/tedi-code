@@ -90,8 +90,7 @@ def get_mpls_command(id, iface, operation="switch"):
                 tagOut = get_iface_label(routes, "none", iface, uav_out_id)
                 tagsOut = get_iface_label(routes, iface_in, iface, uav_out_id)
                 tagsOut2 = get_iface_label(routes, iface ,iface_in, uav_out_id)
-                arguments = "{}_{}_{}|{}_{}_{}|{}_{}_{}".format(iface, uav_network, tagOut, 
-                                                iface,tagsOut, base_to_uav_ip,
+                arguments = "{}_{}_{}|{}_{}_{}".format(iface,tagsOut, base_to_uav_ip,
                                                 iface, tagsOut2, uav_to_base_ip)
             else:
                 base_data = json.load(json_out)
@@ -102,7 +101,7 @@ def get_mpls_command(id, iface, operation="switch"):
                 else:    
                     base_tagOut = get_iface_label(routes, "none", iface)
                     uav_tagOut = get_iface_label(routes, "none", iface, uav_out_id)
-                arguments = "{}_{}_{}|{}_{}_{}".format(iface, base_network, base_tagOut, iface, uav_network, uav_tagOut)            
+                arguments = "{}_{}_{}".format(iface, base_network, base_tagOut)            
     return arguments
 
 
@@ -116,6 +115,8 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
             result = dict["in_label"]+ "_" + dict["out_label"]
     return result
 
-#print(get_mpls_command(1 , "tun1o2"))
+print(get_mpls_command(1 , "tun1o2"))
+
+
 
 

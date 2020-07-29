@@ -540,7 +540,7 @@ void setUAVTunnel(char* configs, char *result){
         case 2:
             printf("MPLS\n");
             mpls_thread_create(remote_ip, in_command, out_command);
-        //     setMPLSRoute(tun_name, route_impl_res);
+            setMPLSRoute(tun_name, route_impl_res);
             break;
         default:
             break;
@@ -797,12 +797,6 @@ void setMPLSRoute(char *tun_name, char *result){
             sprintf(args, "%d_%s", i, tun_name);
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
             token = strtok(command_args, "|");
-            add_route_args = token;
-            printf("First token: %s", add_route_args);
-
-            memset(result_config, 0, sizeof(result_config));
-            memset(command, 0, sizeof(command));;
-            token = strtok(NULL, "|");
             sprintf(command, "-M'S_%s", token);
             initUAVClient(node_ip, command, result_config);
 
@@ -811,11 +805,7 @@ void setMPLSRoute(char *tun_name, char *result){
             token = strtok(NULL, "|");
             sprintf(command, "-M'S_%s", token);
             initUAVClient(node_ip, command, result_config);
-            
-            memset(result_config, 0, sizeof(result_config));
-            memset(command, 0, sizeof(command));
-            sprintf(command, "-M'A_%s", add_route_args);
-            initUavMplsClient(node_ip, command, result_config);       
+   
         }
     }
     
@@ -828,19 +818,8 @@ void setMPLSRoute(char *tun_name, char *result){
 
     sprintf(args, "%d_%s_%s", n, tun_name, "lastNode");
     get_mpls_command_args("get_mpls_command", 3 ,args, command_args);    
-    add_uav_route_token  = strtok(command_args, "|");
-    add_base_route_token = add_uav_route_token;
+    sprintf(command, "D_%s", command_args);
     
-    add_uav_route_token = strtok(NULL, "|");
-    sprintf(command, "A_%s", add_uav_route_token);
-    printf("%s\n", command);
-    execConfigMPLS(command, result_config);
-
-    memset(result_config, 0, sizeof(result_config));
-    memset(command, 0, sizeof(command));
-
-    sprintf(command, "D_%s", add_base_route_token);
-    printf("%s\n", command);
     execConfigMPLS(command, result_config);
 ///////////////////////////////////////////////////////////////////////
     // memset(command, 0, sizeof(command));
