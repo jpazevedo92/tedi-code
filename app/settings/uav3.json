@@ -44,13 +44,13 @@
             "in_if": "none",
             "in_label": "none",
             "out_if": "tun1o3",
-            "out_label": "401"
+            "out_label": "200"
         },
         {
             "in_if": "none",
             "in_label": "none",
             "out_if": "tun1o3",
-            "out_label": "200"
+            "out_label": "401"
         },
         {
             "in_if": "none",
