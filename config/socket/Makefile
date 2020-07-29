@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-pthread -Wall
 PYLIB=/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu/libpython3.6m.a
 PYINC=-I/usr/include -I/usr/include -I/usr/include/python3.6 -I/usr/include/python3.6
 LIBS=-L/opt/lib/python3.6/config-3.6m -ldl -lpthread -lutil -lm -lpython3.6m -Xlinker -export-dynamic

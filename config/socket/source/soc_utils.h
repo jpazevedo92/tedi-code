@@ -14,6 +14,7 @@
 #include <string.h>
 #include <net/if.h>
 #include <ifaddrs.h>
+#include <pthread.h>
 #include <python3.6/Python.h>
 
 /* Constant variables / MACROS */
@@ -28,6 +29,14 @@
 #define ADDRESS     2
 #define MASK        3
 
+#define NUM_THREADS     2
+
+struct thread_args
+ {
+     char *remote_ip; 
+     char *configs; 
+     int option;
+} typedef targs;
 
 /* Function Headers */
 
@@ -53,6 +62,9 @@ void execUavTun(char* configs, char *result);
 void execConfigRoute(char* configs, char *result);
 void execConfigIpTables(char* configs, char *result);
 void execConfigMPLS(char* configs, char *result);
+void mpls_thread_create(char *remote_ip, char *in_commands, char *out_commands);
+void *mpls_thread_func(void *input);
+//void mpls_thread_func(char *remote_ip, char *configs, int option);
 void initUavMplsClient(char *srv_ip, char *clt_message, char *result);
 void execAddMPLSRoute(char* configs, char *result);
 void setUAVTunnel(char* configs, char *result);

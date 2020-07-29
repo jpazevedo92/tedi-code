@@ -71,8 +71,6 @@ void initUavMplsClient(char *srv_ip, char *clt_message, char *result)
 
     int sockfd; 
     struct sockaddr_in     servaddr; 
-    int n;
-    socklen_t len;
 
     // Creating socket file descriptor 
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
@@ -253,7 +251,7 @@ void execConfigMPLS(char* configs, char *result){
     char option = token[0];
 
     char *if_name = strtok(configs, "_");
-    printf("\tSplit args: \n\t\tOption: %c\n\t\t Interface Name: %s", option, if_name);
+    printf("\tSplit args: \n\t\tOption: %c\n\t\t Interface Name: %s\n\n", option, if_name);
     FILE *pp;
     char command_arg[1024] = {0};
     printf("Start MPLS configuration of %s\n", if_name);
@@ -346,6 +344,33 @@ void execConfigMPLS(char* configs, char *result){
             printProcessInfo(pp);
             pclose(pp);
             break;
+        case 'f':
+        case 'F':
+            nw = strtok(NULL, "_");
+            label_out = strtok(NULL, "_");
+            /*
+            Enable ifaces
+            */
+
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -c %s", if_name);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+
+            /*
+            Add MLPLS to network
+            */
+            memset(command_arg, 0, sizeof(command_arg));
+            sprintf(command_arg, "cd ../../../app/scripts && sh mpls_config -a %s %s %s", if_name, nw, label_out);
+            printf("%s\n", command_arg);
+
+            pp = popen(command_arg, "r");
+            printProcessInfo(pp);
+            pclose(pp);
+            break;
+
         case 'l':
         case 'L':
             break;
@@ -465,6 +490,8 @@ void execConfigIpTables(char* configs, char *result){
 void setUAVTunnel(char* configs, char *result){
     char *command_local = configs; 
     char *command_remote = {0};
+    char in_command[MAXLINE] = {0};
+    char out_command[MAXLINE] = {0};
     char *route_method = {0};
     char msg[MAXLINE] = {0};
     char res[MAXLINE] = {0};
@@ -473,11 +500,13 @@ void setUAVTunnel(char* configs, char *result){
 
     command_remote = strtok_r(command_local, " ", &command_local);
     printf("\nCommnad Remote: %s\n", command_remote);
+    sprintf(out_command, "%s", command_remote);
+    
     command_local = strtok(command_local, " ");
     route_method = strtok(NULL, " ");
-
-    printf("\nCommnad Local: %s\n", command_local);
-    printf("Route Method: %s\n", route_method);
+    sprintf(in_command, "%s", command_local);
+    printf("\nCommnad Local: %s\n", in_command);
+    printf("Route Method: %s\n", out_command);
     
     /*Set Tunnel Between UAVs*/
     sprintf(msg, "-T_%s", command_remote);
@@ -509,16 +538,87 @@ void setUAVTunnel(char* configs, char *result){
             setIPRoute(tun_name, route_impl_res);
             break;
         case 2:
+            printf("MPLS\n");
+            mpls_thread_create(remote_ip, in_command, out_command);
             setMPLSRoute(tun_name, route_impl_res);
             break;
         default:
             break;
     }
-
-
-
-
 }
+
+void mpls_thread_create(char *remote_ip, char *in_commands, char *out_commands){
+    pthread_t threads[NUM_THREADS];
+    int rc;
+    long t;
+    targs *args = (targs *)malloc(sizeof(targs));
+    targs *args2= (targs *)malloc(sizeof(targs));
+    printf("command_local: %s\ncommand_remote:  %s\n", in_commands, out_commands);
+    for(t=0; t<NUM_THREADS; t++){
+        printf("In main: creating thread %ld\n", t);
+        if(t == 0){
+            printf("enter thread0\n");
+            args->remote_ip=remote_ip;
+            args->configs=out_commands;
+            args->option=t;
+            rc = pthread_create(&threads[t], NULL, mpls_thread_func, (void *)args);
+        }
+        else
+        {
+            args2->remote_ip=remote_ip;
+            args2->configs=in_commands;
+            args2->option=t;
+            rc = pthread_create(&threads[t], NULL, mpls_thread_func, (void *)args2);
+        }
+        pthread_join(threads[t], NULL);
+        if (rc){
+            printf("ERROR; return code from pthread_create() is %d\n", rc);
+        exit(-1);
+        }
+    }
+    //pthread_exit(NULL);
+}
+
+void *mpls_thread_func(void *input){
+
+
+    
+    targs* data = (targs*) input;
+    char *config_command = ((targs *)data)->configs;
+    char *ip_remote = ((targs *)data)->remote_ip;
+    int option = ((targs *)data)->option;
+    free(data);
+
+    printf("enter thread: %d func\n", option);
+    printf("remote_ip: %s\nconfigs: %s\noption: %d\n", ip_remote, config_command, option);
+    char *if_name = strtok(config_command, "_");
+    printf("Start configuration of %s\n", if_name);
+    char *tun_ip_in = strtok(NULL, "_");
+    char *tun_ip_out = strtok(NULL, "_");
+    char *ip_address = strtok(NULL, "_");
+    char *nw = strtok(NULL, "_");
+    char *tag = strtok(NULL, "_");
+    printf("A_%s_%s_%s\n", if_name, nw, tag);
+    char command_to_send[MAXLINE] = {0};
+    char result[MAXLINE] = {0};
+
+    switch (option)
+    {
+        case 0:
+            sprintf(command_to_send, "-M'F_%s_%s_%s", if_name, nw, tag);
+            initUAVClient(ip_remote, command_to_send, result);
+            break;
+        case 1:
+            sprintf(command_to_send, "F_%s_%s_%s", if_name, nw, tag);
+            execConfigMPLS(command_to_send, result);
+            break;
+        
+        default:
+            break;
+    }
+    return NULL;
+}
+
 
 void getLinkDownIface(char* iface_name, char *result){
     for (int i=0; i<sizeof(iface_name); i++){
@@ -640,19 +740,16 @@ void setMPLSRoute(char *tun_name, char *result){
     char command_args[MAXLINE] = {0};
     char command[MAXLINE] = {0};
     char result_config[MAXLINE] = {0};
-    char tun_down[MAXLINE] = {0};
-    char result_tun_down[MAXLINE] = {0};
 
     /* set routes */
     int first_element  = (int) tun_name[strlen(tun_name)-3] - '0';
     int last_element   = (int) tun_name[strlen(tun_name)-1] - '0';
     int n = last_element;
-    int config_verifiction[n];
-    int counter = 0;
     int dif = last_element - first_element;
-    int check_base_result;
+    int check_base_result = 0;
     char *token, *add_route_args;
-
+    char *add_base_route_token = {0};
+    char *add_uav_route_token = {0};
     sprintf(base_ip, "10.0.%d0.1", n);
     printf("MPLS Route config\n");
     for(int i = 0; i < n; i++)
@@ -672,6 +769,7 @@ void setMPLSRoute(char *tun_name, char *result){
             printf("\tcommand_to_send: %s\n", command);
             initUAVClient(base_ip, command, result_config);
             printf("Response from Base: %s\n", result_config);
+
             if(strcmp(result_config, "MPLS added route to Base: OK") == STR_EQUAL)
                 check_base_result = 1;  
         }
@@ -699,55 +797,37 @@ void setMPLSRoute(char *tun_name, char *result){
             sprintf(args, "%d_%s", i, tun_name);
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
             token = strtok(command_args, "|");
-            add_route_args = token;
-            printf("First token: %s\n", add_route_args);
+            sprintf(command, "-M'S_%s", token);
+            initUAVClient(node_ip, command, result_config);
 
             memset(result_config, 0, sizeof(result_config));
             memset(command, 0, sizeof(command));
             token = strtok(NULL, "|");
             sprintf(command, "-M'S_%s", token);
             initUAVClient(node_ip, command, result_config);
-            printf("1st Response from UAV1: %s\n", result_config);
-
-            memset(result_config, 0, sizeof(result_config));
-            memset(command, 0, sizeof(command));
-            token = strtok(NULL, "|");
-            sprintf(command, "-M'S_%s", token);
-            initUAVClient(node_ip, command, result_config);
-            printf("2nd Response from UAV1: %s\n", result_config);
-            
-            memset(result_config, 0, sizeof(result_config));
-            memset(command, 0, sizeof(command));
-            sprintf(command, "-M'A_%s", add_route_args);
-            initUavMplsClient(node_ip, command, result_config);
-            printf("3rd Response from UAV1: %s\n", result_config);           
+   
         }
     }
     
     /* Last network node */
     memset(args, 0, sizeof(args));
-    memset(command, 0, sizeof(command));
     memset(command_args, 0, sizeof(command_args));
     memset(result_config, 0, sizeof(result_config));
-    printf("UAV%d ID: %d\n", n, n);
-    sprintf(args, "%d_%s", n, tun_name);
-    get_mpls_command_args("get_mpls_command", 3 ,args, command_args);
-    memset(token, 0, sizeof(token));
-    memset(add_route_args, 0, sizeof(add_route_args));
-    token = strtok(command_args, "|");
-    add_route_args = token;
-    while (token!=NULL)
-    {
-        memset(command, 0, sizeof(command));
-        token = strtok(NULL, "|");
-        sprintf(command, "-A_%s", token);
-        execConfigMPLS(command, result);
-    }
-
     memset(command, 0, sizeof(command));
-    sprintf(command, "-A_%s", add_route_args);
-    execConfigMPLS(command, result); 
+    printf("UAV%d ID: %d\n", n, n);
+
+    sprintf(args, "%d_%s_%s", n, tun_name, "lastNode");
+    get_mpls_command_args("get_mpls_command", 3 ,args, command_args);    
+    sprintf(command, "D_%s", command_args);
     
+    execConfigMPLS(command, result_config);
+///////////////////////////////////////////////////////////////////////
+    // memset(command, 0, sizeof(command));
+    // token = strtok(NULL, "|");
+    // sprintf(command, "A_%s", token);
+    // printf("%s\n", command);
+    // execConfigMPLS(command, result_config);
+
     // if(dif == 1)
     // {
     //     memset(result_tun_down, 0, sizeof(result_tun_down));
@@ -755,7 +835,6 @@ void setMPLSRoute(char *tun_name, char *result){
     //     getLinkDownIface(tun_name, tun_down);
     //     setLinkDown(tun_down,  result_tun_down);
     // }
-    execConfigRoute(command_args, result_config);
 
 }
 
