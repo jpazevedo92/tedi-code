@@ -41,11 +41,17 @@
             "out_if": "tun1",
             "out_label": "100"
         },
-        {
+	{
             "in_if": "none",
             "in_label": "none",
             "out_if": "tun1o2",
             "out_label": "300"
+        },
+        {
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "tun1o2",
+            "out_label": "204"
         },
         {
             "in_if": "tun1",
@@ -54,12 +60,18 @@
             "out_label": "300"
         },
         {
+            "in_if": "tun1",
+            "in_label": "104",
+            "out_if": "tun1o2",
+            "out_label": "304"
+        },
+        {
             "in_if": "tun1o2",
             "in_label": "301",
             "out_if": "tun1",
             "out_label": "100"
         },
-        {
+	{
             "in_if": "none",
             "in_label": "none",
             "out_if": "tun1o3",
