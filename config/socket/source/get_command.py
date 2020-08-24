@@ -86,7 +86,7 @@ def get_mpls_command(id, iface, operation="switch"):
             #print("uav_network: ", uav_network)
             if operation == "switch":
                 base_to_uav_ip = str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface)) + 1)
-                uav_to_base_ip = ipaddress.IPv4Address(get_ip(data["interfaces"], iface_in)) - 1
+                uav_to_base_ip = str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface_in)) - 1)
                 tagOut = get_iface_label(routes, "none", iface, uav_out_id)
                 tagsOut = get_iface_label(routes, iface_in, iface, uav_out_id)
                 tagsOut2 = get_iface_label(routes, iface ,iface_in, uav_out_id)
@@ -114,3 +114,5 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None"):
         if dict['out_if'] == out_if and dict['in_if'] != "none" and dict['in_if'] == in_if:
             result = dict["in_label"]+ "_" + dict["out_label"]
     return result
+
+print(get_mpls_command(1, "tun1o3")) #1, "tun1o3"

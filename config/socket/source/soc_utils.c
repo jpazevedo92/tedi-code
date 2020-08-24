@@ -787,15 +787,19 @@ void setMPLSRoute(char *tun_name, char *result){
             {
                 printf("UAV%d ID: %d\n", n-dif, n-dif);
                 sprintf(node_ip, "10.0.%d%d.1", n-dif, n);
+                sprintf(args, "%d_%s", n-dif, tun_name);
+                printf("args: %s\n", args);
                 
             }
             else
             {
                 printf("UAV%d ID: %d\n", i, i);
                 sprintf(node_ip, "10.0.%d%d.1", n-1, n);
+                sprintf(args, "%d_%s", i, tun_name);
             }
-            sprintf(args, "%d_%s", i, tun_name);
+            
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
+            printf("after get_mpls_args");
             token = strtok(command_args, "|");
             sprintf(command, "-M'S_%s", token);
             initUAVClient(node_ip, command, result_config);
@@ -923,6 +927,7 @@ void get_mpls_command_args(char *function_name, int n_args, char *args, char *re
         \targs: %s\n", function_name, /* n_args, */ args);
 
     PyObject *strret, *pModule, *pFunc, *pArgs;
+
     char *token;
     int arg1;
     char *arg2, *arg3;
@@ -945,27 +950,27 @@ void get_mpls_command_args(char *function_name, int n_args, char *args, char *re
         PyErr_Print();
         exit(-1);
      }
-
+    printf("get_command_args: before switch\n");
     switch (n_args)
     {
-    case 2:
-        token = strtok(args, "_");
-        arg1 = atoi(token);
-        arg2 = strtok(NULL ,"_");
-        pArgs = Py_BuildValue("(is)", arg1, arg2);
-        break;
-    case 3:
-        token = strtok(args, "_");
-        arg1 = atoi(token);
-        arg2 = strtok(NULL ,"_");
-        arg3 = strtok(NULL ,"_");
-        pArgs = Py_BuildValue("(iss)", arg1, arg2, arg3);
-        break;
-    
-    default:
-        break;
+        case 2:
+            token = strtok(args, "_");
+            arg1 = atoi(token);
+            arg2 = strtok(NULL ,"_");
+            pArgs = Py_BuildValue("(is)", arg1, arg2);
+            break;
+        case 3:
+            token = strtok(args, "_");
+            arg1 = atoi(token);
+            arg2 = strtok(NULL ,"_");
+            arg3 = strtok(NULL ,"_");
+            pArgs = Py_BuildValue("(iss)", arg1, arg2, arg3);
+            break;
+        
+        default:
+            break;
     }
-    
+    printf("get_command_args: after switch\n");
     
     strret = PyEval_CallObject(pFunc, pArgs);
     //printf("Returned string: %s\n", strret);
