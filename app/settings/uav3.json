@@ -69,6 +69,6 @@
             "in_label": "none",
             "out_if": "tun1o3",
             "out_label": "401"
-        },
+        }
     ]
 }
