@@ -25,6 +25,8 @@ $(BIN)/socket.o: ${SRC}
 $(BIN)/soc_utils.o: $(SOURCE)/soc_utils.c
 	$(CC) $(CFLAGS) -g 	$(SOURCE)/soc_utils.c -c $(PYINC) -o $(BIN)/soc_utils.o
 
+$(shell   mkdir -p $(BIN))
+
 clean:
 	rm -rf $(SCKT_OBJS) ${LIST}
 
