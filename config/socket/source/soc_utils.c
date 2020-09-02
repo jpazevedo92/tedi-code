@@ -825,6 +825,7 @@ void setMPLSRoute(char *tun_name, char *result){
     sprintf(command, "D_%s", command_args);
     
     execConfigMPLS(command, result_config);
+    
 ///////////////////////////////////////////////////////////////////////
     // memset(command, 0, sizeof(command));
     // token = strtok(NULL, "|");
@@ -872,10 +873,8 @@ void get_command_args(char *function_name, int n_args, char *args, char *result)
     char *arg2;
     char *arg3;
     PyObject *sys_path = PySys_GetObject("path");
-    //~/Repos/tedi-uavcommandforward/1_Code/tests
     PyList_Append(sys_path, PyUnicode_FromString("../source"));
     PyObject* fname = PyUnicode_FromString("get_command");
-    //PyObject* module = PyImport_Import(fname);
     pModule = PyImport_Import(fname);
     if (pModule == NULL) {
         PyErr_Print();
@@ -890,8 +889,6 @@ void get_command_args(char *function_name, int n_args, char *args, char *result)
 
     switch (n_args)
     {
-        // case 1:
-        //     pArgs = Py_BuildValue("(s)", arg1, arg2);
         case 2:
             token = strtok(args, "_");
             arg1 = atoi(token);
@@ -913,7 +910,6 @@ void get_command_args(char *function_name, int n_args, char *args, char *result)
     }
     
     strret = PyEval_CallObject(pFunc, pArgs);
-    //printf("Returned string: %s\n", strret);
 
     sprintf(result, "%s", _PyUnicode_AsString(strret));
     
@@ -934,11 +930,9 @@ void get_mpls_command_args(char *function_name, int n_args, char *args, char *re
 
     Py_Initialize();
     PyObject *sys_path = PySys_GetObject("path");
-    // //~/Repos/tedi-uavcommandforward/1_Code/tests
     
     PyList_Append(sys_path, PyUnicode_FromString("../source"));
     PyObject* fname = PyUnicode_FromString("get_command");
-    // //PyObject* module = PyImport_Import(fname);
     pModule = PyImport_Import(fname);
     if (pModule == NULL) {
          PyErr_Print();
@@ -950,7 +944,6 @@ void get_mpls_command_args(char *function_name, int n_args, char *args, char *re
         PyErr_Print();
         exit(-1);
      }
-    printf("get_command_args: before switch\n");
     switch (n_args)
     {
         case 2:

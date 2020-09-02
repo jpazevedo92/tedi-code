@@ -44,7 +44,6 @@ socket_dir = os.path.abspath(os.path.join(__file__,"..", "..", "config"))
 '''
     Class definitions
 '''
-# 
 class Application:    
     def __init__(self, master=None):
         self.command_msg = StringVar()
@@ -263,18 +262,16 @@ class Application:
                 response = send_command(uav_ip, "-A").decode("utf-8")
                 print(get_time() +" MPLS Configuration - Alive Check UAV #" + str(btn_id)+ ": " + response)
                 logger.info("MPLS Configuration - Alive Check UAV #" + str(btn_id)+ ": " + response)
-                time.sleep(1)
-        
+                time.sleep(1)    
         #Send Init Firmware
         # response = send_command(uav_ip, "-I_"+str(btn_id)).decode("utf-8")
         # print(get_time() +" Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         # logger.info("Firmware on Drone TEDI-GUEST" + str(btn_id)+ " status: " + response)
         # time.sleep(1)
-            
+
     def _stop_drone(self, btn_id):
         self.start_drone["text"] = "Start"
         self.start_drone["command"] = lambda: self._start_drone(btn_id)
-
         #do stuff for shutdown drone
 
     def _config_drone(self, btn_id, master=None):
@@ -366,19 +363,22 @@ class Application:
         self.mpls.pack( side = LEFT )
 
     def _create_tun(self, id):
-        id_cont = tun_name_entries[id].get()[5:]
+        id_in = int(tun_name_entries[id].get()[3])
+        id_out = int(tun_name_entries[id].get()[5:])
+        dif = id_out - id_in
+
         print("Start Tunnel Configuration")
         print("\tTun uav_in: {}\n\tTun uav_out: {}\n\ttun_name: {}".format(
             tun_in_entries[id].get(), tun_out_entries[id].get(), tun_name_entries[id].get()))
         
         uav_route_type = route_base_entries[id-1].get()
-        
         uav_out_ip = get_ip(tun_out_entries[id].get())
-        uav_in_data = config_uav_tunnel(tun_in_entries[id].get(), tun_name_entries[id].get(), "in")
+        uav_in_data = config_uav_tunnel(tun_in_entries[id].get(), tun_name_entries[id].get(), "in", id_in)
         if uav_route_type == 1:
             uav_out_data = config_uav_tunnel(tun_out_entries[id].get(), tun_name_entries[id].get(), "out" )
         else:
-            uav_out_data = config_uav_tunnel(tun_out_entries[id].get(), tun_name_entries[id].get(), "out", id_cont)
+            uav_out_data = config_uav_tunnel(tun_out_entries[id].get(), tun_name_entries[id].get(), "out", id_in)
+
         print("UAV IP: {}\nUAV IN: {}\nUAV OUT: {}".format(uav_out_ip, uav_in_data, uav_out_data))
 
         
@@ -387,17 +387,9 @@ class Application:
         else:
             uav_route_method = "MPLS"
 
-
         data = send_command(uav_out_ip, "-U").decode("utf-8")
         if data == "-A":
             send_command(uav_out_ip, "-S_" + uav_in_data + " " + uav_out_data + " " + uav_route_method)
-        
-# class DroneButton(Button):
-#     drone_id = 0
-#     def __init__(self,master=None, width=10, font=("Verdana", "8")):
-#         Button.__init__(self, master, text="Start", font=font, width=width)
-#         #self.drone_button = Button(master, text="Start", font=font, width=width)
-        
                 
 '''
     Function definitions
@@ -420,7 +412,6 @@ def t_send_command(threadName, ip, command, btn_id):
     else:
         print(get_time() +" MPLS configuration on "+ threadName +": " + response)
         logger.info("MPLS configuration on "+ threadName +": " + response)
-    #return data
 
 
 def send_command(ip, command):
@@ -478,11 +469,15 @@ def config_tunnel(host, id):
 
 def config_mpls(host, id):
     if host == "Host":
-        with open(app_settings_dir + "/base.json") as json_file:
+        base_json = app_settings_dir + "/base.json"
+        with open(base_json) as json_file:
             data = json.load(json_file)
             host_info = data["interfaces"][id-1]
             routes = data["routes"]
-            tagOut = routes[id]["out_label"] #get_iface_label(routes, host_info["name"], "out")
+            if id == 1:
+                tagOut = get_iface_label(routes, "tun" + str(id), "out", id)
+            else:
+                tagOut = get_iface_label(routes, "tun" + str(id), "out")
             tagLocalOut = get_iface_label(routes, "lo", "out")
             result = host_info["name"] + "_" + host_info["network"] + host_info["network_mask"] + "_" + tagOut + "_" + tagLocalOut
     else:
@@ -490,7 +485,7 @@ def config_mpls(host, id):
             data = json.load(json_file)
             host_info = data["interfaces"][0]
             routes = data["routes"]
-            tagOut = routes[1]["out_label"] #get_iface_label(routes, host_info["name"], "out") #100
+            tagOut = get_iface_label(routes, "tun" + str(id), "out")
             tagLocalOut = get_iface_label(routes, "lo", "out") #200
             result = host_info["name"] + "_" + host_info["network"] + host_info["network_mask"] + "_" + tagOut + "_" + tagLocalOut
     return result
@@ -501,7 +496,6 @@ def get_ip(host, tun=None):
         if tun is not None:
             host_info = data["interfaces"][0]
             ip = host_info["ip"]
-
         else:
             ip = data["local_ip"]
     return ip
@@ -515,7 +509,6 @@ def create_timed_rotating_log(path,):
     """"""
     logger = logging.getLogger("UAVApp")
     logger.setLevel(logging.INFO)
-#   fh = logging.FileHandler(path)
     
     formatter = logging.Formatter('[%(asctime)s]|%(name)s|%(levelname)s|%(message)s')
 
@@ -528,7 +521,7 @@ def create_timed_rotating_log(path,):
     
     return logger
 
-def config_uav_tunnel(host, tun_name, dir, contains="None"):
+def config_uav_tunnel(host, tun_name, dir, id="None"):
     first_element = int(tun_name[3])
     last_element = int(tun_name[5])
     dif = last_element - first_element
@@ -548,8 +541,12 @@ def config_uav_tunnel(host, tun_name, dir, contains="None"):
             remote_ip = "ERROR on get remote_ip"
         network = get_network(data["interfaces"], tun_name)
         ip = get_tun_ip(data["interfaces"], tun_name)
-        tag = get_iface_label_mpls(data["routes"], "none", tun_name, contains)
+        if dif > 1:
+            tag = get_iface_label_mpls(data["routes"], "none", tun_name, id)
+        else: 
+            tag = get_iface_label_mpls(data["routes"], "none", tun_name, dif)
         arguments = tun_name + "_" + data["local_ip"] + "_" + str(remote_ip) + "_" + ip + "_" + network + "_" + tag
+
     return arguments
 
 def get_network(dict_objects, name):
@@ -562,23 +559,34 @@ def get_tun_ip(dict_objects, name):
         if dict['name'] == name:
             return dict['ip']
 
-def get_iface_label(dict_objects, name, type):
+def get_iface_label(dict_objects, name, type, id="None"):
+    count = 0
     for dict in dict_objects:
         if type == "in":
             if dict['in_if'] == name:
                 result = dict["in_label"]
         else:
             if dict['out_if'] == name:
-                result = dict["out_label"]
+                count += 1
+                if count == id:
+                    result = dict["out_label"]
+                    return result
+                else:
+                 result = dict["out_label"]
     return result
 
 
-def get_iface_label_mpls(dict_objects, in_if, out_if, label_contains="None"):
+def get_iface_label_mpls(dict_objects, in_if, out_if, id="None"):
+    count=0
     for dict in dict_objects:
-        if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains in dict["out_label"]:
-            result = dict["out_label"]
-        if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains == "None":
-            result = dict["out_label"]
+        if dict['out_if'] == out_if and dict['in_if'] == "none":
+            print("enter_condition1")
+            count=+1
+            if count==id:
+                result = dict["out_label"]
+                return result
+            else:
+                result = dict["out_label"]
         if dict['out_if'] == out_if and dict['in_if'] != "none" and dict['in_if'] == in_if:
             result = dict["in_label"]+ "_" + dict["out_label"]
     return result
