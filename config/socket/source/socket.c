@@ -13,7 +13,7 @@ void chooseOption(int argc, char * argv[]){
         printf("UAVProtocol Client\n");
         char *srv_ip = argv[2];
         char *command = argv[3];
-        printf("\tSend command %s to %s", command, srv_ip);
+        printf("\tSend command %s to %s\n", command, srv_ip);
         initClient(srv_ip, command);
         break;
     case 'S':

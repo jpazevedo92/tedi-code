@@ -621,15 +621,26 @@ void *mpls_thread_func(void *input){
 
 
 void getLinkDownIface(char* iface_name, char *result){
-    for (int i=0; i<sizeof(iface_name); i++){
-        if(i!=3)
+    int tun_in = (int)iface_name[3] - '0';
+    int tun_out = (int)iface_name[5] - '0';
+    int dif = tun_out - tun_in;
+    for (int i=0; i < sizeof(iface_name); i++){
+        result[i] = iface_name[i];
+        if(i != 3)
             result[i] = iface_name[i];
-        else
+        else if(i == 3 && (dif > 1 || dif == 1) && tun_in == 1) 
+        {
+            result[i] = iface_name[i+2];
+            break;
+        }
+        
+        else if(i == 3 && dif == 1 && tun_in > 1)
         {
             int n_ant = (int)iface_name[i] - '0' - 1;
             result[i] = n_ant + '0';
         }
     }
+    
 }
 
 void setLinkDown(char* configs, char *result){
@@ -682,7 +693,8 @@ void setIPRoute(char *tun_name, char *result){
             sprintf(command, "-R_%s", command_args);
             printf("command: %s base ip: %s\n", command, base_ip);
             initUAVClient(base_ip, command, result_config);
-        }  else if(i == n-1)
+        }  
+        else if(i == n-1)
         {
             
             /* Intermedious nodes */
@@ -750,11 +762,12 @@ void setMPLSRoute(char *tun_name, char *result){
     char *token, *add_route_args;
     char *add_base_route_token = {0};
     char *add_uav_route_token = {0};
+    char tun_down[MAXLINE] = {0};
+    char result_tun_down[MAXLINE] = {0};
     sprintf(base_ip, "10.0.%d0.1", n);
     printf("MPLS Route config\n");
     for(int i = 0; i < n; i++)
     {        
-        
         if(i == 0)
         {
             /* Base Network Node */
@@ -767,16 +780,66 @@ void setMPLSRoute(char *tun_name, char *result){
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
             sprintf(command, "-N_Base_%s", command_args);
             printf("\tcommand_to_send: %s\n", command);
-            initUAVClient(base_ip, command, result_config);
-            printf("Response from Base: %s\n", result_config);
+            //initUAVClient(base_ip, command, result_config);
+            
+            // printf("Response from Base: %s\n", result_config);
+            if(first_element < 2)
+            {
+                memset(command, 0, sizeof(command));
+                memset(result_tun_down, 0, sizeof(result_tun_down));
+                memset(tun_down, 0, sizeof(tun_down));
+                getLinkDownIface(tun_name, tun_down);                
+                sprintf(command, "-O_%s", tun_down);
+                printf("\tcommand_to_send: %s\n", command);
+                //initUavMplsClient(base_ip, command, result_config);
+            }
 
             if(strcmp(result_config, "MPLS added route to Base: OK") == STR_EQUAL)
                 check_base_result = 1;  
         }
+        else if(i== n-2 && n-2 > 0){
+            /* UAV1 Network Node */
+            printf("\n\tUAV1 Configurations\n");
+            memset(node_ip, 0, sizeof(node_ip));
+            printf("\tUAV%d ID: %d\n", i, i);
+            sprintf(node_ip, "10.0.%d%d.1", n-2, n);
+            printf("\tUAV%d IP: %s\n", i, node_ip);
+            sprintf(args, "%d_%s", i, tun_name);
+            memset(args, 0, sizeof(args));
+            memset(command, 0, sizeof(command));
+            memset(command_args, 0, sizeof(command_args));
+            memset(result_config, 0, sizeof(result_config));
+            
+            sprintf(args, "%d_%s", i, tun_name);
+            printf("\t\tArgs: %s\n", args);
+            get_mpls_command_args("get_mpls_command", 2, args, command_args);
+            
+            token = strtok(command_args, "|");
+            add_uav_route_token = token;
+            
+            token = strtok(NULL, "|");
+            sprintf(command, "-M'S_%s", token);
+            printf("\t\tCommand: %s\n", command);
+            //initUAVClient(node_ip, command, result_config);
+            sprintf(command, "-M'A_%s", add_uav_route_token);
+            printf("\t\tRoute Add Command: %s\n", command);
+            memset(result_config, 0, sizeof(result_config));
+            //initUAVClient(node_ip, command, result_config);
+            //Delete prior configuration 
+            memset(command, 0, sizeof(command));
+            memset(result_tun_down, 0, sizeof(result_tun_down));
+            memset(tun_down, 0, sizeof(tun_down));
+            getLinkDownIface(tun_name, tun_down);                
+            sprintf(command, "-O_%s", tun_down);
+            printf("\tcommand_to_send: %s\n", command);
+            //initUavMplsClient(node_ip, command, result_config);
+        }
+
         else if(i == n-1)
         {
             
             /* Intermedious nodes */
+            printf("\tUAV%d ID: %d\n", i, i);
             memset(args, 0, sizeof(args));
             memset(command, 0, sizeof(command));
             memset(command_args, 0, sizeof(command_args));
@@ -963,8 +1026,6 @@ void get_mpls_command_args(char *function_name, int n_args, char *args, char *re
         default:
             break;
     }
-    printf("get_command_args: after switch\n");
-    
     strret = PyEval_CallObject(pFunc, pArgs);
     //printf("Returned string: %s\n", strret);
     sprintf(result, "%s", _PyUnicode_AsString(strret));
