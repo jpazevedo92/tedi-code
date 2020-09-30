@@ -862,16 +862,23 @@ void setMPLSRoute(char *tun_name, char *result){
             }
             
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
-            printf("after get_mpls_args");
-            token = strtok(command_args, "|");
-            sprintf(command, "-M'S_%s", token);
-            initUAVClient(node_ip, command, result_config);
 
-            memset(result_config, 0, sizeof(result_config));
-            memset(command, 0, sizeof(command));
-            token = strtok(NULL, "|");
-            sprintf(command, "-M'S_%s", token);
-            initUAVClient(node_ip, command, result_config);
+            token = strtok(command_args, "|");
+            while(token != NULL){
+                sprintf(command, "-M'S_%s", token);
+                // initUAVClient(node_ip, command, result_config);
+                token = strtok(NULL, "|");
+                memset(result_config, 0, sizeof(result_config));
+                memset(command, 0, sizeof(command));
+            }
+            // sprintf(command, "-M'S_%s", token);
+            // initUAVClient(node_ip, command, result_config);
+
+            // memset(result_config, 0, sizeof(result_config));
+            // memset(command, 0, sizeof(command));
+            // token = strtok(NULL, "|");
+            // sprintf(command, "-M'S_%s", token);
+            // initUAVClient(node_ip, command, result_config);
    
         }
     }
@@ -886,23 +893,23 @@ void setMPLSRoute(char *tun_name, char *result){
     sprintf(args, "%d_%s_%s", n, tun_name, "lastNode");
     get_mpls_command_args("get_mpls_command", 3 ,args, command_args);    
     sprintf(command, "D_%s", command_args);
+    token = strtok(command_args, "|");
+    while(token != NULL){
+        sprintf(command, "-M'S_%s", token);
+        printf("%s\n", token);
+        // execConfigMPLS(command, result_config);
+        token = strtok(NULL, "|");
+        memset(result_config, 0, sizeof(result_config));
+        memset(command, 0, sizeof(command));
+    }
     
-    execConfigMPLS(command, result_config);
-    
-///////////////////////////////////////////////////////////////////////
-    // memset(command, 0, sizeof(command));
-    // token = strtok(NULL, "|");
-    // sprintf(command, "A_%s", token);
-    // printf("%s\n", command);
-    // execConfigMPLS(command, result_config);
-
-    // if(dif == 1)
-    // {
-    //     memset(result_tun_down, 0, sizeof(result_tun_down));
-    //     memset(tun_down, 0, sizeof(tun_down));
-    //     getLinkDownIface(tun_name, tun_down);
-    //     setLinkDown(tun_down,  result_tun_down);
-    // }
+    if(dif == 1)
+    {
+        memset(result_tun_down, 0, sizeof(result_tun_down));
+        memset(tun_down, 0, sizeof(tun_down));
+        getLinkDownIface(tun_name, tun_down);
+        setLinkDown(tun_down,  result_tun_down);
+    }
 
 }
 
@@ -1027,7 +1034,6 @@ void get_mpls_command_args(char *function_name, int n_args, char *args, char *re
             break;
     }
     strret = PyEval_CallObject(pFunc, pArgs);
-    //printf("Returned string: %s\n", strret);
     sprintf(result, "%s", _PyUnicode_AsString(strret));
     printf("Returned string: %s\n", result);
     Py_Finalize();

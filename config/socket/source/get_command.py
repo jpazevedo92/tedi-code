@@ -93,7 +93,6 @@ def get_mpls_command(id, iface, operation="switch"):
         with open(app_settings_dir + "/uav"+ str(id) +".json") as json_file:
             data = json.load(json_file)
             routes = data["routes"]
-            print(id_in)
             if id_in > id:
                 iface_in = iface[:3]+str(id)
                 iface_out = iface[:3]+str(id)+iface[4:5]+str(id_in)
@@ -103,8 +102,6 @@ def get_mpls_command(id, iface, operation="switch"):
             else:
                 iface_in = iface[:4]
                 iface_out = iface
-
-            print("iface_in: ", iface_in, "iface_out: ", iface_out)
             json_out = open(app_settings_dir + "/base.json", 'r')
             uav_network = get_network(data["interfaces"], iface_out)
             if operation == "switch":
@@ -131,12 +128,20 @@ def get_mpls_command(id, iface, operation="switch"):
                 base_data = json.load(json_out)
                 base_network = get_network(base_data["interfaces"], iface_in)
                 if operation == "lastNode":
-                    base_tagOut = get_iface_label(routes, "none", iface_out, uav_out_id)
+                    base_tagsOut = get_iface_label(routes, "none", iface_out)
                     uav_tagOut = get_iface_label(routes, "none", iface)
                 else:    
-                    base_tagOut = get_iface_label(routes, "none", iface_out)
-                    uav_tagOut = get_iface_label(routes, "none", iface_out, uav_out_id)
-                arguments = "{}_{}_{}".format(iface_out, base_network, base_tagOut)            
+                    base_tagsOut = get_iface_label(routes, "none", iface_out)
+                arguments = ""
+                count = 0
+                if id_in > 1:
+                    for tagOut in base_tagsOut:
+                        if count > 0:
+                            arguments = arguments + "{}_{}_{}|".format(iface_out, base_network, tagOut)
+                        count += 1
+                    arguments = arguments[:-1]  
+                else:
+                    arguments = "{}_{}_{}".format(iface_out, base_network, base_tagsOut[1])
     return arguments
 
 def get_iface_label(dict_objects, in_if, out_if, label_contains="None", id="None"):
@@ -146,18 +151,17 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None", id="None
         if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains in dict["out_label"]:
             result = dict["out_label"]
         if dict['out_if'] == out_if and dict['in_if'] == "none" and label_contains == "None":
-            result = dict["out_label"]
+            tags.append(dict["out_label"])
+            result = tags
         if dict['out_if'] == out_if and dict['in_if'] != "none" and dict['in_if'] == in_if:
             count += 1
             if count == id:
-                print("cond1")
                 tags.append(dict["in_label"]+ "_" + dict["out_label"])
                 result = tags
                 return result
             else:
-                print("cond2")
                 tags.append(dict["in_label"]+ "_" + dict["out_label"])
                 result = tags
     return result
 
-print(get_mpls_command(1, "tun1o3"))
+# print(get_mpls_command(3, "tun2o3", "lastNode"))
