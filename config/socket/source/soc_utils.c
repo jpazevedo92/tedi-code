@@ -780,7 +780,7 @@ void setMPLSRoute(char *tun_name, char *result){
             get_mpls_command_args("get_mpls_command", 2, args, command_args);
             sprintf(command, "-N_Base_%s", command_args);
             printf("\tcommand_to_send: %s\n", command);
-            //initUAVClient(base_ip, command, result_config);
+            initUAVClient(base_ip, command, result_config);
             
             // printf("Response from Base: %s\n", result_config);
             if(first_element < 2)
@@ -791,7 +791,7 @@ void setMPLSRoute(char *tun_name, char *result){
                 getLinkDownIface(tun_name, tun_down);                
                 sprintf(command, "-O_%s", tun_down);
                 printf("\tcommand_to_send: %s\n", command);
-                //initUavMplsClient(base_ip, command, result_config);
+                initUavMplsClient(base_ip, command, result_config);
             }
 
             if(strcmp(result_config, "MPLS added route to Base: OK") == STR_EQUAL)
@@ -820,18 +820,18 @@ void setMPLSRoute(char *tun_name, char *result){
             token = strtok(NULL, "|");
             sprintf(command, "-M'S_%s", token);
             printf("\t\tCommand: %s\n", command);
-            //initUAVClient(node_ip, command, result_config);
+            initUAVClient(node_ip, command, result_config);
             sprintf(command, "-M'A_%s", add_uav_route_token);
             printf("\t\tRoute Add Command: %s\n", command);
             memset(result_config, 0, sizeof(result_config));
-            //initUAVClient(node_ip, command, result_config);
+            initUAVClient(node_ip, command, result_config);
             //Delete prior configuration 
-            memset(command, 0, sizeof(command));
-            memset(result_tun_down, 0, sizeof(result_tun_down));
-            memset(tun_down, 0, sizeof(tun_down));
-            getLinkDownIface(tun_name, tun_down);                
-            sprintf(command, "-O_%s", tun_down);
-            printf("\tcommand_to_send: %s\n", command);
+            // memset(command, 0, sizeof(command));
+            // memset(result_tun_down, 0, sizeof(result_tun_down));
+            // memset(tun_down, 0, sizeof(tun_down));
+            // getLinkDownIface(tun_name, tun_down);                
+            // sprintf(command, "-O_%s", tun_down);
+            // printf("\tcommand_to_send: %s\n", command);
             //initUavMplsClient(node_ip, command, result_config);
         }
 
