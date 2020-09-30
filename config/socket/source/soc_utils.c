@@ -765,7 +765,7 @@ void setMPLSRoute(char *tun_name, char *result){
     char tun_down[MAXLINE] = {0};
     char result_tun_down[MAXLINE] = {0};
     if(first_element > 1 && last_element >= 3)
-        sprintf(base_ip, "10.0.%d%d.1", first_element-1, last_element);
+        sprintf(base_ip, "10.0.10.1");
     else
         sprintf(base_ip, "10.0.%d0.1", n);
     printf("MPLS Route config\n");
