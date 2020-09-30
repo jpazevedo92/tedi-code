@@ -826,13 +826,13 @@ void setMPLSRoute(char *tun_name, char *result){
             memset(result_config, 0, sizeof(result_config));
             initUAVClient(node_ip, command, result_config);
             //Delete prior configuration 
-            // memset(command, 0, sizeof(command));
-            // memset(result_tun_down, 0, sizeof(result_tun_down));
-            // memset(tun_down, 0, sizeof(tun_down));
-            // getLinkDownIface(tun_name, tun_down);                
-            // sprintf(command, "-O_%s", tun_down);
-            // printf("\tcommand_to_send: %s\n", command);
-            //initUavMplsClient(node_ip, command, result_config);
+            memset(command, 0, sizeof(command));
+            memset(result_tun_down, 0, sizeof(result_tun_down));
+            memset(tun_down, 0, sizeof(tun_down));
+            getLinkDownIface(tun_name, tun_down);                
+            sprintf(command, "-O_%s", tun_down);
+            printf("\tcommand_to_send: %s\n", command);
+            initUavMplsClient(node_ip, command, result_config);
         }
 
         else if(i == n-1)
@@ -866,7 +866,7 @@ void setMPLSRoute(char *tun_name, char *result){
             token = strtok(command_args, "|");
             while(token != NULL){
                 sprintf(command, "-M'S_%s", token);
-                // initUAVClient(node_ip, command, result_config);
+                initUAVClient(node_ip, command, result_config);
                 token = strtok(NULL, "|");
                 memset(result_config, 0, sizeof(result_config));
                 memset(command, 0, sizeof(command));
@@ -896,7 +896,6 @@ void setMPLSRoute(char *tun_name, char *result){
     token = strtok(command_args, "|");
     while(token != NULL){
         sprintf(command, "-M'S_%s", token);
-        printf("%s\n", token);
         // execConfigMPLS(command, result_config);
         token = strtok(NULL, "|");
         memset(result_config, 0, sizeof(result_config));
@@ -908,6 +907,7 @@ void setMPLSRoute(char *tun_name, char *result){
         memset(result_tun_down, 0, sizeof(result_tun_down));
         memset(tun_down, 0, sizeof(tun_down));
         getLinkDownIface(tun_name, tun_down);
+        printf("%s\n", tun_down);
         setLinkDown(tun_down,  result_tun_down);
     }
 
