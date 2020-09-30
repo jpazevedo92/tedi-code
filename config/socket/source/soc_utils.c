@@ -896,7 +896,7 @@ void setMPLSRoute(char *tun_name, char *result){
     token = strtok(command_args, "|");
     while(token != NULL){
         sprintf(command, "-M'S_%s", token);
-        // execConfigMPLS(command, result_config);
+        execConfigMPLS(command, result_config);
         token = strtok(NULL, "|");
         memset(result_config, 0, sizeof(result_config));
         memset(command, 0, sizeof(command));
