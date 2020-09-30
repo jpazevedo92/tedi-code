@@ -764,7 +764,10 @@ void setMPLSRoute(char *tun_name, char *result){
     char *add_uav_route_token = {0};
     char tun_down[MAXLINE] = {0};
     char result_tun_down[MAXLINE] = {0};
-    sprintf(base_ip, "10.0.%d0.1", n);
+    if(first_element > 1 && last_element >= 3)
+        sprintf(base_ip, "10.0.%d%d.1", first_element-1, last_element);
+    else
+        sprintf(base_ip, "10.0.%d0.1", n);
     printf("MPLS Route config\n");
     for(int i = 0; i < n; i++)
     {        
@@ -891,16 +894,25 @@ void setMPLSRoute(char *tun_name, char *result){
     printf("UAV%d ID: %d\n", n, n);
 
     sprintf(args, "%d_%s_%s", n, tun_name, "lastNode");
-    get_mpls_command_args("get_mpls_command", 3 ,args, command_args);    
-    sprintf(command, "D_%s", command_args);
+    get_mpls_command_args("get_mpls_command", 3 ,args, command_args);
     token = strtok(command_args, "|");
-    while(token != NULL){
-        sprintf(command, "-M'S_%s", token);
-        execConfigMPLS(command, result_config);
-        token = strtok(NULL, "|");
-        memset(result_config, 0, sizeof(result_config));
-        memset(command, 0, sizeof(command));
-    }
+    // if(first_element > 1){
+        while(token != NULL){
+            sprintf(command, "D_%s", command_args);
+            execConfigMPLS(command, result_config);
+            token = strtok(NULL, "|");
+            memset(result_config, 0, sizeof(result_config));
+            memset(command, 0, sizeof(command));
+        }
+    // }
+    // else
+    // {
+    //         memset(result_config, 0, sizeof(result_config));
+    //         memset(command, 0, sizeof(command));
+    //         sprintf(command, "-M'S_%s", token);
+    //         execConfigMPLS(command, result_config);
+    // }
+    
     
     if(dif == 1)
     {
