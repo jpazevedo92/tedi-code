@@ -169,7 +169,10 @@ void execCommand(char* command, char *result){
             printf("\tEnter execCommand: 'A' option\n");
             execAliveCheck(result);
             break;
-        
+        case 'd':
+        case 'D':
+            setRouteDown(command, result);
+            break;
         case 'i':
         case 'I':
             execInitFirmware(command, result);
@@ -658,6 +661,21 @@ void setLinkDown(char* configs, char *result){
     sprintf(result, "Set Link Down of %s: OK", if_name);
 }
 
+void setRouteDown(char* configs, char *result){
+    printf("enter setLinkDown function\n");
+    char *if_name = strtok(configs, "_");
+
+    printf("Set Link Down: %s\n", if_name);
+    FILE *pp;
+    char command_arg[1024] = {0};
+    sprintf(command_arg, "cd ../../../app/scripts && sh route_config -d %s", if_name);
+    //printf("%s\n", command_arg);
+    pp = popen(command_arg, "r");
+    printProcessInfo(pp);
+    pclose(pp);
+    sprintf(result, "Set Route Down of %s: OK", if_name);
+}
+
 void setIPRoute(char *tun_name, char *result){
     char base_ip[MAXLINE] = {0};
     char node_ip[MAXLINE] = {0};
@@ -792,7 +810,7 @@ void setMPLSRoute(char *tun_name, char *result){
                 memset(result_tun_down, 0, sizeof(result_tun_down));
                 memset(tun_down, 0, sizeof(tun_down));
                 getLinkDownIface(tun_name, tun_down);                
-                sprintf(command, "-O_%s", tun_down);
+                sprintf(command, "-D_%s", tun_down);
                 printf("\tcommand_to_send: %s\n", command);
                 initUavMplsClient(base_ip, command, result_config);
             }
@@ -920,7 +938,7 @@ void setMPLSRoute(char *tun_name, char *result){
         memset(tun_down, 0, sizeof(tun_down));
         getLinkDownIface(tun_name, tun_down);
         printf("%s\n", tun_down);
-        setLinkDown(tun_down,  result_tun_down);
+        setRouteDown(tun_down,  result_tun_down);
     }
 
 }
