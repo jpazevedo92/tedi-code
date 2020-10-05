@@ -668,7 +668,7 @@ void setRouteDown(char* configs, char *result){
     printf("Set Link Down: %s\n", if_name);
     FILE *pp;
     char command_arg[1024] = {0};
-    sprintf(command_arg, "cd ../../../app/scripts && sh route_config -d %s", if_name);
+    sprintf(command_arg, "cd ../../../app/scripts && sh tunnel_config -r %s", if_name);
     //printf("%s\n", command_arg);
     pp = popen(command_arg, "r");
     printProcessInfo(pp);
