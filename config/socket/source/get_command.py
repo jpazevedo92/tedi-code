@@ -174,5 +174,5 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None", id="None
                 result = tags
     return result
 
-print(get_mpls_command(3, "tun2o3", "lastNode"))
+# print(get_mpls_command(3, "tun2o3", "lastNode"))
 
