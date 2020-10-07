@@ -31,6 +31,7 @@ then
 elif [ $OPTION = '-s' ]
 then
     sudo IN_TAG=$2 OUT_TAG=$3 IP_OUT=$4 su -p -c '
+        ip -f mpls route del $IN_TAG
         ip -f mpls route add $IN_TAG as $OUT_TAG via inet $IP_OUT
     '
 elif [ $OPTION = '-l' ]

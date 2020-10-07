@@ -99,6 +99,9 @@ def get_mpls_command(id, iface, operation="switch"):
             elif id_in == id and id_in > 1:
                 iface_in = iface[:3]+str(id-1)+iface[4:5]+str(id_in)
                 iface_out = iface
+            elif id_out == id and id_in > 1:
+                iface_in = iface[:3]+str(id-2)
+                iface_out = iface        
             else:
                 iface_in = iface[:4]
                 iface_out = iface
@@ -130,14 +133,21 @@ def get_mpls_command(id, iface, operation="switch"):
                 if operation == "lastNode":
                     base_tagsOut = get_iface_label(routes, "none", iface_out)
                     uav_tagOut = get_iface_label(routes, "none", iface)
-                else:    
+                else:
+                    #base_network = get_network(base_data["interfaces"], iface_in)    
                     base_tagsOut = get_iface_label(routes, "none", iface_out)
                 arguments = ""
                 count = 0
                 if id_in > 1:
                     for tagOut in base_tagsOut:
                         if count > 0:
-                            arguments = arguments + "{}_{}_{}|".format(iface_out, base_network, tagOut)
+                            if dif == 1 and id_in > 1:
+                                base_network = get_network(base_data["interfaces"], iface_in)
+                                if count == 2:
+                                    uav_json_out = open(app_settings_dir + "/uav"+ str(id_in) +".json", 'r')
+                                    uav_data = json.load(uav_json_out)
+                                    base_network = get_network(uav_data["interfaces"], iface[:3]+str(id-2)+iface[4:5]+str(id_in))
+                                arguments = arguments + "{}_{}_{}|".format(iface_out, base_network, tagOut)
                         count += 1
                     arguments = arguments[:-1]  
                 else:
@@ -164,4 +174,5 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None", id="None
                 result = tags
     return result
 
-# print(get_mpls_command(1, "tun2o3"))
+print(get_mpls_command(3, "tun2o3", "lastNode"))
+
