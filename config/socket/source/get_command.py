@@ -115,8 +115,11 @@ def get_mpls_command(id, iface, operation="switch"):
                     base_network = get_network(base_data["interfaces"], iface_in)
                     tagsOut3 = get_iface_label(routes, iface_in, iface_out, uav_out_id)
                     base_tagOut = get_iface_label(routes, "none", iface_out)
+                    uav_json_out = open(app_settings_dir + "/uav"+ str(id_out) +".json")
+                    uav_out_data = json.load(uav_json_out)
+                    uav_network_out = get_network(uav_out_data["interfaces"], iface)
                     uav_tagOut = get_iface_label(routes, "none", iface_out, uav_out_id)
-                    arguments = "{}_{}_{}|{}_{}_{}".format(iface_out, uav_network, base_tagOut[1], iface_out, tagsOut3[1], base_to_uav_ip)
+                    arguments = "{}_{}_{}|{}_{}_{}".format(iface_out, uav_network_out, base_tagOut[1], iface_out, tagsOut3[1], base_to_uav_ip)
                 else:
                     arguments = ""
                     tagsOut = get_iface_label(routes, iface_in, iface_out, uav_out_id, id)
@@ -174,5 +177,5 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None", id="None
                 result = tags
     return result
 
-# print(get_mpls_command(3, "tun2o3", "lastNode"))
+print(get_mpls_command(1, "tun2o3"))
 
