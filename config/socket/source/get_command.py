@@ -14,6 +14,7 @@ app_settings_dir = os.path.abspath(os.path.join(__file__,"..","..","..","..","ap
 
 def get_command(id, iface, option="route"):
     list_ids = [int(s) for s in re.findall(r'\d+', iface)]
+    id_in = list_ids[0]
     id_out = list_ids[1]
     if option == "route":
         if id == 0:
@@ -25,14 +26,20 @@ def get_command(id, iface, option="route"):
                 network = get_network(json.load(json_out)["interfaces"], iface)
                 ip_out = str(ipaddress.IPv4Address(host_info["ip"])+1)
                 arguments = "{}_{}_{}".format(if_out, network, ip_out)
-
         else:
             with open(app_settings_dir + "/uav"+ str(id) +".json") as json_file:
-                data = json.load(json_file)
-                json_out = open(app_settings_dir + "/base.json", 'r')
-                network = get_network(json.load(json_out)["interfaces"], "tun1")
-                ip_out =  str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface))-1)
-                arguments = "{}_{}_{}".format(iface, network, ip_out)
+                data = json.load(json_file)    
+                if id_in > 1 and id_out >2:
+                    json_out = open(app_settings_dir + "/uav"+ str(id_out) +".json", 'r')
+                    network = get_network(json.load(json_out)["interfaces"], iface)
+                    iface_out = iface[:3] +str(int(iface[3:-2])-1) + iface[4:-1]+ str(int(iface[5:])-1)
+                    ip_out =  str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface_out))+1)
+                else:
+                    json_out = open(app_settings_dir + "/base.json", 'r')
+                    network = get_network(json.load(json_out)["interfaces"], "tun1")
+                    iface_out = iface
+                    ip_out =  str(ipaddress.IPv4Address(get_ip(data["interfaces"], iface_out))-1)
+                arguments = "{}_{}_{}".format(iface_out, network, ip_out)
     else:
         if id > 1:
             with open(app_settings_dir + "/uav"+ str(id) +".json") as json_file:
@@ -177,5 +184,5 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None", id="None
                 result = tags
     return result
 
-print(get_mpls_command(1, "tun2o3"))
+print(get_command(1, "tun2o3"))
 

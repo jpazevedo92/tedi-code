@@ -711,6 +711,26 @@ void setIPRoute(char *tun_name, char *result){
             sprintf(command, "-R_%s", command_args);
             printf("command: %s base ip: %s\n", command, base_ip);
             initUAVClient(base_ip, command, result_config);
+        }
+        else if(i== n-2 && n-2 > 0){
+            /* UAV1 Network Node */
+            printf("\n\tUAV1 Configurations\n");
+            memset(node_ip, 0, sizeof(node_ip));
+            printf("\tUAV%d ID: %d\n", i, i);
+            sprintf(node_ip, "10.0.%d%d.1", n-2, n);
+            printf("\tUAV%d IP: %s\n", i, node_ip);
+            sprintf(args, "%d_%s", i, tun_name);
+            memset(args, 0, sizeof(args));
+            memset(command, 0, sizeof(command));
+            memset(command_args, 0, sizeof(command_args));
+            memset(result_config, 0, sizeof(result_config));
+            sprintf(args, "%d_%s", i, tun_name);
+            printf("\t\tArgs: %s\n", args);
+            get_command_args("get_command", 2, args, command_args);
+            sprintf(command, "-R_%s", command_args);
+            initUAVClient(node_ip, command, result_config);
+
+            
         }  
         else if(i == n-1)
         {
