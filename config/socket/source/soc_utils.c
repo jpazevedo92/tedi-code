@@ -719,7 +719,7 @@ void setIPRoute(char *tun_name, char *result){
             printf("\tUAV%d ID: %d\n", i, i);
             sprintf(node_ip, "10.0.%d%d.1", n-2, n);
             printf("\tUAV%d IP: %s\n", i, node_ip);
-            sprintf(args, "%d_%s", i, tun_name);
+
             memset(args, 0, sizeof(args));
             memset(command, 0, sizeof(command));
             memset(command_args, 0, sizeof(command_args));
@@ -770,13 +770,13 @@ void setIPRoute(char *tun_name, char *result){
     sprintf(args, "%d_%s", n, tun_name);
     get_command_args("get_command", 2, args, command_args);
     memset(result_tun_down, 0, sizeof(result_tun_down));
-    
     if(dif == 1)
     {
         memset(tun_down, 0, sizeof(tun_down));
         getLinkDownIface(tun_name, tun_down);
         setLinkDown(tun_down,  result_tun_down);
     }
+
     execConfigRoute(command_args, result_config);
 
 }
