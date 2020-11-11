@@ -29,7 +29,7 @@ def get_command(id, iface, option="route"):
         else:
             with open(app_settings_dir + "/uav"+ str(id) +".json") as json_file:
                 data = json.load(json_file)    
-                if id_in > 1 and id_out >2:
+                if id_in > 1 and id_out >2 and id != id_out:
                     json_out = open(app_settings_dir + "/uav"+ str(id_out) +".json", 'r')
                     network = get_network(json.load(json_out)["interfaces"], iface)
                     iface_out = iface[:3] +str(int(iface[3:-2])-1) + iface[4:-1]+ str(int(iface[5:])-1)
@@ -184,5 +184,5 @@ def get_iface_label(dict_objects, in_if, out_if, label_contains="None", id="None
                 result = tags
     return result
 
-print(get_command(1, "tun2o3"))
+#print(get_command(3, "tun2o3"))
 

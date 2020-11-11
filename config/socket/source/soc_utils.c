@@ -769,6 +769,7 @@ void setIPRoute(char *tun_name, char *result){
     printf("UAV%d ID: %d\n", n, n);
     sprintf(args, "%d_%s", n, tun_name);
     get_command_args("get_command", 2, args, command_args);
+
     memset(result_tun_down, 0, sizeof(result_tun_down));
     if(dif == 1)
     {
@@ -778,7 +779,6 @@ void setIPRoute(char *tun_name, char *result){
     }
 
     execConfigRoute(command_args, result_config);
-
 }
 
 void setMPLSRoute(char *tun_name, char *result){
