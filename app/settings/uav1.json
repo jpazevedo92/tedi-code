@@ -9,11 +9,18 @@
             "ip": "10.0.10.2"
         },
         {
-            "name": "tun1t2",
+            "name": "tun1o2",
             "network": "10.0.12.0",
             "network_mask": "/24",
             "ip": "10.0.12.1"
         },
+        {
+            "name": "tun1o3",
+            "network": "10.0.13.0",
+            "network_mask": "/24",
+            "ip": "10.0.13.1"
+        },
+
         {
             "name": "lo",
             "network": "127.0.0.1",
@@ -34,33 +41,51 @@
             "out_if": "tun1",
             "out_label": "100"
         },
-        {
+	{
             "in_if": "none",
             "in_label": "none",
-            "out_if": "tun2",
+            "out_if": "tun1o2",
             "out_label": "300"
         },
         {
             "in_if": "none",
             "in_label": "none",
-            "out_if": "tun2",
-            "out_label": "304"
+            "out_if": "tun1o2",
+            "out_label": "204"
         },
         {
             "in_if": "tun1",
-            "in_label": "203",
-            "out_if": "tun2",
+            "in_label": "103",
+            "out_if": "tun1o2",
             "out_label": "300"
         },
         {
             "in_if": "tun1",
-            "in_label": "204",
-            "out_if": "tun2",
+            "in_label": "104",
+            "out_if": "tun1o2",
             "out_label": "304"
         },
         {
-            "in_if": "tun3",
-            "in_label": "201",
+            "in_if": "tun1o2",
+            "in_label": "301",
+            "out_if": "tun1",
+            "out_label": "100"
+        },
+	{
+            "in_if": "none",
+            "in_label": "none",
+            "out_if": "tun1o3",
+            "out_label": "400"
+        },
+        {
+            "in_if": "tun1",
+            "in_label": "104",
+            "out_if": "tun1o3",
+            "out_label": "400"
+        },
+        {
+            "in_if": "tun1o3",
+            "in_label": "401",
             "out_if": "tun1",
             "out_label": "100"
         }

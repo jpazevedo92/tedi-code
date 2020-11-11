@@ -1,0 +1,50 @@
+#!/bin/bash
+
+echo "Route Configuration Script"
+#set -x
+
+OPTION=$1
+echo $OPTION
+
+########## RUN COMMANDS ############
+
+if [ $OPTION = '-a' ]
+then
+    sudo IF_NAME=$2 NETWORK=$3 IP=$4  su -p -c '
+    ip route add $NETWORK via $IP dev $IF_NAME
+    exit 
+    '
+echo "Route created"
+
+elif [ $OPTION = '-d'  ]
+then
+    sudo IF_NAME=$2 su -p -c '
+        ip route del $TUN_NAME
+        exit
+    '
+    echo "Route deleted"
+elif [ $OPTION = '-t'  ]
+then
+    sudo IF_1=$2 IF_2=$3 su -p -c '
+        IPTABLES=/sbin/iptables;
+        echo 1 > /proc/sys/net/ipv4/ip_forward;
+        $IPTABLES -F;
+        $IPTABLES -X;
+        $IPTABLES -t nat -A POSTROUTING -o $IF_1 -j MASQUERADE;
+        $IPTABLES -A FORWARD -i $IF_1 -o $IF_2 -m state --state RELATED,ESTABLISHED -j ACCEPT;
+        $IPTABLES -A FORWARD -i $IF_2 -o $IF_1 -j ACCEPT;
+        $IPTABLES -t nat -A POSTROUTING -o $IF_2 -j MASQUERADE;
+        $IPTABLES -A FORWARD -i $IF_2 -o $IF_1 -m state --state RELATED,ESTABLISHED -j ACCEPT;
+        $IPTABLES -A FORWARD -i $IF_1 -o $IF_2 -j ACCEPT;
+        exit
+    '
+    echo "IP Forwarding Table configured"
+elif [ $OPTION = '-h'  ]
+then
+    echo "Add route: route_config -a if_name network via_ip"
+    echo "Delete route: route_config -d if_name"
+    echo "IP Tables: route_config -t if_name_1 if_name_2"
+fi
+
+
+

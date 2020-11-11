@@ -1,0 +1,10 @@
+#!/bin/bash
+
+DIR=/home/pi/Repos/tedi-uavcommandforward/1_Code/config/socket
+cd $DIR
+make all
+cd $DIR/bin 
+sudo su &
+./socket -C 192.168.56.1 -R	
+./socket -S &
+exit 0

@@ -28,14 +28,26 @@ then
     echo "Tunnel IP: $IP"
     echo "Tunnel network: $NETWORK"
 
-elif [ $OPTION == '-d'  ]
+elif [ $OPTION = '-d'  ]
 then
     sudo TUN_NAME=$2 TUN_IN=$3 TUN_OUT=$4 su -p -c '
         ip tun d $TUN_NAME mode gre remote $TUN_OUT local $TUN_IN
         exit
     '
     echo "Tunnel deleted"
-elif [ $OPTION == '-h'  ]
+elif [ $OPTION = '-o'  ]
+then
+    sudo TUN_NAME=$2 su -p -c '
+    ip link set $TUN_NAME down
+    exit '
+elif [ $OPTION = '-r'  ]
+then
+    sudo TUN_NAME=$2 su -p -c '
+        ip tunnel del $TUN_NAME
+        exit
+    '
+    echo "Tunnel deleted"
+elif [ $OPTION = '-h'  ]
 then
     echo "Add tunnel: tunnel_config -a tunnel_name tunnel_ip_in tunnel_ip_out tunnel_given_ip tunnel_network"
     echo "Delete tunnel: tunnel_config -d tunnel_name tunnel_ip_in tunnel_ip_out"
